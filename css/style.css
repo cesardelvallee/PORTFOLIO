@@ -1,4 +1,3 @@
-
 @media (max-width: 1024px) {
   .top-bar {
     padding-left: 20px;
@@ -186,8 +185,9 @@ body.about-page .hero-subtitle {
 
 .hero-content-elegant {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 120px;
+  /* mejor equilibrio entre texto y retrato */
+  grid-template-columns: 1fr 420px;
+  gap: 48px;
   align-items: center;
 }
 
@@ -197,7 +197,7 @@ body.about-page .hero-subtitle {
 
 .elegant-title {
   font-family: 'Inter', sans-serif;
-  font-size: 8rem;
+  font-size: 6rem; /* más proporcionado con el retrato */
   font-weight: 900;
   letter-spacing: -0.05em;
   line-height: 0.9;
@@ -243,7 +243,7 @@ body.about-page .hero-subtitle {
 }
 
 .description-elegant {
-  max-width: 480px;
+  max-width: 560px; /* permitir más ancho para lectura cómoda */
 }
 
 .description-elegant p {
@@ -266,50 +266,36 @@ body.about-page .hero-subtitle {
   position: relative;
 }
 
-.visual-element {
-  position: relative;
-  width: 300px;
-  height: 300px;
+.about-image {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  padding: 12px;            /* espacio alrededor de la foto */
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
-.elegant-square {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
-  width: 180px;
-  height: 180px;
-  border: 2px solid rgba(78, 205, 196, 0.3);
-  border-radius: 20px;
-  animation: float 6s ease-in-out infinite;
+.about-image img {
+  width: 100%;
+  height: auto;         /* preservar proporción — NO recortar */
+  object-fit: contain;  /* asegura que la imagen completa se vea */
+  display: block;
+  border-radius: 8px;
 }
 
-.elegant-circle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 120px;
-  height: 120px;
-  border: 1px solid rgba(255, 107, 107, 0.4);
-  border-radius: 50%;
-  animation: float 6s ease-in-out infinite reverse;
+.about-image:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.72);
 }
 
-.elegant-line {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  width: 200px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: float 8s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(-50%, -50%) rotate(45deg) translateY(0); }
-  50% { transform: translate(-50%, -50%) rotate(45deg) translateY(-10px); }
+/* Hide previous visual line elements if they remain */
+.visual-element, .elegant-square, .elegant-circle, .elegant-line {
+  display: none !important;
 }
 
 .skills-elegant {
