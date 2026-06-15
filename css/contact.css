@@ -57,13 +57,12 @@
 }
 
 .contact-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
+  /* layout manejado por Bootstrap row/col */
   margin-bottom: 20px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+}
+
+.contact-grid .contact-card {
+  height: 100%;
 }
 
 .contact-card {
@@ -265,22 +264,13 @@
   background: linear-gradient(135deg, #ff7979, #55efc4);
 }
 
-@media (max-width: 900px) {
-  .contact-grid {
-    max-width: 500px;
-  }
-}
-
 @media (max-width: 768px) {
   .contact-container {
     padding: 60px 15px 30px;
   }
-  
+
   .contact-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
     margin-bottom: 40px;
-    max-width: 400px;
   }
   
   .contact-card {
@@ -298,35 +288,71 @@
 }
 
 @media (max-width: 480px) {
+  .contact-container {
+    padding: 50px 12px 20px;
+  }
+
+  .contact-title {
+    font-size: 2.5rem;
+  }
+
+  .contact-subtitle {
+    font-size: 1rem;
+  }
+
   .contact-grid {
-    grid-template-columns: 1fr;
+    /* Bootstrap stacks to 1 col on xs automatically */
   }
   
   .contact-card {
-    padding: 18px;
+    padding: 16px;
+    border-radius: 12px;
   }
   
   .card-icon {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 16px;
+    width: 36px;
+    height: 36px;
+    margin-bottom: 12px;
   }
   
   .card-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
   
   .card-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
   }
   
   .card-description {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
   }
   
   .card-link {
     font-size: 0.8rem;
+    word-break: break-word;
+  }
+  
+  .contact-cta {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+  
+  .cta-title {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+  }
+  
+  .cta-description {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+  
+  .cta-button {
+    padding: 10px 20px;
+    font-size: 0.85rem;
   }
 }
 
@@ -335,10 +361,10 @@
   animation-fill-mode: both;
 }
 
-.contact-card:nth-child(1) { animation-delay: 0.1s; }
-.contact-card:nth-child(2) { animation-delay: 0.2s; }
-.contact-card:nth-child(3) { animation-delay: 0.3s; }
-.contact-card:nth-child(4) { animation-delay: 0.4s; }
+.contact-grid > *:nth-child(1) .contact-card { animation-delay: 0.1s; }
+.contact-grid > *:nth-child(2) .contact-card { animation-delay: 0.2s; }
+.contact-grid > *:nth-child(3) .contact-card { animation-delay: 0.3s; }
+.contact-grid > *:nth-child(4) .contact-card { animation-delay: 0.4s; }
 
 .contact-cta {
   animation: fadeInUp 0.8s ease-out 0.5s both;

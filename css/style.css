@@ -48,7 +48,14 @@
   }
   .top-bar-left, .top-bar-right {
     font-size: 0.7rem;
-    max-width: 70vw;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    flex: 0 0 auto !important;
+  }
+  .top-bar-center {
+    flex: 1 !important;
+    min-width: 0;
   }
   .hero-title {
     font-size: 8vw;
@@ -70,19 +77,19 @@
     max-height: 70vw;
   }
   .stacked-images {
-    width: 120px;
-    height: 120px;
+    width: 190px;
+    height: 190px;
     left: 50%;
     top: 60%;
     transform: translate(-50%, -50%);
   }
   .stacked-images .img-drag {
-    width: 100px;
-    height: 100px;
-    min-width: 100px;
-    min-height: 100px;
-    max-width: 100px;
-    max-height: 100px;
+    width: 175px;
+    height: 175px;
+    min-width: 175px;
+    min-height: 175px;
+    max-width: 175px;
+    max-height: 175px;
   }
   .hero-btn {
     font-size: 0.85rem;
@@ -184,11 +191,7 @@ body.about-page .hero-subtitle {
 }
 
 .hero-content-elegant {
-  display: grid;
-  /* mejor equilibrio entre texto y retrato */
-  grid-template-columns: 1fr 420px;
-  gap: 48px;
-  align-items: center;
+  /* layout manejado por Bootstrap row/col */
 }
 
 .hero-text-block {
@@ -327,9 +330,7 @@ body.about-page .hero-subtitle {
 }
 
 .skills-grid-elegant {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 60px 80px;
+  /* layout manejado por Bootstrap row/col */
 }
 
 .skill-block {
@@ -385,9 +386,7 @@ body.about-page .hero-subtitle {
 }
 
 .info-grid-elegant {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 60px;
+  /* layout manejado por Bootstrap row/col */
   padding: 60px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -418,19 +417,7 @@ body.about-page .hero-subtitle {
 
 @media (max-width: 1024px) {
   .hero-content-elegant {
-    grid-template-columns: 1fr;
-    gap: 80px;
     text-align: center;
-  }
-  
-  .skills-grid-elegant {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  
-  .info-grid-elegant {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 40px;
   }
 }
 
@@ -506,8 +493,6 @@ body.about-page .hero-subtitle {
   }
   
   .info-grid-elegant {
-    grid-template-columns: 1fr;
-    gap: 30px;
     padding: 40px 0;
   }
 }
@@ -1180,6 +1165,46 @@ img {
   border-radius: 20px;
 }
 
+@media (max-width: 480px) {
+  .stacked-images {
+    width: 160px;
+    height: 160px;
+  }
+
+  .stacked-images .img-drag {
+    width: 145px;
+    height: 145px;
+    min-width: 145px;
+    min-height: 145px;
+    max-width: 145px;
+    max-height: 145px;
+  }
+
+  .hero-title {
+    font-size: 7vw;
+  }
+
+  .hero-subtitle {
+    font-size: 3.5vw;
+  }
+  
+  .top-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 36px;
+    padding-top: 8px;
+  }
+  
+  .model-3d-bg model-viewer {
+    width: 95vw;
+    height: 50vw;
+    min-width: 150px;
+    min-height: 150px;
+    max-width: 100vw;
+    max-height: 60vw;
+  }
+}
+
 @media (max-width: 768px) {
   #egg-cursor {
     display: none !important;
@@ -1189,6 +1214,8 @@ img {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
     cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
   }
   
   .img-drag:active {
@@ -1199,6 +1226,7 @@ img {
   .img-drag-bubble {
     pointer-events: none;
     transition: opacity 0.2s ease;
+    display: block !important;
   }
   
   .img-drag:active + .img-drag-bubble {
@@ -1207,6 +1235,19 @@ img {
   
   .stacked-images {
     touch-action: manipulation;
+  }
+  
+  .top-bar-left, .top-bar-right {
+    font-size: 0.65rem;
+  }
+  
+  .bg-changer-btn {
+    font-size: 0.55rem;
+    padding: 6px 10px;
+  }
+  
+  .bg-changer-icon {
+    font-size: 0.7rem;
   }
 }
 
@@ -1445,6 +1486,10 @@ img {
   cursor: none;
   transition: all 0.2s ease;
   font-size: 0.9rem;
+  min-width: 35px;
+  min-height: 35px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .control-btn.main-control {
@@ -1489,6 +1534,9 @@ img {
   margin-bottom: 8px;
   cursor: none;
   overflow: hidden;
+  position: relative;
+  min-height: 4px;
+  touch-action: manipulation;
 }
 
 .progress-fill {
@@ -1713,4 +1761,526 @@ img {
 }
 .circle-progress .progress {
   transition: none;
+}
+
+@media (max-width: 600px) {
+  .elegant-nav {
+    padding: 20px 0;
+  }
+  
+  .nav-link {
+    font-size: 0.75rem;
+  }
+  
+  .hero-btn-bottom-wrapper {
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html, body {
+    font-size: 14px;
+  }
+  
+  .elegant-nav {
+    padding: 15px 0;
+  }
+  
+  .nav-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+  
+  .nav-divider {
+    margin: 0 15px;
+    height: 15px;
+  }
+  
+  .about-hero-elegant {
+    padding: 40px 20px;
+    margin-bottom: 60px;
+  }
+  
+  .elegant-title {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .title-accent {
+    width: 60px;
+    height: 2px;
+    margin-bottom: 40px;
+  }
+  
+  .name-elegant {
+    font-size: 1.8rem;
+  }
+  
+  .role-elegant {
+    font-size: 0.95rem;
+  }
+  
+  .description-elegant {
+    max-width: 100%;
+  }
+  
+  .description-elegant p {
+    font-size: 0.9rem;
+    margin: 0 0 16px 0;
+  }
+  
+  .about-image {
+    max-width: 100%;
+    padding: 8px;
+  }
+  
+  .skills-elegant {
+    padding: 0 20px;
+    margin-bottom: 60px;
+  }
+  
+  .section-header {
+    margin-bottom: 40px;
+  }
+  
+  .section-title-elegant {
+    font-size: 1.6rem;
+  }
+  
+  .skills-grid-elegant {
+    /* Bootstrap handles responsive stacking */
+  }
+  
+  .skill-block {
+    gap: 15px;
+    padding: 20px 0;
+  }
+  
+  .skill-number {
+    font-size: 0.9rem;
+  }
+  
+  .skill-content h4 {
+    font-size: 1.1rem;
+  }
+  
+  .skill-content p {
+    font-size: 0.85rem;
+  }
+  
+  .info-elegant {
+    padding: 0 20px 60px 20px;
+  }
+  
+  .info-grid-elegant {
+    padding: 30px 0;
+  }
+  
+  .info-column h4 {
+    font-size: 0.75rem;
+  }
+  
+  .info-column p {
+    font-size: 1rem;
+  }
+  
+  .circle-progress {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .circle-progress svg {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .circle-progress-inner {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .circle-logo-center {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .circle-logo-center img {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+
+/* ================================================
+   BACK BUTTON – páginas no principales
+   ================================================ */
+
+.back-btn {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  z-index: 3000;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: none;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+}
+
+.back-btn:hover {
+  background: rgba(0, 0, 0, 0.52);
+  border-color: rgba(255, 255, 255, 0.36);
+  transform: translateY(-3px);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+}
+
+.back-btn svg {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .back-btn {
+    cursor: pointer;
+    bottom: 20px;
+    left: 16px;
+  }
+}
+
+
+/* Enlace ATRÁS en top-bar (páginas no-principales) */
+a.back-top-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  color: #fff;
+  cursor: none;
+}
+
+a.back-top-link svg {
+  flex-shrink: 0;
+}
+
+/* ================================================
+   INDEX – MOBILE LAYOUT
+   ================================================ */
+
+@media (max-width: 768px) {
+
+  /* Ocultar en móvil: reproductor, CHANGE BG, fondo VANTA */
+  #music-player,
+  .bg-changer-btn,
+  #vanta-bg {
+    display: none !important;
+  }
+
+  /* Hacer content-drag-area el bloque contenedor y encuadrarlo
+     exactamente al viewport — sin scroll, sin desbordamiento */
+  .content-drag-area {
+    position: relative !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;       /* fallback para navegadores viejos */
+    height: 100svh !important;      /* small viewport height: excluye chrome del navegador */
+    min-height: unset !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Modelo 3D: el inline style="width:140%;height:140%" bloquea las
+     reglas CSS normales, !important lo anula.
+     Damos al contenedor el mismo tamaño que el model-viewer para
+     evitar que desborde hacia abajo. */
+  .model-3d-bg {
+    width: 115vw !important;
+    height: 110vw !important;
+    min-width: 340px !important;
+    min-height: 320px !important;
+  }
+
+  .model-3d-bg model-viewer {
+    width: 115vw !important;
+    height: 110vw !important;
+    min-width: 340px !important;
+    min-height: 320px !important;
+    max-width: 120vw !important;
+    max-height: 115vw !important;
+  }
+
+  /* Cards: más grandes y bien posicionadas en móvil */
+  .stacked-images {
+    width: 290px !important;
+    height: 290px !important;
+    left: 50% !important;
+    top: 48% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .stacked-images .img-drag {
+    width: 275px !important;
+    height: 275px !important;
+    min-width: 275px !important;
+    min-height: 275px !important;
+    max-width: 275px !important;
+    max-height: 275px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .content-drag-area {
+    height: 100dvh !important;    /* dynamic viewport height en pantallas pequeñas */
+  }
+
+  /* Modelo ajustado a pantallas muy pequeñas */
+  .model-3d-bg {
+    width: 110vw !important;
+    height: 105vw !important;
+    min-width: 300px !important;
+    min-height: 280px !important;
+  }
+
+  .model-3d-bg model-viewer {
+    width: 110vw !important;
+    height: 105vw !important;
+    min-width: 300px !important;
+    min-height: 280px !important;
+    max-width: 115vw !important;
+    max-height: 110vw !important;
+  }
+
+  /* Cards adaptadas */
+  .stacked-images {
+    width: 240px !important;
+    height: 240px !important;
+    top: 50% !important;
+  }
+
+  .stacked-images .img-drag {
+    width: 225px !important;
+    height: 225px !important;
+    min-width: 225px !important;
+    min-height: 225px !important;
+    max-width: 225px !important;
+    max-height: 225px !important;
+  }
+}
+
+
+/* ================================================
+   PÁGINAS DE PROYECTO – IMÁGENES/VIDEO RESPONSIVE
+   ================================================ */
+
+@media (max-width: 768px) {
+
+  /* Imagen principal de proyecto */
+  .project-hero-img {
+    height: auto !important;
+    max-height: 72vw !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  /* Vídeo principal de proyecto (img5) */
+  .project-hero-video {
+    height: auto !important;
+    max-height: 72vw !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  /* Columna visual primero en móvil (imagen/vídeo antes del texto) */
+  .right-column {
+    order: -1 !important;
+    height: auto !important;
+    padding: 0 !important;
+    align-items: center !important;
+  }
+
+  /* Contenedor de imagen/vídeo: centrar en columna única */
+  .image-container,
+  .video-container {
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  /* Barra decorativa vertical (left:-30px): ocultar para evitar overflow */
+  .project-info {
+    overflow: hidden !important;
+  }
+
+  /* Separador entre nº proyecto y categoría: ocultar (queda raro girado) */
+  .project-number-category .divider {
+    display: none !important;
+  }
+
+  /* Alinear fila de nº-categoría al centro */
+  .project-number-category {
+    justify-content: center !important;
+  }
+
+  /* Descripción: full width en móvil */
+  .project-description {
+    max-width: 100% !important;
+  }
+
+  /* img3 – flip card escalado para móvil */
+  .card-flip-container {
+    width: 90% !important;
+    height: 300px !important;
+    max-width: 320px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .flip-card {
+    width: 100% !important;
+    height: 300px !important;
+    max-width: 320px !important;
+    min-width: unset !important;
+  }
+
+  .card-side,
+  .card-front,
+  .card-back {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* img3 – imágenes fijadas (ScrollTrigger pinned) */
+  .pinned-image {
+    width: 90% !important;
+    height: 220px !important;
+  }
+
+  /* img2 – galería horizontal */
+  .img-container img {
+    width: 240px !important;
+    height: 300px !important;
+  }
+
+  /* Footer CTA: de grid 1fr auto a columna única */
+  .project-footer-cta {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    text-align: center !important;
+  }
+
+  .project-footer-cta a.cta-button-subtle {
+    margin: 0 auto !important;
+  }
+
+  /* img4 ya tiene .grid-2col */
+  .grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  /* Ilustración decorativa del footer: oculta en móvil */
+  .project-footer-illustration {
+    display: none !important;
+  }
+
+  /* Footer nav – centrar en móvil */
+  footer nav {
+    align-items: center !important;
+  }
+
+  footer .social-links,
+  footer > div div[style*="display: flex; gap: 0.8rem"] {
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-hero-img,
+  .project-hero-video {
+    max-height: 85vw !important;
+    border-radius: 8px !important;
+  }
+
+  .flip-card {
+    height: 260px !important;
+  }
+
+  .card-flip-container {
+    height: 260px !important;
+  }
+}
+
+
+/* ================================================
+   ABOUT – SKILLS ROW MÓVIL
+   ================================================ */
+
+@media (max-width: 768px) {
+  .skills-row {
+    flex-wrap: wrap !important;
+    gap: 20px 16px !important;
+    overflow: visible !important;
+    justify-content: center !important;
+  }
+
+  /* Ocultar separadores verticales al hacer wrap */
+  .skills-row > div:not(.skill-item) {
+    display: none !important;
+  }
+
+  .technical-skills-elegant {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    overflow: visible !important;
+  }
+
+  /* Círculos más pequeños para que quepan en móvil */
+  .circle-progress,
+  .circle-progress svg,
+  .circle-progress-inner,
+  .circle-logo-center {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .circle-logo-center img {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .circle-progress,
+  .circle-progress svg,
+  .circle-progress-inner,
+  .circle-logo-center {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .circle-logo-center img {
+    width: 36px !important;
+    height: 36px !important;
+  }
 }
