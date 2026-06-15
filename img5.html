@@ -574,35 +574,29 @@
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
       
-      const isAnimationOk = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-      
-      if(isAnimationOk) {
-        
-        const pinTrigger = ScrollTrigger.create({
-          trigger: "#video-section",
-          start: "top top",
-          end: "bottom bottom", 
-          pin: ".video-figure",
-          pinSpacing: false
-        });
-        
-        
-        gsap.fromTo("#kaleo-video", 
-          {
-            scale: 0.55
-          },
-          {
-            scale: 0.92, 
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: "#video-section",
-              start: "top top",
-              end: "+=350%", 
-              scrub: 1.5 
-            }
+      ScrollTrigger.normalizeScroll(true);
+
+      const pinTrigger = ScrollTrigger.create({
+        trigger: "#video-section",
+        start: "top top",
+        end: "bottom bottom",
+        pin: ".video-figure",
+        pinSpacing: false
+      });
+
+      gsap.fromTo("#kaleo-video",
+        { scale: 0.55 },
+        {
+          scale: 0.92,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: "#video-section",
+            start: "top top",
+            end: "+=350%",
+            scrub: 1.5
           }
-        );
-      }
+        }
+      );
     }
 
     
