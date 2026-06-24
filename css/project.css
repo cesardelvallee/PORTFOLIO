@@ -1,0 +1,149 @@
+/* ============================================================
+   PROJECT CASE-STUDY SYSTEM  ·  compartido por img1–img5
+   Acento por proyecto via --ph-ink / --ph-accent / --ph-bg /
+   --ph-line en <body>. El bloque "siguiente proyecto" usa además
+   --pn-ink / --pn-accent (los colores del PRÓXIMO proyecto).
+   Curva de la casa: cubic-bezier(0.22, 0.61, 0.36, 1).
+   ============================================================ */
+
+:root { --proj-ease: cubic-bezier(0.22, 0.61, 0.36, 1); }
+
+[data-reveal] { will-change: opacity, transform; }
+[data-reveal].is-revealed { will-change: auto; }
+
+/* ============================================================
+   SIGUIENTE PROYECTO  ·  teaser inmersivo (imagen + color al hover)
+   ============================================================ */
+.proj-next {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--ph-ink, #1c1a16);
+  color: var(--ph-bg, #ece6da);
+}
+/* lavado de color del próximo proyecto, sigue al cursor */
+.pn-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(58% 120% at var(--mx, 72%) var(--my, 50%),
+              color-mix(in srgb, var(--pn-ink, #000) 92%, transparent), transparent 72%);
+  transition: opacity 0.6s ease;
+}
+/* imagen/teaser del próximo proyecto */
+.pn-media {
+  position: absolute;
+  z-index: 1;
+  top: 50%; left: 50%;
+  width: clamp(150px, 18vw, 260px);
+  aspect-ratio: 4 / 3;
+  transform: translate(-50%, -50%) scale(0.92);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  transition: opacity 0.5s ease, transform 0.65s var(--proj-ease);
+  will-change: transform;
+}
+.pn-media img, .pn-media video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pn-media::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--pn-accent, #fff);
+  mix-blend-mode: overlay;
+  opacity: 0.22;
+}
+
+.proj-next-link {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(36px, 6vh, 60px) clamp(24px, 6vw, 80px);
+  text-decoration: none;
+  color: inherit;
+}
+.proj-next-eyebrow {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ph-bg, #ece6da) 44%, transparent);
+  margin-bottom: 0.75rem;
+}
+.proj-next-title {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  transition: transform 0.5s var(--proj-ease);
+}
+.proj-next-title .pn-num {
+  font-size: 0.62em;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ph-accent, #c2a875) 82%, transparent);
+  margin-right: 0.55ch;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.proj-next-arrow {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--ph-bg, #ece6da) 26%, transparent);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: transform 0.5s var(--proj-ease), border-color 0.4s ease, background-color 0.4s ease;
+}
+.proj-next-arrow svg { width: 38%; height: 38%; }
+
+@media (hover: hover) and (pointer: fine) {
+  .proj-next.is-hover .pn-wash { opacity: 0.5; }
+  .proj-next.is-hover .pn-media { opacity: 1; }
+  .proj-next.is-hover .proj-next-title { transform: translateX(7px); }
+  .proj-next.is-hover .proj-next-arrow {
+    transform: translateX(5px);
+    border-color: color-mix(in srgb, var(--ph-bg, #ece6da) 52%, transparent);
+    background-color: color-mix(in srgb, var(--ph-bg, #ece6da) 8%, transparent);
+  }
+}
+.proj-next-link:focus-visible {
+  outline: 2px solid var(--ph-accent, #c2a875);
+  outline-offset: 4px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 560px) {
+  .proj-next-link { padding: 36px 22px; gap: 16px; }
+  .proj-next-eyebrow { margin-bottom: 0.6rem; }
+  .proj-next-title { font-size: clamp(1.25rem, 6vw, 1.6rem); }
+  .proj-next-arrow { width: 38px; height: 38px; }
+}
+
+/* ============================================================
+   ACCESIBILIDAD  —  visibles y sin movimiento
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .pn-media, .pn-wash { display: none !important; }
+  .proj-next-title, .proj-next-arrow { transition: none !important; }
+}

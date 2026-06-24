@@ -3,10 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
-  <meta name="description" content="Contacto - Cesar Del Valle">
+  <meta name="description" content="Contact César Del Valle — graphic designer. Available for branding, packaging, 3D and motion projects. Email, LinkedIn and Instagram.">
+  <meta name="author" content="César Del Valle">
   <meta name="theme-color" content="#080808">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Contacto - César Del Valle</title>
+  <title>Contact — César Del Valle, Graphic Designer</title>
+  <link rel="canonical" href="https://cesardelvallee.github.io/PORTFOLIO/contact.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="César Del Valle">
+  <meta property="og:title" content="Contact — César Del Valle, Graphic Designer">
+  <meta property="og:description" content="Available for branding, packaging, 3D and motion projects. Let's create something together.">
+  <meta property="og:url" content="https://cesardelvallee.github.io/PORTFOLIO/contact.html">
+  <meta property="og:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="es_ES">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Contact — César Del Valle, Graphic Designer">
+  <meta name="twitter:description" content="Available for branding, packaging, 3D and motion projects.">
+  <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
@@ -14,6 +35,8 @@
   <link rel="stylesheet" href="css/contact.css">
 </head>
 <body class="contact-page">
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
   
   <div id="egg-cursor"></div>
 
@@ -23,8 +46,8 @@
     </svg>
   </a>
 
-  <div id="background-container">
-    <canvas id="background-canvas"></canvas>
+  <div id="background-container" aria-hidden="true">
+    <div class="bg-drift"><span class="bg-blob bg-blob-1"></span><span class="bg-blob bg-blob-2"></span><span class="bg-blob bg-blob-3"></span></div>
   </div>
   
   <div class="top-bar">
@@ -35,97 +58,73 @@
     </div>
   </div>
   
-  <div class="contact-container">
-    <div class="contact-content">
-      
-      <div class="contact-grid row g-4 justify-content-center">
+  <main class="contact-container">
+    <div class="contact-shell">
 
-        <div class="col-12 col-sm-6">
-          <div class="contact-card email-card">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="card-content">
-              <h3 class="card-title">Email</h3>
-              <p class="card-description">Para colaboraciones y proyectos</p>
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="card-link">
-                cesardelvallefuentes@gmail.com
-              </a>
-            </div>
-          </div>
-        </div>
+      <header class="contact-intro">
+        <span class="contact-status"><span class="status-dot"></span>Disponible para proyectos</span>
+        <h1 class="contact-title">Hablemos.</h1>
+        <p class="contact-lead">¿Tienes un proyecto en mente? Cuéntamelo y le damos forma juntos. Suelo responder en menos de 24&nbsp;h.</p>
+      </header>
 
-        <div class="col-12 col-sm-6">
-          <div class="contact-card linkedin-card">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="card-content">
-              <h3 class="card-title">LinkedIn</h3>
-              <p class="card-description">Conectemos profesionalmente</p>
-              <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" class="card-link">
-                César Del Valle Fuentes
-              </a>
-            </div>
-          </div>
-        </div>
+      <div class="contact-cards">
 
-        <div class="col-12 col-sm-6">
-          <div class="contact-card instagram-card">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" stroke="currentColor" stroke-width="2"/>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div class="card-content">
-              <h3 class="card-title">Instagram</h3>
-              <p class="card-description">Sígueme para ver mi trabajo</p>
-              <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" class="card-link">
-                @cesardelvalle.jpg
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6">
-          <div class="contact-card schedule-card">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="card-content">
-              <h3 class="card-title">Disponibilidad</h3>
-              <p class="card-description">Respuesta en 24h</p>
-              <span class="card-link">Lun - Vie, 9:00 - 18:00</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      
-      <div class="contact-cta">
-        <h2 class="cta-title">¿Listo para colaborar?</h2>
-        <p class="cta-description">
-          Cuéntame sobre tu proyecto y trabajemos juntos para crear algo increíble.
-        </p>
-        <a href="mailto:cesardelvallefuentes@gmail.com?subject=Nuevo%20Proyecto&body=Hola%20César,%0A%0AMe%20gustaría%20hablar%20contigo%20sobre..." class="cta-button">
-          Enviar Mensaje
+        <a class="c-card c-card--primary" href="mailto:cesardelvallefuentes@gmail.com?subject=Nuevo%20proyecto&body=Hola%20César,%0A%0AMe%20gustaría%20hablar%20contigo%20sobre...">
+          <span class="c-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="c-text">
+            <span class="c-label">Email · escríbeme</span>
+            <span class="c-value">cesardelvallefuentes@gmail.com</span>
+          </span>
+          <span class="c-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
         </a>
+
+        <a class="c-card" href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">
+          <span class="c-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="c-text">
+            <span class="c-label">LinkedIn · conectemos</span>
+            <span class="c-value">César Del Valle Fuentes</span>
+          </span>
+          <span class="c-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+          </span>
+        </a>
+
+        <a class="c-card" href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">
+          <span class="c-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" stroke="currentColor" stroke-width="2"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="c-text">
+            <span class="c-label">Instagram · mi trabajo</span>
+            <span class="c-value">@cesardelvalle.jpg</span>
+          </span>
+          <span class="c-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+          </span>
+        </a>
+
       </div>
-      
+
+      <p class="contact-foot">Normalmente activo de Lun a Vie, 9:00 – 18:00 (CET).</p>
+
     </div>
-  </div>
+  </main>
   
   <script src="script.js"></script>
 </body>

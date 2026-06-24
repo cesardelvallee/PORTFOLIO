@@ -4,33 +4,51 @@
   <style>html, body { margin:0!important; padding:0!important; box-sizing:border-box!important; }</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#080808">
-  <title>Proyecto 01</title>
+  <meta name="theme-color" content="#2d4a1f">
+  <meta name="description" content="Coffee Rituals — packaging design for a premium coffee collection where illustrated characters embody each origin's culture. Branding & packaging by César Del Valle.">
+  <meta name="author" content="César Del Valle">
+  <title>Coffee Rituals — Branding & Packaging · César Del Valle</title>
+  <link rel="canonical" href="https://cesardelvallee.github.io/PORTFOLIO/img1.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="César Del Valle">
+  <meta property="og:title" content="Coffee Rituals — Branding & Packaging">
+  <meta property="og:description" content="Packaging for a premium coffee collection: illustrated characters that embody each origin's culture.">
+  <meta property="og:url" content="https://cesardelvallee.github.io/PORTFOLIO/img1.html">
+  <meta property="og:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Coffee Rituals — Branding & Packaging">
+  <meta name="twitter:description" content="Packaging for a premium coffee collection, by César Del Valle.">
+  <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       gsap.registerPlugin(ScrollTrigger);
-      
+      ScrollTrigger.config({ ignoreMobileResize: true });
+
       const container = document.querySelector('.cafe-scroll-container');
       const wrapper = document.querySelector('.cafe-scroll-wrapper');
       const slides = gsap.utils.toArray('.cafe-slide');
-      
+
       if (!container || !wrapper || slides.length === 0) return;
-      
+
       const getScrollAmount = () => {
         const wrapperWidth = wrapper.scrollWidth;
         return -(wrapperWidth - window.innerWidth);
       };
-      
-      gsap.set(wrapper, { x: window.innerWidth });
-      
-      const tween = gsap.to(wrapper, {
+
+      gsap.set(wrapper, { x: 0 });
+
+      gsap.to(wrapper, {
         x: getScrollAmount,
         ease: "none",
         scrollTrigger: {
@@ -38,191 +56,95 @@
           pin: true,
           scrub: 1,
           start: "top top",
-          end: () => `+=${wrapper.scrollWidth}`,
+          end: () => `+=${wrapper.scrollWidth - window.innerWidth}`,
           invalidateOnRefresh: true
         }
       });
-      
-      window.addEventListener('resize', () => {
-        ScrollTrigger.refresh();
-      });
+
+      window.addEventListener('resize', () => { ScrollTrigger.refresh(); });
     });
   </script>
-  
-  <style>
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes rotate-reverse {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.3; }
-      50% { transform: scale(1.1); opacity: 0.6; }
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes fadeInOut {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    
-    @keyframes fadeInUp {
-      from { 
-        opacity: 0; 
-        transform: translateY(30px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
-    }
-    
-    @keyframes scrollPulse {
-      0%, 100% { transform: scaleY(1); opacity: 0.4; }
-      50% { transform: scaleY(1.2); opacity: 1; }
-    }
-    
-    .scroll-item {
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .scroll-item.visible {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-    
-    .top-bar-left,
-    .top-bar-right {
-      color: #2d4a1f !important;
-    }
-    
-    @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr !important;
-        gap: 6vw !important;
-        text-align: center;
-      }
-      
-      .project-info {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3rem !important;
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .main-section {
-        min-height: 100vh !important;
-        padding: 15vh 4vw 6vh 4vw !important;
-      }
 
-      .main-grid {
-        gap: 4rem !important;
-      }
-      
-      .project-number-category {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 1rem !important;
-      }
-      
-      .project-number-category .divider {
-        width: 60px !important;
-        transform: rotate(90deg);
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-        text-align: center;
-      }
-      
-      .technical-info {
-        margin: 2rem 0 !important;
-      }
-      
-      .right-column {
-        padding: 1rem !important;
-      }
-      
-      .cafe-img-container img {
-        width: 80vw !important;
-        height: 60vh !important;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .main-section {
-        padding: 12vh 3vw 4vh 3vw !important;
-      }
-      
-      .project-info {
-        max-width: 100% !important;
-      }
-      
-      .main-title {
-        font-size: clamp(2.5rem, 12vw, 4rem) !important;
-        line-height: 0.9 !important;
-      }
-      
-      .project-description {
-        font-size: clamp(1rem, 4vw, 1.2rem) !important;
-        margin-bottom: 2rem !important;
-      }
-      
-      .cafe-img-container img {
-        width: 90vw !important;
-        height: 50vh !important;
-      }
-    }
+  <style>
+    .top-bar-left, .top-bar-right { color: #2d4a1f !important; }
 
     .cafe-scroll-container {
       width: 100%;
-      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       background: #c4d1a8;
     }
-
     .cafe-scroll-wrapper {
       display: flex;
       width: fit-content;
-      height: 100vh;
+      height: 100dvh;
       will-change: transform;
     }
-
     .cafe-slide {
       width: 100vw;
-      height: 100vh;
+      height: 100dvh;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0;
-      box-sizing: border-box;
     }
-
     .cafe-slide img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
+    /* en móvil mostramos el packaging completo (sin recorte agresivo) */
+    @media (max-width: 768px) {
+      .cafe-slide { box-sizing: border-box; padding: 13vw 7vw; }
+      .cafe-slide img { object-fit: contain; }
+    }
+
+    /* Intro editorial de la colección (chicha) */
+    .gx-section { position: relative; overflow: hidden; padding: clamp(84px, 15vh, 190px) clamp(24px, 6vw, 90px); }
+    .proj-intro { background: var(--ph-bg, #c4d1a8); }
+    .gx-inner { max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; }
+    .gx-bgnum {
+      position: absolute; top: 50%; right: -3%; transform: translateY(-50%);
+      z-index: 0; pointer-events: none; user-select: none;
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(13rem, 38vw, 46rem);
+      line-height: 0.72; letter-spacing: -0.05em; color: var(--ph-ink, #2d4a1f); opacity: 0.05;
+    }
+    .gx-eyebrow { display: inline-block; font-family: 'Inter', sans-serif; font-size: 0.64rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ph-accent, #a87d22); }
+    .gx-title { font-family: 'Inter', sans-serif; font-size: clamp(1.9rem, 4.8vw, 3.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.02; color: var(--ph-ink, #2d4a1f); margin: 0.8rem 0 0; max-width: 16ch; text-wrap: balance; }
+    .gx-title em { font-style: normal; color: var(--ph-accent, #a87d22); }
+    .gx-sub { margin: 1.2rem 0 0; max-width: 52ch; font-family: 'Inter', sans-serif; font-size: clamp(0.92rem, 1.1vw, 1.05rem); font-weight: 400; line-height: 1.7; color: color-mix(in srgb, var(--ph-ink, #2d4a1f) 78%, transparent); }
+    .gx-cue { margin-top: clamp(34px, 6vh, 60px); display: inline-flex; align-items: center; gap: 11px; font-family: 'Inter', sans-serif; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--ph-ink, #2d4a1f) 62%, transparent); }
+    .gx-cue svg { width: 26px; height: 14px; animation: gx-cue-move 1.8s ease-in-out infinite; }
+    @keyframes gx-cue-move { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+    .gx-reveal { transition: opacity 0.8s cubic-bezier(0.22,0.61,0.36,1), transform 0.8s cubic-bezier(0.22,0.61,0.36,1); }
+    .gx-reveal.gx-hidden { opacity: 0; transform: translateY(28px); }
+    .gx-cue.gx-reveal.gx-hidden { transform: translateY(18px); transition-delay: 0.1s; }
+    /* Ticker kinético de orígenes (firma de Coffee Rituals) */
+    .cafe-ticker { margin-top: clamp(42px, 8vh, 88px); overflow: hidden; border-top: 1px solid color-mix(in srgb, var(--ph-ink, #2d4a1f) 20%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--ph-ink, #2d4a1f) 20%, transparent); padding: clamp(13px, 1.8vh, 22px) 0; }
+    .cafe-ticker-track { width: max-content; white-space: nowrap; will-change: transform; animation: cafe-ticker 30s linear infinite; }
+    .cafe-ticker-track b { font-family: 'Inter', sans-serif; font-size: clamp(1.3rem, 3vw, 2.3rem); font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ph-ink, #2d4a1f); }
+    .cafe-ticker-track i { font-style: normal; color: var(--ph-accent, #a87d22); padding: 0 0.55em; }
+    @keyframes cafe-ticker { to { transform: translateX(-50%); } }
+
+    /* Hero móvil a pantalla — visual arriba grande, texto repartido, sin hueco */
+    @media (max-width: 560px) {
+      .proj-hero { min-height: 100dvh; align-items: stretch; padding: 54px 18px 20px; }
+      .proj-hero-inner { display: flex; flex-direction: column; gap: 0; }
+      .proj-hero-visual { order: -1; flex: 0 0 auto; margin-bottom: clamp(12px, 2.4vh, 26px); }
+      .proj-hero-visual img { max-height: 40dvh; }
+      .proj-hero-text { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+      .proj-eyebrow { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.56rem, 1.3dvh, 0.72rem); }
+      .proj-title { margin: 0 0 clamp(0.3rem, 0.9dvh, 0.65rem); font-size: clamp(2rem, 6.2dvh, 3.1rem); line-height: 0.98; }
+      .proj-tagline { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.86rem, 2dvh, 1.15rem); line-height: 1.3; max-width: none; }
+      .proj-desc { margin: 0; font-size: clamp(0.74rem, 1.7dvh, 0.95rem); line-height: 1.42; }
+      .proj-meta { margin-top: clamp(0.5rem, 1.4dvh, 0.95rem); padding-top: clamp(0.65rem, 1.7dvh, 1.1rem); }
+    }
   </style>
 </head>
-<body>
+<body style="--ph-bg:#c4d1a8; --ph-ink:#2d4a1f; --ph-accent:#a87d22; --ph-line:rgba(45,74,31,0.18);">
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
   <a href="index.html" class="back-btn" title="Volver al inicio">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -232,196 +154,90 @@
       <a href="index.html" class="top-bar-left back-top-link" id="home-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
       <div class="top-bar-right">CAFÉ PREMIUM</div>
     </div>
-  <div class="main-section" style="min-height:80vh;background:#c4d1a8;display:flex;align-items:center;justify-content:center;padding:10vh 5vw 4vh 5vw;">
-    
-    <div class="main-grid" style="max-width:1400px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:center;">
-      
-      <div class="project-info" style="opacity:0; animation:fadeInUp 0.9s ease-out 0.4s forwards; position:relative;">
-        
-        <div style="position:absolute; top:-20px; left:-30px; width:4px; height:60px; background:linear-gradient(180deg, #2d4a1f 0%, transparent 100%); border-radius:2px; opacity:0; animation:fadeInUp 1s ease-out 0.3s forwards;"></div>
-        
-        <div class="project-number-category" style="display:flex;align-items:center;margin-bottom:2.5rem; opacity:0; animation:fadeInUp 0.9s ease-out 0.45s forwards;">
-          <span style="color:#2d4a1f;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:600;letter-spacing:0.25em;text-transform:uppercase;">Project 01</span>
-          <div class="divider" style="width:50px;height:1px;background:linear-gradient(90deg, #2d4a1f 0%, #d4a947 100%);margin:0 1.8rem;"></div>
-          <span style="color:#d4a947;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:400;letter-spacing:0.15em; opacity:0; animation:fadeInUp 0.9s ease-out 0.5s forwards;">Branding & Packaging</span>
+  <section class="proj-hero" style="--ph-bg:#c4d1a8; --ph-ink:#2d4a1f; --ph-accent:#a87d22; --ph-line:rgba(45,74,31,0.18); --ph-num:'01'; --ph-img:url('img/CAFE_PACKAGING_EXTERIOR.png');">
+    <div class="proj-hero-inner">
+      <div class="proj-hero-text">
+        <p class="proj-eyebrow ph-rise" style="animation-delay:0.10s;"><span class="n">Project 01</span><span class="bar"></span>Branding &amp; Packaging</p>
+        <h1 class="proj-title ph-rise" style="animation-delay:0.18s;">Coffee Rituals</h1>
+        <p class="proj-tagline ph-rise" style="animation-delay:0.26s;">Packaging para una colección de café premium — una pieza para coleccionar y <em>viajar a través de ella</em>.</p>
+        <p class="proj-desc ph-rise" style="animation-delay:0.34s;">No buscaba un packaging simplemente atractivo, sino una pieza capaz de generar conexión emocional. Cada variedad de café está representada por un <strong>personaje ilustrado</strong> en estilo cartoon que refleja el carácter y la cultura de su país de origen: la elegancia italiana, la calma japonesa o la energía mexicana transmiten algo más que el propio sabor.</p>
+        <div class="proj-meta ph-rise" style="animation-delay:0.42s;">
+          <div><span class="m-label">Role</span><span class="m-value">Brand &amp; Package Design</span></div>
+          <div><span class="m-label">Product</span><span class="m-value">Coffee Rituals Collection</span></div>
+          <div><span class="m-label">Software</span><span class="m-value">Illustrator · Photoshop</span></div>
         </div>
-
-        <h1 class="main-title" style="color:#2d4a1f;font-family:'Inter',sans-serif;font-size:clamp(3rem,5.5vw,5rem);font-weight:800;line-height:0.82;letter-spacing:-0.04em;margin:0 0 2rem 0; opacity:0; animation:fadeInUp 0.95s ease-out 0.6s forwards; text-shadow:0 2px 8px rgba(45,74,31,0.1);">COFFEE&nbsp;RITUALS<br><span style="font-weight:200;font-style:italic;color:#d4a947;">Packaging</span></h1>
-
-        <p class="project-description" style="color:#3d5f32;font-family:'Inter',sans-serif;font-size:clamp(0.85rem,1.1vw,0.95rem);line-height:1.5;font-weight:300;margin:0 0 3.5rem 0;max-width:520px; opacity:0; animation:fadeInUp 0.9s ease-out 0.75s forwards;">Desde el inicio tuve claro que no buscaba un packaging simplemente atractivo, sino una pieza capaz de generar una conexión emocional. Por ello, cada variedad de café está representada por un <strong style="font-weight:500;color:#2d4a1f;">personaje ilustrado</strong> en estilo cartoon, pensado para reflejar el carácter y la cultura de su país de origen, y actuar como un embajador más que como un elemento decorativo. Así, la elegancia italiana, la calma japonesa o la energía mexicana transmiten, de forma simbólica y cercana, algo más que el propio sabor del café.<br><br>El café es una experiencia ligada a personas, rituales e identidades, y el diseño busca equilibrar lo lúdico con lo cuidado: una estética clara y limpia, una estructura en cartón reciclable y una intención de colección que invite a descubrir todas las variedades y, en cierto modo, <em style="color:#d4a947;">viajar a través de ellas</em>.</p>
-
       </div>
-
-      <div class="right-column" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;">
-        
-        <div class="image-container" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:flex-start;opacity:0;animation:fadeInUp 1s ease-out 0.5s forwards;">
-          <img
-            src="img/CAFE_PACKAGING_EXTERIOR.png"
-            alt="Café Premium Packaging"
-            class="project-hero-img"
-            style="width:100%;height:550px;object-fit:contain;display:block;border-radius:8px;margin-bottom:1.5rem;">
-          
-          <div style="display:flex;gap:2rem;flex-wrap:wrap;width:100%;opacity:0;animation:fadeInUp 1s ease-out 0.7s forwards;">
-            <div style="flex:0 1 auto;border-left:3px solid #2d4a1f;padding-left:1rem;">
-              <h4 style="color:#2d4a1f;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Role</h4>
-              <p style="color:#d4a947;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Brand Designer · Package Design</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #d4a947;padding-left:1rem;">
-              <h4 style="color:#2d4a1f;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Product</h4>
-              <p style="color:#d4a947;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Coffee Rituals Collection</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #4a6b2a;padding-left:1rem;">
-              <h4 style="color:#2d4a1f;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Software</h4>
-              <p style="color:#d4a947;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Illustrator · Photoshop</p>
-            </div>
-          </div>
+      <div class="proj-hero-visual ph-rise" style="animation-delay:0.30s;">
+        <div class="ph-tilt">
+          <img src="img/CAFE_PACKAGING_EXTERIOR.png" alt="Coffee Rituals — packaging exterior">
         </div>
-        
-      </div>
-      
-    </div>
-    
-  </div>
-  
-  <section class="cafe-scroll-container">
-    <div class="cafe-scroll-wrapper">
-      <div class="cafe-slide">
-        <img src="img/CAFE_1.png" alt="Café Premium - Imagen 1" />
-      </div>
-      <div class="cafe-slide">
-        <img src="img/CAFE_2.png" alt="Café Premium - Imagen 2" />
-      </div>
-      <div class="cafe-slide">
-        <img src="img/CAFE_3.png" alt="Café Premium - Imagen 3" />
-      </div>
-      <div class="cafe-slide">
-        <img src="img/CAFE_4.png" alt="Café Premium - Imagen 4" />
-      </div>
-      <div class="cafe-slide">
-        <img src="img/CAFE_5.png" alt="Café Premium - Imagen 5" />
-      </div>
-      <div class="cafe-slide">
-        <img src="img/CAFE_6.png" alt="Café Premium - Imagen 6" />
       </div>
     </div>
   </section>
 
-  <footer style="position: relative; background: linear-gradient(135deg, #1a1a14 0%, #2a2a1e 50%, #1a1a14 100%); overflow: hidden; padding: 0;">
-    
-    <div style="position: relative; background: linear-gradient(135deg, #3a3a30 0%, #4a4a38 100%); padding: 4rem 0; overflow: hidden;">
-      
-      <div style="position: absolute; top: -10%; left: -5%; width: 120px; height: 120px; background: rgba(193, 170, 110, 0.08); border-radius: 50%; transform: rotate(45deg);"></div>
-      <div style="position: absolute; bottom: -8%; right: -3%; width: 90px; height: 90px; background: rgba(30, 30, 20, 0.3); border-radius: 15px; transform: rotate(-20deg);"></div>
-      <div style="position: absolute; top: 40%; right: 8%; width: 40px; height: 40px; background: rgba(193, 170, 110, 0.1); border-radius: 50%; animation: float-subtle 8s ease-in-out infinite;"></div>
-      
-      <div style="position: absolute; top: 25%; left: 15%; width: 6px; height: 6px; background: rgba(193, 170, 110, 0.4); border-radius: 50%; animation: float-dot-subtle 5s ease-in-out infinite;"></div>
-      <div style="position: absolute; top: 70%; left: 12%; width: 4px; height: 4px; background: rgba(193, 170, 110, 0.3); border-radius: 50%; animation: float-dot-subtle 4s ease-in-out infinite reverse;"></div>
-      <div style="position: absolute; bottom: 30%; right: 20%; width: 5px; height: 5px; background: rgba(193, 170, 110, 0.2); border-radius: 50%; animation: float-dot-subtle 6s ease-in-out infinite;"></div>
-      
-      <div class="project-footer-cta" style="max-width: 1400px; margin: 0 auto; padding: 0 5vw; display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center;">
-
-        <div style="z-index: 2;">
-          <h2 style="font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: #c1aa6e; margin: 0 0 1rem 0; line-height: 1.1; letter-spacing: -0.01em;">¿Trabajamos juntos?</h2>
-          <p style="font-family: 'Inter', sans-serif; font-size: clamp(0.95rem, 1.3vw, 1.1rem); color: rgba(193, 170, 110, 0.8); margin: 0 0 2rem 0; line-height: 1.5; font-weight: 300; max-width: 420px;">Siempre estoy abierto a nuevos proyectos creativos y colaboraciones interesantes.</p>
-          
-          <a href="mailto:cesardelvallefuentes@gmail.com" class="cta-button-subtle email-link" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #c1aa6e; color: #2a2a1e; padding: 0.9rem 2rem; border-radius: 25px; text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden;" onclick="window.location.href='mailto:cesardelvallefuentes@gmail.com';">
-            <span style="z-index: 2;">Contactar</span>
-            <span style="z-index: 2; font-size: 1rem;">→</span>
-          </a>
+  <section class="gx-section proj-intro" aria-label="La colección Coffee Rituals">
+    <span class="gx-bgnum" aria-hidden="true">01</span>
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">La colección</span>
+        <h2 class="gx-title">Cada origen, su <em>personaje</em></h2>
+        <p class="gx-sub">Cada café se encarna en un personaje ilustrado que respira la cultura de su país —la elegancia italiana, la calma japonesa, la energía mexicana—. Un packaging para coleccionar y viajar a través de él.</p>
+      </div>
+      <span class="gx-cue gx-reveal">Desliza para explorar
+        <svg viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h23M18 1l6 6-6 6"/></svg>
+      </span>
+      <div class="cafe-ticker gx-reveal" aria-hidden="true">
+        <div class="cafe-ticker-track">
+          <b>Italia<i>✦</i>Japón<i>✦</i>México<i>✦</i>Etiopía<i>✦</i>Turquía<i>✦</i>Suecia<i>✦</i>Coffee Rituals<i>✦</i>Italia<i>✦</i>Japón<i>✦</i>México<i>✦</i>Etiopía<i>✦</i>Turquía<i>✦</i>Suecia<i>✦</i>Coffee Rituals<i>✦</i>Italia<i>✦</i>Japón<i>✦</i>México<i>✦</i>Etiopía<i>✦</i>Turquía<i>✦</i>Suecia<i>✦</i>Coffee Rituals<i>✦</i>Italia<i>✦</i>Japón<i>✦</i>México<i>✦</i>Etiopía<i>✦</i>Turquía<i>✦</i>Suecia<i>✦</i>Coffee Rituals<i>✦</i></b>
         </div>
-
-        <div class="project-footer-illustration" style="position: relative; width: 200px; height: 200px; z-index: 1;">
-
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 130px; height: 130px; background: linear-gradient(135deg, rgba(193, 170, 110, 0.2) 0%, rgba(193, 170, 110, 0.1) 100%); border-radius: 50% 25% 50% 25%; animation: morph-subtle 12s ease-in-out infinite; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);"></div>
-          
-          <div style="position: absolute; top: 40%; left: 45%; width: 12px; height: 12px; background: rgba(193, 170, 110, 0.6); border-radius: 50%; animation: bounce-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; top: 65%; left: 60%; width: 8px; height: 8px; background: rgba(193, 170, 110, 0.4); border-radius: 50%; animation: bounce-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-          <div style="position: absolute; top: 15%; right: 25%; width: 18px; height: 18px; background: rgba(193, 170, 110, 0.3); border-radius: 50%; animation: orbit-subtle 10s linear infinite;"></div>
-          <div style="position: absolute; bottom: 20%; left: 15%; width: 15px; height: 15px; background: rgba(193, 170, 110, 0.2); transform: rotate(45deg); animation: float-subtle 6s ease-in-out infinite reverse;"></div>
-          
-          <div style="position: absolute; top: 35%; left: 25%; width: 35px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(193, 170, 110, 0.3) 50%, transparent 100%); transform: rotate(30deg); animation: pulse-line-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; bottom: 45%; right: 20%; width: 28px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(193, 170, 110, 0.2) 50%, transparent 100%); transform: rotate(-20deg); animation: pulse-line-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-        </div>
-        
       </div>
     </div>
+  </section>
 
-    <div style="background: #2a2a1e; padding: 2.5rem 5vw 1.5rem 5vw; position: relative;">
-      
-      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(193, 170, 110, 0.2) 25%, rgba(193, 170, 110, 0.4) 50%, rgba(193, 170, 110, 0.2) 75%, transparent 100%);"></div>
-      
-      <div style="max-width: 1400px; margin: 0 auto;">
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2rem;">
-          
-          <div>
-            <h3 style="color: #c1aa6e; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0 0 0.8rem 0; letter-spacing: 0.02em;">Cesar Del Valle</h3>
-            <p style="color: rgba(193, 170, 110, 0.8); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; line-height: 1.5; margin: 0 0 1.2rem 0;">Creative Director & 3D Artist especializado en experiencias audiovisuales.</p>
-            
-            <div style="display: flex; gap: 0.8rem;">
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(193, 170, 110, 0.1); border: 1px solid rgba(193, 170, 110, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(193, 170, 110, 0.8);">
-                  <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(193, 170, 110, 0.1); border: 1px solid rgba(193, 170, 110, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(193, 170, 110, 0.8);">
-                  <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://www.instagram.com/cesardelvallee/" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(193, 170, 110, 0.1); border: 1px solid rgba(193, 170, 110, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(193, 170, 110, 0.8);">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2"/>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" stroke="currentColor" stroke-width="2"/>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
+  <section class="cafe-scroll-container" aria-label="Galería del proyecto Coffee Rituals">
+    <div class="cafe-scroll-wrapper">
+      <div class="cafe-slide"><img src="img/CAFE_1.png" alt="Coffee Rituals — pieza de packaging 1" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_2.png" alt="Coffee Rituals — pieza de packaging 2" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_3.png" alt="Coffee Rituals — pieza de packaging 3" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_4.png" alt="Coffee Rituals — pieza de packaging 4" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_5.png" alt="Coffee Rituals — pieza de packaging 5" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_6.png" alt="Coffee Rituals — pieza de packaging 6" loading="lazy" decoding="async" /></div>
+    </div>
+  </section>
 
-          <div>
-            <h4 style="color: #c1aa6e; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Navegación</h4>
-            <nav style="display: flex; flex-direction: column; gap: 0.6rem;">
-              <a href="index.html" class="footer-link-subtle" style="color: rgba(193, 170, 110, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Portfolio</a>
-              <a href="about.html" class="footer-link-subtle" style="color: rgba(193, 170, 110, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Sobre mí</a>
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="footer-link-subtle" style="color: rgba(193, 170, 110, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Contacto</a>
-            </nav>
-          </div>
+  <div class="proj-marquee" aria-hidden="true" style="--pm-bg:#2d4a1f; --pm-fg:#c4d1a8; --pm-accent:#d4a947;">
+    <div class="proj-marquee-track">
+      <span class="seg">Coffee Rituals <span class="dot">&bull;</span> Branding &amp; Packaging <span class="dot">&bull;</span> Illustrator <span class="dot">&bull;</span> Photoshop <span class="dot">&bull;</span> Coffee Rituals <span class="dot">&bull;</span> Branding &amp; Packaging <span class="dot">&bull;</span> Illustrator <span class="dot">&bull;</span> Photoshop <span class="dot">&bull;</span> Coffee Rituals <span class="dot">&bull;</span> Branding &amp; Packaging <span class="dot">&bull;</span> Illustrator <span class="dot">&bull;</span> Photoshop <span class="dot">&bull;</span> </span>
+      <span class="seg">Coffee Rituals <span class="dot">&bull;</span> Branding &amp; Packaging <span class="dot">&bull;</span> Illustrator <span class="dot">&bull;</span> Photoshop <span class="dot">&bull;</span> Coffee Rituals <span class="dot">&bull;</span> Branding &amp; Packaging <span class="dot">&bull;</span> Illustrator <span class="dot">&bull;</span> Photoshop <span class="dot">&bull;</span> Coffee Rituals <span class="dot">&bull;</span> Branding &amp; Packaging <span class="dot">&bull;</span> Illustrator <span class="dot">&bull;</span> Photoshop <span class="dot">&bull;</span> </span>
+    </div>
+  </div>
 
-          <div>
-            <h4 style="color: #c1aa6e; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Especialidades</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem;">
-              <li style="color: rgba(193, 170, 110, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(193, 170, 110, 0.5);">•</span>
-                Diseño 3D & Motion
-              </li>
-              <li style="color: rgba(193, 170, 110, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(193, 170, 110, 0.5);">•</span>
-                Spots audiovisuales
-              </li>
-              <li style="color: rgba(193, 170, 110, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(193, 170, 110, 0.5);">•</span>
-                Experiencias digitales
-              </li>
-            </ul>
-          </div>
-          
-        </div>
 
-        <div style="border-top: 1px solid rgba(193, 170, 110, 0.15); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <div style="width: 5px; height: 5px; background: rgba(193, 170, 110, 0.4); border-radius: 50%; animation: pulse-gentle 3s ease-in-out infinite;"></div>
-            <p style="color: rgba(193, 170, 110, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">© 2025 Cesar Del Valle</p>
-          </div>
-          <p style="color: rgba(193, 170, 110, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">Diseñado desde España</p>
-        </div>
+  <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#48293a; --pn-accent:#b076c9;">
+    <div class="pn-wash" aria-hidden="true"></div>
+    <div class="pn-media" aria-hidden="true"><img src="img/POSTER_GAFAS_1_web.jpg" alt="" loading="lazy" decoding="async"></div>
+    <a class="proj-next-link" href="img2.html">
+      <span>
+        <span class="proj-next-eyebrow">Siguiente proyecto</span>
+        <span class="proj-next-title"><span class="pn-num">02</span>Ottolinger × Mykita</span>
+      </span>
+      <span class="proj-next-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+  </nav>
 
-      </div>
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Tienes un proyecto en mente?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
     </div>
   </footer>
 
@@ -431,27 +247,23 @@
       window.location.href = 'index.html';
     });
 
-    const scrollItems = document.querySelectorAll('.scroll-item');
-    
-    const scrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.classList.add('visible');
-          }, index * 150);
-        }
-      });
-    }, {
-      threshold: 0.3,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    
-    scrollItems.forEach(item => {
-      scrollObserver.observe(item);
-    });
+    /* Reveal de la sección editorial. Sin observer o reduced-motion → visible. */
+    (function() {
+      var items = document.querySelectorAll('.gx-reveal');
+      if (!items.length) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) return;
+      items.forEach(function(el) { el.classList.add('gx-hidden'); });
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.remove('gx-hidden'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
+      items.forEach(function(el) { io.observe(el); });
+    })();
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>

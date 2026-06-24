@@ -4,206 +4,161 @@
   <style>html, body { margin:0!important; padding:0!important; box-sizing:border-box!important; }</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#080808">
-  <title>Imagen 5</title>
+  <meta name="theme-color" content="#2a1f15">
+  <meta name="description" content="Loewe 001 — audiovisual spot and visual concept for the perfume. Motion and art direction by César Del Valle.">
+  <meta name="author" content="César Del Valle">
+  <title>Loewe 001 — Perfume Spot · César Del Valle</title>
+  <link rel="canonical" href="https://cesardelvallee.github.io/PORTFOLIO/img5.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="César Del Valle">
+  <meta property="og:title" content="Loewe 001 — Perfume Spot">
+  <meta property="og:description" content="Audiovisual spot and visual concept for Loewe 001 perfume. Motion & art direction.">
+  <meta property="og:url" content="https://cesardelvallee.github.io/PORTFOLIO/img5.html">
+  <meta property="og:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Loewe 001 — Perfume Spot">
+  <meta name="twitter:description" content="Audiovisual spot for Loewe 001, by César Del Valle.">
+  <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  
+
   <style>
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes rotate-reverse {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.3; }
-      50% { transform: scale(1.1); opacity: 0.6; }
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes fadeInOut {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    
-    @keyframes fadeInUp {
-      from { 
-        opacity: 0; 
-        transform: translateY(30px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
-    }
-    
-    @keyframes scrollIndicator {
-      0% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(30px); }
-      100% { transform: translateX(-50%) translateY(60px); opacity: 0; }
-    }
-    
-    @keyframes scrollPulse {
-      0%, 100% { transform: scaleY(1); opacity: 0.4; }
-      50% { transform: scaleY(1.2); opacity: 1; }
-    }
-    
-    .scroll-item {
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .scroll-item.visible {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-    
-    .interactive-element:hover .play-icon {
-      animation: playPulse 0.6s ease-in-out;
-    }
-    
-    @keyframes playPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    
-    .stat-number {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .stat-number::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
+    .top-bar-left, .top-bar-right { color: #6b5d47 !important; }
+
+    /* Sección de vídeo (spot) con pin + scale al hacer scroll */
+    #video-section { min-height: 500vh; background: #e8dab0; padding-bottom: 4rem; }
+    .video-figure {
+      margin: 0;
       width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #2a1f15, transparent);
-      transform: translateX(-100%);
-      transition: transform 0.6s ease;
+      height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    
-    .stat-item:hover .stat-number::after {
-      transform: translateX(100%);
+    #kaleo-video {
+      width: min(90vw, 1280px);
+      height: auto;
+      max-height: 86dvh;
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 24px 64px -28px rgba(42, 31, 21, 0.32);
+      background: #e8dab0;
     }
-    
-    
-    .top-bar-left,
-    .top-bar-right {
-      color: #6b5d47 !important;
+    /* botón de sonido del spot */
+    .video-figure { position: relative; }
+    .kaleo-sound {
+      position: absolute; bottom: 8%; right: 6%; z-index: 6;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 15px 9px 13px; border-radius: 100px; cursor: pointer;
+      background: rgba(42, 31, 21, 0.55); color: #f0e6c8;
+      border: 1px solid rgba(240, 230, 200, 0.28);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      font-family: 'Inter', sans-serif; font-size: 0.64rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      transition: transform 0.16s cubic-bezier(0.22,0.61,0.36,1), background 0.2s, border-color 0.2s, color 0.2s;
     }
-    
-    /* RESPONSIVE */
-    
-    /* Tablet (768px - 1024px) */
-    @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr !important;
-        gap: 6vw !important;
-        text-align: center;
-      }
-      
-      .project-info {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3rem !important;
-      }
+    @media (hover: hover) and (pointer: fine) {
+      .kaleo-sound:hover { transform: translateY(-2px); background: rgba(42, 31, 21, 0.74); }
     }
-    
-    /* Mobile (max-width: 768px) */
-    @media (max-width: 768px) {
-      .main-section {
-        min-height: auto !important;
-        padding: 62px 5vw 2.5rem 5vw !important;
-      }
+    .kaleo-sound:active { transform: scale(0.96); }
+    .kaleo-sound svg { width: 18px; height: 18px; display: block; }
+    .kaleo-sound .ks-on { display: none; }
+    .kaleo-sound.is-on .ks-off { display: none; }
+    .kaleo-sound.is-on .ks-on { display: block; }
+    .kaleo-sound.is-on { background: rgba(232, 218, 176, 0.94); color: #2a1f15; border-color: transparent; }
+    @media (max-width: 560px) { .kaleo-sound { bottom: 5%; right: 5%; padding: 8px 13px 8px 11px; font-size: 0.6rem; } }
+    /* el vídeo del hero (inline 650px) se adapta en móvil */
+    @media (max-width: 900px) {
+      .project-hero-video { height: auto !important; max-height: 44vh !important; }
+    }
+    @media (max-width: 560px) {
+      /* img5: hero a pantalla — vídeo arriba grande, texto repartido, sin hueco arriba */
+      .proj-hero { min-height: 100dvh; align-items: stretch; padding: 54px 18px 20px; }
+      .proj-hero-inner { display: flex; flex-direction: column; gap: 0; }
+      .proj-hero-visual { order: -1; flex: 0 0 auto; margin-bottom: clamp(12px, 2.4vh, 24px); }
+      .project-hero-video { width: 100% !important; height: 42dvh !important; max-height: 42dvh !important; border-radius: 12px; }
+      .proj-hero-text { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+      .proj-eyebrow { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.56rem, 1.3dvh, 0.72rem); }
+      .proj-title { margin: 0 0 clamp(0.3rem, 0.9dvh, 0.65rem); font-size: clamp(2rem, 6.2dvh, 3.1rem); line-height: 0.98; }
+      .proj-tagline { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.86rem, 2dvh, 1.15rem); line-height: 1.3; }
+      .proj-desc { margin: 0; font-size: clamp(0.74rem, 1.7dvh, 0.95rem); line-height: 1.42; }
+      .proj-meta { margin-top: clamp(0.5rem, 1.4dvh, 0.95rem); padding-top: clamp(0.65rem, 1.7dvh, 1.1rem); }
+    }
 
-      .main-grid {
-        gap: 1.5rem !important;
-      }
-      
-      .project-number-category {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 1rem !important;
-      }
-      
-      .project-number-category .divider {
-        width: 60px !important;
-        transform: rotate(90deg);
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-        text-align: center;
-      }
-      
-      .technical-info {
-        margin: 2rem 0 !important;
-      }
-      
-      .right-column {
-        padding: 1rem !important;
-      }
-      
-      .year-display {
-        margin-bottom: 3rem !important;
-      }
-      
-      .quote-section {
-        margin-bottom: 2rem !important;
-      }
-      
-      .dots-pattern {
-        margin-bottom: 2rem !important;
-      }
+    /* Tríptico de imágenes de campaña (mismo estilo que la sección de las gafas) */
+    .gx-section { padding: clamp(78px, 13vh, 168px) clamp(24px, 6vw, 80px); }
+    .gx-inner { max-width: 1180px; margin: 0 auto; }
+    .gx-head { margin-bottom: clamp(34px, 6vh, 64px); }
+    .gx-eyebrow {
+      font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.26em; text-transform: uppercase; color: var(--ph-accent, #8a6f4a);
     }
-    
-    
-    @media (max-width: 480px) {
-      .main-section {
-        padding: 58px 4vw 2rem 4vw !important;
-      }
-
-      .project-info {
-        max-width: 100% !important;
-      }
-      
-      .main-title {
-        font-size: clamp(2.5rem, 12vw, 4rem) !important;
-        line-height: 0.9 !important;
-      }
-      
-      .project-description {
-        font-size: clamp(1rem, 4vw, 1.2rem) !important;
-        margin-bottom: 2rem !important;
-      }
-      
-      .year-display {
-        font-size: clamp(3rem, 15vw, 4rem) !important;
-      }
+    .gx-title {
+      font-family: 'Inter', sans-serif; font-size: clamp(1.7rem, 3.6vw, 2.7rem);
+      font-weight: 600; letter-spacing: -0.025em; line-height: 1.06;
+      color: var(--ph-ink, #2a1f15); margin: 0.7rem 0 0; text-wrap: balance;
     }
+    .gx-title em { font-style: normal; color: var(--ph-accent, #8a6f4a); }
+    .gx-sub {
+      margin: 0.9rem 0 0; max-width: 54ch;
+      font-family: 'Inter', sans-serif; font-size: clamp(0.9rem, 1vw, 1rem);
+      font-weight: 400; line-height: 1.7;
+      color: color-mix(in srgb, var(--ph-ink, #2a1f15) 70%, transparent);
+    }
+    .lw-gallery { background: #e8dab0; position: relative; overflow: hidden; }
+    .lw-gallery .gx-inner { position: relative; z-index: 1; }
+    /* número gigante de fondo (eco del watermark del hero) — personalidad editorial */
+    .lw-gallery::before {
+      content: '001'; position: absolute; top: 50%; right: -2.5%; transform: translateY(-50%);
+      z-index: 0; pointer-events: none;
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(11rem, 32vw, 40rem);
+      line-height: 0.78; letter-spacing: -0.05em;
+      color: #2a1f15; opacity: 0.045;
+    }
+    .lw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 26px); align-items: start; }
+    .lw-grid figure { margin: 0; }
+    /* stagger editorial: las laterales bajan, la del medio destaca */
+    .lw-grid figure:nth-child(1), .lw-grid figure:nth-child(3) { margin-top: clamp(26px, 5vw, 66px); }
+    .lw-grid img {
+      width: 100%; height: auto; display: block; border-radius: 5px;
+      box-shadow: 0 26px 60px -34px rgba(42, 31, 21, 0.5);
+      transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    /* pie de figura numerado */
+    .lw-cap {
+      margin-top: 0.85rem; display: flex; align-items: baseline; gap: 0.6rem;
+      font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #2a1f15) 55%, transparent);
+    }
+    .lw-num { font-weight: 700; letter-spacing: 0.04em; color: var(--ph-accent, #8a6f4a); }
+    @media (hover: hover) and (pointer: fine) {
+      .lw-grid figure:hover img { transform: translateY(-7px); }
+    }
+    @media (max-width: 760px) {
+      .lw-grid { grid-template-columns: 1fr; gap: 7vw; max-width: 440px; margin: 0 auto; }
+      .lw-grid figure:nth-child(1), .lw-grid figure:nth-child(3) { margin-top: 0; }
+      .lw-gallery::before { font-size: 9rem; right: auto; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; }
+    }
+    /* reveal al scroll — visible por defecto; solo se oculta si el JS lo gestiona */
+    .gx-reveal { transition: opacity 0.75s cubic-bezier(0.22,0.61,0.36,1), transform 0.75s cubic-bezier(0.22,0.61,0.36,1); }
+    .gx-reveal.gx-hidden { opacity: 0; transform: translateY(26px); }
+    .lw-grid .gx-reveal.gx-hidden { transform: translateY(34px); }
+    .lw-grid .gx-reveal:nth-child(2) { transition-delay: 0.08s; }
+    .lw-grid .gx-reveal:nth-child(3) { transition-delay: 0.16s; }
   </style>
 </head>
-<body>
+<body style="--ph-bg:#e8dab0; --ph-ink:#2a1f15; --ph-accent:#8a6f4a; --ph-line:rgba(42,31,21,0.18);">
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
   <a href="index.html" class="back-btn" title="Volver al inicio">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -213,370 +168,151 @@
       <a href="index.html" class="top-bar-left back-top-link" id="home-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
       <div class="top-bar-right">LOEWE 001</div>
     </div>
-  <div class="main-section" style="min-height:80vh;background:#e8dab0;display:flex;align-items:center;justify-content:center;padding:10vh 5vw 4vh 5vw;">
-    
-    <div class="main-grid" style="max-width:1400px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:center;">
-      
-      
-      <div class="project-info" style="opacity:0; animation:fadeInUp 0.9s ease-out 0.4s forwards; position:relative;">
-        
-      
-        <div style="position:absolute; top:-20px; left:-30px; width:4px; height:60px; background:linear-gradient(180deg, #2a1f15 0%, transparent 100%); border-radius:2px; opacity:0; animation:fadeInUp 1s ease-out 0.3s forwards;"></div>
-        
-        
-        <div class="project-number-category" style="display:flex;align-items:center;margin-bottom:2.5rem; opacity:0; animation:fadeInUp 0.9s ease-out 0.45s forwards;">
-          <span style="color:#1a1310;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:600;letter-spacing:0.25em;text-transform:uppercase;">Project 05</span>
-          <div class="divider" style="width:50px;height:1px;background:linear-gradient(90deg, #2a1f15 0%, #6b5d47 100%);margin:0 1.8rem;"></div>
-          <span style="color:#6b5d47;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:400;letter-spacing:0.15em; opacity:0; animation:fadeInUp 0.9s ease-out 0.5s forwards;">3D Animation</span>
+  <section class="proj-hero" style="--ph-bg:#e8dab0; --ph-ink:#2a1f15; --ph-accent:#8a6f4a; --ph-line:rgba(42,31,21,0.18); --ph-num:'05';">
+    <div class="proj-hero-inner">
+      <div class="proj-hero-text">
+        <p class="proj-eyebrow ph-rise" style="animation-delay:0.10s;"><span class="n">Project 05</span><span class="bar"></span>3D · Motion · Spot</p>
+        <h1 class="proj-title ph-rise" style="animation-delay:0.18s;">Loewe 001</h1>
+        <p class="proj-tagline ph-rise" style="animation-delay:0.26s;">Spot audiovisual para el perfume — <em>elegancia tranquila</em> en movimiento.</p>
+        <p class="proj-desc ph-rise" style="animation-delay:0.34s;">Pieza creada íntegramente en <strong>Cinema 4D</strong>: modelado, iluminación, shading, animación y composición final. Una reinterpretación de la identidad de <strong>Loewe 001</strong> a través de un lenguaje minimalista y delicado, con movimientos suaves de cámara y reflejos sutiles que transmiten la <em>elegancia tranquila</em> del producto.</p>
+        <div class="proj-meta ph-rise" style="animation-delay:0.42s;">
+          <div><span class="m-label">Role</span><span class="m-value">3D Artist · Motion</span></div>
+          <div><span class="m-label">Product</span><span class="m-value">Loewe 001 Perfume</span></div>
+          <div><span class="m-label">Software</span><span class="m-value">Cinema 4D · After Effects</span></div>
         </div>
-
-        
-        <h1 class="main-title" style="color:#1a1310;font-family:'Inter',sans-serif;font-size:clamp(3.8rem,7.5vw,6.5rem);font-weight:800;line-height:0.82;letter-spacing:-0.04em;margin:0 0 2rem 0; opacity:0; animation:fadeInUp 0.95s ease-out 0.6s forwards; text-shadow:0 2px 8px rgba(26,19,16,0.1);">LOEWE<br><span style="font-weight:200;font-style:italic;color:#4a3828;">001 Perfume</span></h1>
-
-        
-        <p class="project-description" style="color:#2d211a;font-family:'Inter',sans-serif;font-size:clamp(1rem,1.2vw,1.1rem);line-height:1.6;font-weight:300;margin:0 0 2rem 0;max-width:520px; opacity:0; animation:fadeInUp 0.9s ease-out 0.75s forwards;">Esta pieza fue creada íntegramente en <strong style="color:#4a3828; font-weight:700;">Cinema 4D</strong>, encargándome del modelado, la iluminación, el shading, la animación y la composición final. El objetivo era reinterpretar la identidad visual de <strong style="color:#4a3828; font-weight:700;">Loewe 001</strong> a través de un lenguaje minimalista y delicado, poniendo el acento en las texturas, los materiales y el ritmo visual.<br><br>Busqué transmitir la <strong style="color:#4a3828; font-weight:700;">elegancia tranquila</strong> del perfume mediante movimientos suaves de cámara y una iluminación cuidada, jugando con contrastes sutiles y reflejos que aportan profundidad al producto. El resultado es un spot que combina <strong style="color:#4a3828; font-weight:700;">diseño</strong>, motion y dirección estética para presentar el frasco de <strong style="color:#4a3828; font-weight:700;">Loewe 001</strong> en un entorno limpio y contemporáneo.</p>
-
-        
-        <div style="width:80px;height:2px;background:linear-gradient(90deg, #2a1f15 0%, transparent 100%);margin:0 0 3rem 0;opacity:0;animation:fadeInUp 0.8s ease-out 0.8s forwards;"></div>
-
       </div>
-
-      
-      <div class="right-column" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;">
-        
-        
-        <div class="video-container" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:flex-start;opacity:0;animation:fadeInUp 1s ease-out 0.5s forwards;">
-          <video
-            class="project-hero-video"
-            autoplay
-            loop
-            muted
-            playsinline
-            style="width:100%;height:650px;object-fit:cover;display:block;background:transparent;margin-bottom:1.5rem;">
-            <source src="video/LOEWE_GIF.webm" type="video/webm">
-            Tu navegador no soporta el elemento video.
-          </video>
-          
-          
-          <div style="display:flex;gap:2rem;flex-wrap:wrap;width:100%;opacity:0;animation:fadeInUp 1s ease-out 0.7s forwards;">
-            <div style="flex:0 1 auto;border-left:3px solid #2a1f15;padding-left:1rem;">
-              <h4 style="color:#2a1f15;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Role</h4>
-              <p style="color:#4a3828;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">3D Artist · Cinema 4D Specialist</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #4a3828;padding-left:1rem;">
-              <h4 style="color:#2a1f15;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Product</h4>
-              <p style="color:#4a3828;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Loewe 001 Perfume</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #6b5d47;padding-left:1rem;">
-              <h4 style="color:#2a1f15;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Software</h4>
-              <p style="color:#4a3828;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Cinema 4D · After Effects</p>
-            </div>
-          </div>
-        </div>
-        
+      <div class="proj-hero-visual ph-rise" style="animation-delay:0.30s;">
+        <video class="project-hero-video" autoplay loop muted playsinline style="width:100%;height:650px;object-fit:cover;display:block;background:transparent;">
+          <source src="video/LOEWE_GIF.webm" type="video/webm">
+          Tu navegador no soporta el elemento video.
+        </video>
       </div>
-      
     </div>
-    
-  </div>
-  
-  
-  <section id="video-section" style="min-height:500vh;background:#e8dab0;padding-bottom:4rem;">
+  </section>
+
+  <section id="video-section" aria-label="Spot del proyecto Loewe 001">
     <div class="video__content">
       <figure class="video-figure">
-        <video id="kaleo-video" src="video/2283-1-1-Del_Valle_Fuentes_Cesar_95de8d15-a66d-4ec7-84c7-48afe0a13b33.mp4" loop muted playsinline></video>
+        <video id="kaleo-video" src="video/2283-1-1-Del_Valle_Fuentes_Cesar_95de8d15-a66d-4ec7-84c7-48afe0a13b33.mp4" autoplay loop muted playsinline></video>
+        <button id="kaleo-sound" class="kaleo-sound" type="button" aria-label="Activar sonido del spot" aria-pressed="false">
+          <svg class="ks-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          <svg class="ks-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          Sonido
+        </button>
       </figure>
     </div>
   </section>
 
-  
-  <footer style="position: relative; background: linear-gradient(135deg, #1a1512 0%, #2a1f15 50%, #1a1512 100%); overflow: hidden; padding: 0;">
-    
-    
-    <div style="position: relative; background: linear-gradient(135deg, #3a3530 0%, #4a4238 100%); padding: 4rem 0; overflow: hidden;">
-      
-      
-      <div style="position: absolute; top: -10%; left: -5%; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; transform: rotate(45deg);"></div>
-      <div style="position: absolute; bottom: -8%; right: -3%; width: 90px; height: 90px; background: rgba(20, 18, 15, 0.3); border-radius: 15px; transform: rotate(-20deg);"></div>
-      <div style="position: absolute; top: 40%; right: 8%; width: 40px; height: 40px; background: rgba(212, 196, 168, 0.1); border-radius: 50%; animation: float-subtle 8s ease-in-out infinite;"></div>
-      
-      
-      <div style="position: absolute; top: 25%; left: 15%; width: 6px; height: 6px; background: rgba(212, 196, 168, 0.4); border-radius: 50%; animation: float-dot-subtle 5s ease-in-out infinite;"></div>
-      <div style="position: absolute; top: 70%; left: 12%; width: 4px; height: 4px; background: rgba(212, 196, 168, 0.3); border-radius: 50%; animation: float-dot-subtle 4s ease-in-out infinite reverse;"></div>
-      <div style="position: absolute; bottom: 30%; right: 20%; width: 5px; height: 5px; background: rgba(212, 196, 168, 0.2); border-radius: 50%; animation: float-dot-subtle 6s ease-in-out infinite;"></div>
-      
-      <div class="project-footer-cta" style="max-width: 1400px; margin: 0 auto; padding: 0 5vw; display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center;">
-
-        <div style="z-index: 2;">
-          <h2 style="font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: #d4c4a8; margin: 0 0 1rem 0; line-height: 1.1; letter-spacing: -0.01em;">¿Trabajamos juntos?</h2>
-          <p style="font-family: 'Inter', sans-serif; font-size: clamp(0.95rem, 1.3vw, 1.1rem); color: rgba(212, 196, 168, 0.8); margin: 0 0 2rem 0; line-height: 1.5; font-weight: 300; max-width: 420px;">Siempre estoy abierto a nuevos proyectos creativos y colaboraciones interesantes.</p>
-          
-          
-          <a href="mailto:cesardelvallefuentes@gmail.com" class="cta-button-subtle email-link" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #d4c4a8; color: #2a1f15; padding: 0.9rem 2rem; border-radius: 25px; text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden;" onclick="window.location.href='mailto:cesardelvallefuentes@gmail.com';">
-            <span style="z-index: 2;">Contactar</span>
-            <span style="z-index: 2; font-size: 1rem;">→</span>
-          </a>
-        </div>
-
-        
-        <div class="project-footer-illustration" style="position: relative; width: 200px; height: 200px; z-index: 1;">
-
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 130px; height: 130px; background: linear-gradient(135deg, rgba(212, 196, 168, 0.2) 0%, rgba(212, 196, 168, 0.1) 100%); border-radius: 50% 25% 50% 25%; animation: morph-subtle 12s ease-in-out infinite; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);"></div>
-          
-          
-          <div style="position: absolute; top: 40%; left: 45%; width: 12px; height: 12px; background: rgba(212, 196, 168, 0.6); border-radius: 50%; animation: bounce-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; top: 65%; left: 60%; width: 8px; height: 8px; background: rgba(212, 196, 168, 0.4); border-radius: 50%; animation: bounce-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-          
-          <div style="position: absolute; top: 15%; right: 25%; width: 18px; height: 18px; background: rgba(212, 196, 168, 0.3); border-radius: 50%; animation: orbit-subtle 10s linear infinite;"></div>
-          <div style="position: absolute; bottom: 20%; left: 15%; width: 15px; height: 15px; background: rgba(212, 196, 168, 0.2); transform: rotate(45deg); animation: float-subtle 6s ease-in-out infinite reverse;"></div>
-          
-          
-          <div style="position: absolute; top: 35%; left: 25%; width: 35px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(212, 196, 168, 0.3) 50%, transparent 100%); transform: rotate(30deg); animation: pulse-line-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; bottom: 45%; right: 20%; width: 28px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(212, 196, 168, 0.2) 50%, transparent 100%); transform: rotate(-20deg); animation: pulse-line-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-        </div>
-        
+  <section class="gx-section lw-gallery" aria-label="Imágenes de campaña Loewe 001">
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">La campaña</span>
+        <h2 class="gx-title">Tres <em>key visuals</em></h2>
+        <p class="gx-sub">Dirección de arte y composición: la botella sobre piedra, luz cálida y la elegancia tranquila de Loewe 001.</p>
+      </div>
+      <div class="lw-grid">
+        <figure class="gx-reveal">
+          <img src="img/LOEWE_IMG_001_web.jpg" alt="Loewe 001 — key visual de campaña 01" loading="lazy" decoding="async">
+          <figcaption class="lw-cap"><span class="lw-num">01</span> Reposo</figcaption>
+        </figure>
+        <figure class="gx-reveal">
+          <img src="img/LOEWE_IMG_002_web.jpg" alt="Loewe 001 — key visual de campaña 02" loading="lazy" decoding="async">
+          <figcaption class="lw-cap"><span class="lw-num">02</span> Materia</figcaption>
+        </figure>
+        <figure class="gx-reveal">
+          <img src="img/LOEWE_IMG_004_web.jpg" alt="Loewe 001 — key visual de campaña 03" loading="lazy" decoding="async">
+          <figcaption class="lw-cap"><span class="lw-num">03</span> Luz</figcaption>
+        </figure>
       </div>
     </div>
+  </section>
 
-    
-    <div style="background: #2a1f15; padding: 2.5rem 5vw 1.5rem 5vw; position: relative;">
-      
-      
-      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(212, 196, 168, 0.2) 25%, rgba(212, 196, 168, 0.4) 50%, rgba(212, 196, 168, 0.2) 75%, transparent 100%);"></div>
-      
-      <div style="max-width: 1400px; margin: 0 auto;">
-        
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2rem;">
-          
-          
-          <div>
-            <h3 style="color: #d4c4a8; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0 0 0.8rem 0; letter-spacing: 0.02em;">Cesar Del Valle</h3>
-            <p style="color: rgba(212, 196, 168, 0.8); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; line-height: 1.5; margin: 0 0 1.2rem 0;">Creative Director & 3D Artist especializado en experiencias audiovisuales.</p>
-            
-            
-            <div style="display: flex; gap: 0.8rem;">
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(212, 196, 168, 0.1); border: 1px solid rgba(212, 196, 168, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(212, 196, 168, 0.8);">
-                  <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(212, 196, 168, 0.1); border: 1px solid rgba(212, 196, 168, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(212, 196, 168, 0.8);">
-                  <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://www.instagram.com/cesardelvallee/" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(212, 196, 168, 0.1); border: 1px solid rgba(212, 196, 168, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(212, 196, 168, 0.8);">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2"/>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" stroke="currentColor" stroke-width="2"/>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
+  <div class="proj-marquee" aria-hidden="true" style="--pm-bg:#2a1f15; --pm-fg:#e8dab0; --pm-accent:#c2a875;">
+    <div class="proj-marquee-track">
+      <span class="seg">Loewe 001 <span class="dot">&bull;</span> 3D · Motion <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> After Effects <span class="dot">&bull;</span> Loewe 001 <span class="dot">&bull;</span> 3D · Motion <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> After Effects <span class="dot">&bull;</span> Loewe 001 <span class="dot">&bull;</span> 3D · Motion <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> After Effects <span class="dot">&bull;</span> </span>
+      <span class="seg">Loewe 001 <span class="dot">&bull;</span> 3D · Motion <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> After Effects <span class="dot">&bull;</span> Loewe 001 <span class="dot">&bull;</span> 3D · Motion <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> After Effects <span class="dot">&bull;</span> Loewe 001 <span class="dot">&bull;</span> 3D · Motion <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> After Effects <span class="dot">&bull;</span> </span>
+    </div>
+  </div>
 
-          
-          <div>
-            <h4 style="color: #d4c4a8; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Navegación</h4>
-            <nav style="display: flex; flex-direction: column; gap: 0.6rem;">
-              <a href="index.html" class="footer-link-subtle" style="color: rgba(212, 196, 168, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Portfolio</a>
-              <a href="about.html" class="footer-link-subtle" style="color: rgba(212, 196, 168, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Sobre mí</a>
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="footer-link-subtle" style="color: rgba(212, 196, 168, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Contacto</a>
-            </nav>
-          </div>
 
-          
-          <div>
-            <h4 style="color: #d4c4a8; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Especialidades</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem;">
-              <li style="color: rgba(212, 196, 168, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(212, 196, 168, 0.5);">•</span>
-                Diseño 3D & Motion
-              </li>
-              <li style="color: rgba(212, 196, 168, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(212, 196, 168, 0.5);">•</span>
-                Spots audiovisuales
-              </li>
-              <li style="color: rgba(212, 196, 168, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(212, 196, 168, 0.5);">•</span>
-                Experiencias digitales
-              </li>
-            </ul>
-          </div>
-          
-        </div>
+  <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#2d4a1f; --pn-accent:#a87d22;">
+    <div class="pn-wash" aria-hidden="true"></div>
+    <div class="pn-media" aria-hidden="true"><img src="img/CAFE_PACKAGING_EXTERIOR.png" alt="" loading="lazy" decoding="async"></div>
+    <a class="proj-next-link" href="img1.html">
+      <span>
+        <span class="proj-next-eyebrow">Volver al primero</span>
+        <span class="proj-next-title"><span class="pn-num">01</span>Coffee Rituals</span>
+      </span>
+      <span class="proj-next-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+  </nav>
 
-        
-        <div style="border-top: 1px solid rgba(212, 196, 168, 0.15); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <div style="width: 5px; height: 5px; background: rgba(212, 196, 168, 0.4); border-radius: 50%; animation: pulse-gentle 3s ease-in-out infinite;"></div>
-            <p style="color: rgba(212, 196, 168, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">© 2025 Cesar Del Valle</p>
-          </div>
-          <p style="color: rgba(212, 196, 168, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">Diseñado desde España</p>
-        </div>
-
-      </div>
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Tienes un proyecto en mente?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
     </div>
   </footer>
 
-  <style>
-    @keyframes float-subtle {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-8px) rotate(2deg); }
-    }
-    
-    @keyframes float-dot-subtle {
-      0%, 100% { transform: translateY(0px); opacity: 0.3; }
-      50% { transform: translateY(-6px); opacity: 0.7; }
-    }
-    
-    @keyframes morph-subtle {
-      0%, 100% { border-radius: 50% 25% 50% 25%; transform: translate(-50%, -50%) rotate(0deg); }
-      33% { border-radius: 25% 50% 25% 50%; transform: translate(-50%, -50%) rotate(2deg); }
-      66% { border-radius: 50% 25% 50% 25%; transform: translate(-50%, -50%) rotate(-1deg); }
-    }
-    
-    @keyframes bounce-subtle {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-4px) scale(1.05); }
-    }
-    
-    @keyframes orbit-subtle {
-      from { transform: rotate(0deg) translateX(25px) rotate(0deg); }
-      to { transform: rotate(360deg) translateX(25px) rotate(-360deg); }
-    }
-    
-    @keyframes pulse-line-subtle {
-      0%, 100% { opacity: 0.2; transform: scaleX(1); }
-      50% { opacity: 0.5; transform: scaleX(1.1); }
-    }
-    
-    @keyframes pulse-gentle {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.2); }
-    }
-    
-    .cta-button-subtle::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent 0%, rgba(42, 31, 21, 0.1) 50%, transparent 100%);
-      transition: left 0.5s ease;
-    }
-    
-    .cta-button-subtle:hover::before {
-      left: 100%;
-    }
-    
-    .cta-button-subtle:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      background: #e6d5c0;
-      color: #1a1512;
-    }
-    
-    .social-subtle:hover {
-      transform: translateY(-2px);
-      border-color: rgba(212, 196, 168, 0.4);
-      background: rgba(212, 196, 168, 0.15);
-    }
-    
-    .social-subtle:hover svg {
-      color: rgba(212, 196, 168, 1) !important;
-    }
-    
-    .footer-link-subtle::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: rgba(212, 196, 168, 0.5);
-      transition: width 0.3s ease;
-    }
-    
-    .footer-link-subtle:hover {
-      color: rgba(212, 196, 168, 1) !important;
-      transform: translateX(3px);
-    }
-    
-    .footer-link-subtle:hover::after {
-      width: 100%;
-    }
-    
-    @media (max-width: 768px) {
-      footer > div:first-child > div {
-        grid-template-columns: 1fr !important;
-        text-align: center !important;
-        gap: 2rem !important;
-      }
-      
-      footer > div:first-child > div > div:last-child {
-        order: -1;
-        width: 150px;
-        height: 150px;
-        margin: 0 auto;
-      }
-    }
-  </style>
-
   <div id="egg-cursor"></div>
-  <script src="script.js"></script>
+  <script src="script.js?v=13"></script>
   <script>
     document.getElementById('home-link').addEventListener('click', function(e) {
       e.preventDefault();
       window.location.href = 'index.html';
     });
 
-    
-    document.addEventListener('DOMContentLoaded', function() {
-      const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-      emailLinks.forEach(function(link) {
-        link.addEventListener('click', function(e) {
-          e.stopPropagation();
-          
+    /* Reveal del tríptico de campaña. Sin observer o con reduced-motion → visible. */
+    (function() {
+      var items = document.querySelectorAll('.gx-reveal');
+      if (!items.length) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) return;
+      items.forEach(function(el) { el.classList.add('gx-hidden'); });
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.remove('gx-hidden'); io.unobserve(en.target); }
         });
-      });
+      }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+      items.forEach(function(el) { io.observe(el); });
+    })();
 
-      
-      const ctaButton = document.querySelector('.cta-button-subtle.email-link');
-      if (ctaButton) {
-        ctaButton.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          
-          try {
-            window.location.href = 'mailto:cesardelvallefuentes@gmail.com';
-          } catch (error) {
-            
-            navigator.clipboard.writeText('cesardelvallefuentes@gmail.com').then(function() {
-              alert('Email copiado al portapapeles: cesardelvallefuentes@gmail.com');
-            }).catch(function() {
-              alert('Email: cesardelvallefuentes@gmail.com');
-            });
-          }
-        });
+    /* Botón de sonido del spot — un clic es gesto garantizado para el navegador,
+       y "desbloquea" el auto-activado al hacer scroll. El icono se sincroniza con
+       el estado real (lo cambie el botón o el IntersectionObserver de script.js). */
+    (function() {
+      var vid = document.getElementById('kaleo-video');
+      var btn = document.getElementById('kaleo-sound');
+      if (!vid || !btn) return;
+      function sync() {
+        var on = !vid.muted;
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', String(on));
+        btn.setAttribute('aria-label', on ? 'Silenciar el spot' : 'Activar sonido del spot');
       }
-    });
+      vid.addEventListener('volumechange', sync);
+      btn.addEventListener('click', function() {
+        vid.muted = !vid.muted;
+        if (!vid.muted) { var p = vid.play(); if (p && p.catch) p.catch(function(){}); }
+        sync();
+      });
+      sync();
+    })();
 
-    
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
-      
-      ScrollTrigger.normalizeScroll(true);
+      ScrollTrigger.config({ ignoreMobileResize: true });
 
-      const pinTrigger = ScrollTrigger.create({
+      ScrollTrigger.create({
         trigger: "#video-section",
         start: "top top",
         end: "bottom bottom",
@@ -589,77 +325,10 @@
         {
           scale: 0.92,
           ease: "power3.out",
-          scrollTrigger: {
-            trigger: "#video-section",
-            start: "top top",
-            end: "+=350%",
-            scrub: 1.5
-          }
+          scrollTrigger: { trigger: "#video-section", start: "top top", end: "+=350%", scrub: 1.5 }
         }
       );
     }
-
-    
-    const scrollItems = document.querySelectorAll('.scroll-item');
-    
-    const scrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.classList.add('visible');
-          }, index * 150); 
-        }
-      });
-    }, {
-      threshold: 0.3,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    
-    
-    scrollItems.forEach(item => {
-      scrollObserver.observe(item);
-    });
-
-    
-    const video = document.getElementById('kaleo-video');
-    let hasPlayedWithSound = false;
-
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !hasPlayedWithSound) {
-          
-          video.muted = false;
-          video.play().then(() => {
-            hasPlayedWithSound = true;
-            console.log('Video reproduciéndose con sonido');
-          }).catch(error => {
-            console.log('No se pudo reproducir con sonido automáticamente:', error);
-            
-            video.muted = true;
-            video.play();
-            
-            
-            const enableAudioOnClick = () => {
-              video.muted = false;
-              hasPlayedWithSound = true;
-              document.removeEventListener('click', enableAudioOnClick);
-              document.removeEventListener('touchstart', enableAudioOnClick);
-            };
-            
-            document.addEventListener('click', enableAudioOnClick);
-            document.addEventListener('touchstart', enableAudioOnClick);
-          });
-        } else if (!entry.isIntersecting && hasPlayedWithSound) {
-          
-          
-        }
-      });
-    }, {
-      threshold: 0.5 
-    });
-
-    
-    videoObserver.observe(video);
   </script>
 </body>
 </html>

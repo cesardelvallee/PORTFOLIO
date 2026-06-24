@@ -1,56 +1,91 @@
+
+ 
+ 
  <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
-  <meta name="description" content="Portafolio de Cesar Del Valle - Diseñador Gráfico">
+  <meta name="description" content="Portfolio of César Del Valle — graphic designer specializing in branding, packaging, 3D and motion. Selected work in visual identity and creative direction.">
+  <meta name="keywords" content="César Del Valle, graphic designer, diseñador gráfico, branding, packaging, 3D design, motion, art direction, portfolio">
+  <meta name="author" content="César Del Valle">
   <meta name="theme-color" content="#080808">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>CESAR DEL VALLE</title>
-  
-  <link rel="preload" href="assets/loading-emoji.json" as="fetch" crossorigin="anonymous">
-  <link rel="preload" href="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" as="script">
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" as="script">
+  <title>César Del Valle — Graphic Designer Portfolio</title>
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://cesardelvallee.github.io/PORTFOLIO/">
+
+  <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="César Del Valle">
+  <meta property="og:title" content="César Del Valle — Graphic Designer Portfolio">
+  <meta property="og:description" content="Branding, packaging, 3D & motion. Selected work in visual identity and creative direction.">
+  <meta property="og:url" content="https://cesardelvallee.github.io/PORTFOLIO/">
+  <meta property="og:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="César Del Valle — Graphic Designer">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="César Del Valle — Graphic Designer Portfolio">
+  <meta name="twitter:description" content="Branding, packaging, 3D & motion. Selected work in visual identity and creative direction.">
+  <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "César Del Valle",
+    "jobTitle": "Graphic Designer",
+    "url": "https://cesardelvallee.github.io/PORTFOLIO/",
+    "image": "https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png",
+    "email": "cesardelvallefuentes@gmail.com",
+    "nationality": "Spain",
+    "knowsAbout": ["Branding", "Packaging Design", "3D Design", "Motion Design", "Art Direction", "Visual Identity"],
+    "sameAs": [
+      "https://linkedin.com/in/cesar-del-valle-fuentes-518834275",
+      "https://www.instagram.com/cesardelvalle.jpg/"
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net/" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=16">
   <link rel="stylesheet" href="css/dragme.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
 <!-- PANTALLA DE CARGA -->
-<div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-  
-  <!-- Emoji de carga animado -->
-  <div style="margin-bottom: 4rem;">
-    <lottie-player
-      id="loading-emoji"
-      src="assets/loading-emoji.json"
-      background="transparent"
-      speed="1"
-      style="width: 160px; height: 160px;"
-      loop
-      autoplay>
-    </lottie-player>
+<div id="loading-screen">
+  <div class="loader-glow" aria-hidden="true"></div>
+  <div class="loader-grid" aria-hidden="true"></div>
+  <div class="loader-inner">
+    <div class="loader-mark">
+      <span class="loader-name">CÉSAR DEL VALLE</span>
+      <span class="loader-role">Graphic Designer</span>
+    </div>
+    <div class="loader-bar">
+      <div id="loading-progress" class="loader-bar-fill"></div>
+    </div>
+    <div class="loader-meta">
+      <span id="loading-text" class="loader-status">Cargando experiencia</span>
+      <span id="loading-percent" class="loader-percent">0%</span>
+    </div>
   </div>
-
-  <!-- Barra de progreso -->
-  <div style="width: 320px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 1px; overflow: hidden; margin-bottom: 2.5rem;">
-    <div id="loading-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ffffff 0%, #cccccc 100%); border-radius: 1px; transition: width 0.3s ease;"></div>
-  </div>
-
-  <!-- Texto de carga -->
-  <p id="loading-text" style="color: #666; font-family: 'Inter', sans-serif; font-size: clamp(0.9rem, 1.5vw, 1.1rem); font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; margin: 0; opacity: 0;">Cargando Portfolio...</p>
-
-  <!-- Elementos animados de fondo -->
-  <div style="position: absolute; top: 20%; left: 15%; width: 3px; height: 3px; background: rgba(255,255,255,0.2); border-radius: 50%; animation: float-dot 4s ease-in-out infinite;"></div>
-  <div style="position: absolute; bottom: 30%; right: 20%; width: 2px; height: 2px; background: rgba(255,255,255,0.15); border-radius: 50%; animation: float-dot 6s ease-in-out infinite 2s;"></div>
-  <div style="position: absolute; top: 60%; left: 80%; width: 2px; height: 2px; background: rgba(255,255,255,0.25); border-radius: 50%; animation: float-dot 5s ease-in-out infinite 4s;"></div>
-
 </div>
 
 <!-- CONTENIDO PRINCIPAL -->
@@ -69,13 +104,17 @@
   </div>
 
   <div id="player-content" class="player-content">
-    <div class="current-genre">
-      <span id="current-genre-text">Rock Inglés</span>
+    <div class="now-playing">
+      <div class="np-disc" aria-hidden="true"></div>
+      <div class="np-text">
+        <span id="current-genre-text" class="np-genre">Rock Inglés</span>
+        <div class="song-title-wrap"><div class="song-title" id="song-title">Cargando...</div></div>
+        <div class="song-artist" id="song-artist">-</div>
+      </div>
     </div>
 
-    <div class="current-song">
-      <div class="song-title" id="song-title">Cargando...</div>
-      <div class="song-artist" id="song-artist">-</div>
+    <div class="visualizer-wrap">
+      <canvas id="audio-viz" class="audio-viz" aria-hidden="true"></canvas>
     </div>
 
     <div class="player-controls">
@@ -101,7 +140,7 @@
     </div>
 
     <div class="genre-selector">
-      <select id="genre-select" class="genre-dropdown">
+      <select id="genre-select" class="genre-native" tabindex="-1" aria-hidden="true">
         <option value="rock-ingles">Rock Inglés</option>
         <option value="espanolada">Españolada</option>
         <option value="reggaeton">Reggaetón</option>
@@ -111,10 +150,24 @@
         <option value="trap-urbano">Trap / Urbano Español</option>
         <option value="pop-ingles">Pop Inglés</option>
       </select>
+      <button type="button" id="genre-trigger" class="genre-trigger" aria-haspopup="listbox" aria-expanded="false">
+        <span id="genre-trigger-label">Rock Inglés</span>
+        <svg class="genre-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <ul id="genre-list" class="genre-list" role="listbox" aria-label="Género musical">
+        <li class="genre-option" role="option" data-value="rock-ingles">Rock Inglés</li>
+        <li class="genre-option" role="option" data-value="espanolada">Españolada</li>
+        <li class="genre-option" role="option" data-value="reggaeton">Reggaetón</li>
+        <li class="genre-option" role="option" data-value="techno">Techno</li>
+        <li class="genre-option" role="option" data-value="folk">Folk</li>
+        <li class="genre-option" role="option" data-value="indie">Indie / Alternativo</li>
+        <li class="genre-option" role="option" data-value="trap-urbano">Trap / Urbano Español</li>
+        <li class="genre-option" role="option" data-value="pop-ingles">Pop Inglés</li>
+      </ul>
     </div>
 
     <div class="volume-control">
-      <span class="volume-icon">🔊</span>
+      <span class="volume-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 4a9 9 0 0 1 0 16"/></svg></span>
       <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="70">
     </div>
   </div>
@@ -123,11 +176,12 @@
 </div>
 
 <div class="top-bar">
-  <div class="top-bar-left nav-link">CESAR DEL VALLE</div>
+  <div class="top-bar-left nav-link">CÉSAR DEL VALLE</div>
   <div class="top-bar-center">
-    <button class="bg-changer-btn" id="bgChangerBtn">
-      <span class="bg-changer-icon">🎨</span>
-      <span class="bg-changer-text">CHANGE BG</span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema día / noche" aria-pressed="false">
+      <svg class="tt-icon tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="tt-icon tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <span class="tt-knob" aria-hidden="true"></span>
     </button>
   </div>
   <div class="top-bar-right">
@@ -145,23 +199,23 @@
   </div>
   <div class="stacked-images">
     <div>
-      <img class="img-drag img-1" src="img/CAFE_BOLSAS.webp">
+      <img class="img-drag img-1" src="img/CAFE_BOLSAS.webp" alt="Coffee Rituals — premium coffee packaging" decoding="async" draggable="false">
       <span class="img-drag-bubble">CAFÉ PREMIUM</span>
     </div>
-    <div style="display: none;">
-      <img class="img-drag img-2" src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80">
-      <span class="img-drag-bubble">DRAG ME</span>
+    <div>
+      <img class="img-drag img-2" src="img/OTTOLINGER_CARD.png" alt="Ottolinger × Mykita — experimental 3D eyewear" decoding="async" draggable="false">
+      <span class="img-drag-bubble">OTTO × MYKITA</span>
     </div>
     <div>
-      <img class="img-drag img-3" src="img/MOCKUP_ATUN_02.webp">
-      <span class="img-drag-bubble">DRAG ME</span>
+      <img class="img-drag img-3" src="img/MOCKUP_ATUN_02.webp" alt="Catalalata — canned seafood packaging" decoding="async" draggable="false">
+      <span class="img-drag-bubble">CATALALATA</span>
     </div>
     <div>
-      <img class="img-drag img-4" src="img/RASTRILLO_INSTASTORIE2.webp">
-      <span class="img-drag-bubble">EL RASTRILLO DE NUEVO FUTURO</span>
+      <img class="img-drag img-4" src="img/RASTRILLO_INSTASTORIE2.webp" alt="El Rastrillo — Nuevo Futuro campaign" decoding="async" draggable="false">
+      <span class="img-drag-bubble">EL RASTRILLO</span>
     </div>
     <div>
-      <img class="img-drag img-5" src="img/WhatsApp-Image-2025-09-24-at-15.47.46.webp">
+      <img class="img-drag img-5" src="img/WhatsApp-Image-2025-09-24-at-15.47.46.webp" alt="Loewe 001 — perfume spot" decoding="async" draggable="false">
       <span class="img-drag-bubble">SPOT LOEWE</span>
     </div>
   </div>
@@ -197,7 +251,7 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
-<script src="script.js"></script>
+<script src="script.js?v=12"></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script>
 
@@ -215,105 +269,9 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <span id="dragme-bubble" class="img-drag-bubble">DRAG ME</span>
+  <span id="dragme-bubble" class="img-drag-bubble">DRAG ME<span class="drag-hint">“double-click to open”</span></span>
   <div id="egg-cursor"></div>
 
-  <script>
-  
-  (function(){
-    const visitedKey = 'cestudio_visited_main_v1';
-    const loading = document.getElementById('loading-screen');
-    const main = document.getElementById('main-content');
-    const progress = document.getElementById('loading-progress');
-
-    function getNavigationType() {
-      try {
-        const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
-        if (navEntries && navEntries.length) return navEntries[0].type; 
-        if (performance && performance.navigation && typeof performance.navigation.type !== 'undefined') {
-          
-          const t = performance.navigation.type;
-          if (t === 1) return 'reload';
-          if (t === 2) return 'back_forward';
-          return 'navigate';
-        }
-      } catch(e){}
-      return 'navigate';
-    }
-
-    function showMainInstant() {
-      if(loading) {
-        loading.style.display = 'none';
-        loading.classList.remove('fade-out');
-        loading.style.opacity = 0;
-        loading.style.visibility = 'hidden';
-      }
-      if(main) {
-        main.style.opacity = 1;
-        main.style.visibility = 'visible';
-      }
-    }
-
-    function runLoadingSequence() {
-      if(!loading || !main) return;
-      
-      main.style.opacity = 0;
-      main.style.visibility = 'hidden';
-      loading.style.display = 'flex';
-      loading.style.opacity = 1;
-      loading.style.visibility = 'visible';
-
-      
-      if(progress) progress.style.width = '6%';
-      let w = 6;
-      const interval = setInterval(() => {
-        w += Math.random() * 12 + 6; 
-        if(progress) progress.style.width = Math.min(100, Math.round(w)) + '%';
-        if(w >= 100) {
-          clearInterval(interval);
-          loading.classList.add('fade-out');
-          
-          setTimeout(() => {
-            if(loading) loading.style.display = 'none';
-            if(main) {
-              main.style.opacity = 1;
-              main.style.visibility = 'visible';
-            }
-            try { sessionStorage.setItem(visitedKey, '1'); } catch(e) {}
-          }, 600);
-        }
-      }, 180);
-    }
-
-    const navType = getNavigationType();
-    const wasVisited = !!sessionStorage.getItem(visitedKey);
-
-    
-    if (navType === 'reload') {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', runLoadingSequence);
-      } else {
-        runLoadingSequence();
-      }
-    } else {
-      
-      if (wasVisited) {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', showMainInstant);
-        } else {
-          showMainInstant();
-        }
-      } else {
-        
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', runLoadingSequence);
-        } else {
-          runLoadingSequence();
-        }
-      }
-    }
-  })();
-  </script>
 
 </div> 
 

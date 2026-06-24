@@ -4,190 +4,135 @@
   <style>html, body { margin:0!important; padding:0!important; box-sizing:border-box!important; }</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#080808">
-  <title>Proyecto 04</title>
+  <meta name="theme-color" content="#1f5c4a">
+  <meta name="description" content="El Rastrillo: Nuevo Futuro — visual campaign with art direction, moodboard and social assets for the charity initiative. By César Del Valle.">
+  <meta name="author" content="César Del Valle">
+  <title>El Rastrillo: Nuevo Futuro — Campaign · César Del Valle</title>
+  <link rel="canonical" href="https://cesardelvallee.github.io/PORTFOLIO/img4.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="César Del Valle">
+  <meta property="og:title" content="El Rastrillo: Nuevo Futuro — Campaign">
+  <meta property="og:description" content="Visual campaign: art direction, moodboard and social assets for Nuevo Futuro.">
+  <meta property="og:url" content="https://cesardelvallee.github.io/PORTFOLIO/img4.html">
+  <meta property="og:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="El Rastrillo: Nuevo Futuro — Campaign">
+  <meta name="twitter:description" content="Visual campaign and art direction, by César Del Valle.">
+  <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  
+
   <style>
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes rotate-reverse {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.3; }
-      50% { transform: scale(1.1); opacity: 0.6; }
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes fadeInOut {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    
-    @keyframes fadeInUp {
-      from { 
-        opacity: 0; 
-        transform: translateY(30px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
-    }
-    
-    @keyframes scrollPulse {
-      0%, 100% { transform: scaleY(1); opacity: 0.4; }
-      50% { transform: scaleY(1.2); opacity: 1; }
-    }
-    
-    .scroll-item {
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .scroll-item.visible {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-    
-    
-    .top-bar-left,
-    .top-bar-right {
-      color: #1f5c4a !important;
-    }
-    
-    /* RESPONSIVE */
-    
-    /* Tablet (768px - 1024px) */
-    @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr !important;
-        gap: 6vw !important;
-        text-align: center;
-      }
-      
-      .project-info {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3rem !important;
-      }
-    }
-    
-    /* Mobile (max-width: 768px) */
-    @media (max-width: 768px) {
-      .main-section {
-        min-height: auto !important;
-        padding: 62px 5vw 2.5rem 5vw !important;
-      }
+    .top-bar-left, .top-bar-right { color: #1f5c4a !important; }
 
-      .main-grid {
-        gap: 1.5rem !important;
-      }
-      
-      .project-number-category {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 1rem !important;
-      }
-      
-      .project-number-category .divider {
-        width: 60px !important;
-        transform: rotate(90deg);
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-        text-align: center;
-      }
-      
-      .technical-info {
-        margin: 2rem 0 !important;
-      }
-      
-      .right-column {
-        padding: 1rem !important;
-      }
+    /* Galería de cards (moodboards) */
+    .proj-cards {
+      background: #a8d4c8;
+      padding: clamp(72px, 12vh, 160px) 5vw clamp(96px, 14vh, 200px);
+      position: relative;
+      overflow: hidden;
     }
-    
-    
-    @media (max-width: 480px) {
-      .main-section {
-        padding: 58px 4vw 2rem 4vw !important;
+    .proj-cards-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(40px, 6vh, 72px);
+      align-items: center;
+    }
+    .minimal-card { width: min(70%, 760px); }
+    .minimal-card > div {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 30px 90px rgba(31, 74, 61, 0.16);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .minimal-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.7s ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .minimal-card > div:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 40px 110px rgba(31, 74, 61, 0.24);
       }
+      .minimal-card > div:hover img { transform: scale(1.05); }
+    }
+    @media (max-width: 768px) {
+      .minimal-card { width: 92%; }
+    }
 
-      .project-info {
-        max-width: 100% !important;
-      }
-      
-      .main-title {
-        font-size: clamp(2.5rem, 12vw, 4rem) !important;
-        line-height: 0.9 !important;
-      }
-      
-      .project-description {
-        font-size: clamp(1rem, 4vw, 1.2rem) !important;
-        margin-bottom: 2rem !important;
-      }
+    /* Intro editorial de la campaña (chicha) */
+    .gx-section { position: relative; overflow: hidden; padding: clamp(84px, 15vh, 190px) clamp(24px, 6vw, 90px); }
+    .proj-intro { background: var(--ph-bg, #a8d4c8); }
+    .gx-inner { max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; }
+    .gx-bgnum {
+      position: absolute; top: 50%; right: -3%; transform: translateY(-50%);
+      z-index: 0; pointer-events: none; user-select: none;
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(13rem, 38vw, 46rem);
+      line-height: 0.72; letter-spacing: -0.05em; color: var(--ph-ink, #1f5c4a); opacity: 0.05;
     }
-    
-    
-    @media (max-width: 768px) {
-      .minimal-card {
-        width: 90% !important;
-      }
-      
-      .minimal-card > div {
-        padding: 1rem !important;
-      }
+    .gx-eyebrow { display: inline-block; font-family: 'Inter', sans-serif; font-size: 0.64rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ph-accent, #2f8a6b); }
+    .gx-title { font-family: 'Inter', sans-serif; font-size: clamp(1.9rem, 4.8vw, 3.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.02; color: var(--ph-ink, #1f5c4a); margin: 0.8rem 0 0; max-width: 16ch; text-wrap: balance; }
+    .gx-title em { font-style: normal; color: var(--ph-accent, #2f8a6b); }
+    .gx-sub { margin: 1.2rem 0 0; max-width: 52ch; font-family: 'Inter', sans-serif; font-size: clamp(0.92rem, 1.1vw, 1.05rem); font-weight: 400; line-height: 1.7; color: color-mix(in srgb, var(--ph-ink, #1f5c4a) 78%, transparent); }
+    .gx-cue { margin-top: clamp(34px, 6vh, 60px); display: inline-flex; align-items: center; gap: 11px; font-family: 'Inter', sans-serif; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--ph-ink, #1f5c4a) 62%, transparent); }
+    .gx-cue svg { width: 14px; height: 26px; animation: gx-cue-down 1.8s ease-in-out infinite; }
+    @keyframes gx-cue-down { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+    .gx-reveal { transition: opacity 0.8s cubic-bezier(0.22,0.61,0.36,1), transform 0.8s cubic-bezier(0.22,0.61,0.36,1); }
+    .gx-reveal.gx-hidden { opacity: 0; transform: translateY(28px); }
+    .gx-cue.gx-reveal.gx-hidden { transform: translateY(18px); transition-delay: 0.1s; }
+    /* pies numerados de los moodboards */
+    .rs-cap {
+      margin-top: 0.9rem; display: flex; align-items: baseline; gap: 0.6rem;
+      font-family: 'Inter', sans-serif; font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #1f5c4a) 58%, transparent);
     }
-    
-    
-    @media (max-width: 768px) {
-      footer .grid-2col {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-      }
-      
-      footer .illustration {
-        display: none !important;
-      }
-      
-      footer .grid-info {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-        text-align: center;
-      }
-      
-      footer .social-links {
-        justify-content: center !important;
-      }
-      
-      footer nav {
-        align-items: center !important;
-      }
+    .rs-num { font-weight: 700; letter-spacing: 0.04em; color: var(--ph-accent, #2f8a6b); }
+    /* Identidad serif elegante (firma de El Rastrillo) */
+    .rs-serif .gx-title { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-style: italic; letter-spacing: -0.02em; }
+    .rs-serif .gx-title em { font-style: italic; }
+    .rs-quote {
+      margin: clamp(42px, 7vh, 86px) 0 0; max-width: 17ch;
+      font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400;
+      font-size: clamp(1.8rem, 4.6vw, 3.3rem); line-height: 1.12; letter-spacing: -0.015em;
+      color: var(--ph-ink, #1f5c4a);
+    }
+    .rs-quote .rs-mark { color: var(--ph-accent, #2f8a6b); }
+    .rs-quote-by { display: block; margin-top: 1.2rem; font-family: 'Inter', sans-serif; font-style: normal; font-size: 0.64rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--ph-ink, #1f5c4a) 55%, transparent); }
+
+    /* Hero móvil a pantalla — visual arriba grande, texto repartido, sin hueco */
+    @media (max-width: 560px) {
+      .proj-hero { min-height: 100dvh; align-items: stretch; padding: 54px 18px 20px; }
+      .proj-hero-inner { display: flex; flex-direction: column; gap: 0; }
+      .proj-hero-visual { order: -1; flex: 0 0 auto; margin-bottom: clamp(12px, 2.4vh, 26px); }
+      .proj-hero-visual img { max-height: 42dvh; }
+      .proj-hero-text { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+      .proj-eyebrow { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.56rem, 1.3dvh, 0.72rem); }
+      .proj-title { margin: 0 0 clamp(0.3rem, 0.9dvh, 0.65rem); font-size: clamp(2rem, 6.2dvh, 3.1rem); line-height: 0.98; }
+      .proj-tagline { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.86rem, 2dvh, 1.15rem); line-height: 1.3; max-width: none; }
+      .proj-desc { margin: 0; font-size: clamp(0.74rem, 1.7dvh, 0.95rem); line-height: 1.42; }
+      .proj-meta { margin-top: clamp(0.5rem, 1.4dvh, 0.95rem); padding-top: clamp(0.65rem, 1.7dvh, 1.1rem); }
     }
   </style>
 </head>
-<body>
+<body style="--ph-bg:#a8d4c8; --ph-ink:#1f5c4a; --ph-accent:#2f8a6b; --ph-line:rgba(31,92,74,0.18);">
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
   <a href="index.html" class="back-btn" title="Volver al inicio">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -197,318 +142,98 @@
       <a href="index.html" class="top-bar-left back-top-link" id="home-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
       <div class="top-bar-right">EL RASTRILLO</div>
     </div>
-  <div class="main-section" style="min-height:80vh;background:#a8d4c8;display:flex;align-items:center;justify-content:center;padding:10vh 5vw 4vh 5vw;">
-    
-    <div class="main-grid" style="max-width:1400px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:center;">
-      
-      
-      <div class="project-info" style="opacity:0; animation:fadeInUp 0.9s ease-out 0.4s forwards; position:relative;">
-        
-        
-        <div style="position:absolute; top:-20px; left:-30px; width:4px; height:60px; background:linear-gradient(180deg, #1f5c4a 0%, transparent 100%); border-radius:2px; opacity:0; animation:fadeInUp 1s ease-out 0.3s forwards;"></div>
-        
-        
-        <div class="project-number-category" style="display:flex;align-items:center;margin-bottom:2.5rem; opacity:0; animation:fadeInUp 0.9s ease-out 0.45s forwards;">
-          <span style="color:#1f5c4a;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:600;letter-spacing:0.25em;text-transform:uppercase;">Project 04</span>
-          <div class="divider" style="width:50px;height:1px;background:linear-gradient(90deg, #2a7d63 0%, #47a085 100%);margin:0 1.8rem;"></div>
-          <span style="color:#47a085;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:400;letter-spacing:0.15em; opacity:0; animation:fadeInUp 0.9s ease-out 0.5s forwards;">Social Campaign</span>
+  <section class="proj-hero" style="--ph-bg:#a8d4c8; --ph-ink:#1f5c4a; --ph-accent:#2f8a6b; --ph-line:rgba(31,92,74,0.18); --ph-num:'04'; --ph-img:url('img/RASTRILLO_INSTASTORIE2.png');">
+    <div class="proj-hero-inner">
+      <div class="proj-hero-text">
+        <p class="proj-eyebrow ph-rise" style="animation-delay:0.10s;"><span class="n">Project 04</span><span class="bar"></span>Art Direction &amp; Campaign</p>
+        <h1 class="proj-title ph-rise" style="animation-delay:0.18s;">El Rastrillo</h1>
+        <p class="proj-tagline ph-rise" style="animation-delay:0.26s;">Identidad visual para la edición 2024 del evento benéfico Nuevo Futuro — <em>tradición</em> que conecta con un público joven.</p>
+        <p class="proj-desc ph-rise" style="animation-delay:0.34s;">Una <strong>identidad visual</strong> completa para rejuvenecer este evento benéfico tradicional y conectarlo con un público más joven y cultural. La propuesta juega con una <strong>tipografía serif elegante</strong> y la <strong>personificación de objetos</strong> de segunda mano —maletas, sillones y relojes— que cobran vida con ilustraciones lineales de estilo retro, unificadas bajo una potente <em>paleta verde menta</em>.</p>
+        <div class="proj-meta ph-rise" style="animation-delay:0.42s;">
+          <div><span class="m-label">Role</span><span class="m-value">Graphic Designer</span></div>
+          <div><span class="m-label">Platform</span><span class="m-value">Social · Campaign</span></div>
+          <div><span class="m-label">Software</span><span class="m-value">Photoshop · Illustrator</span></div>
         </div>
-
-        
-        <h1 class="main-title" style="color:#1f5c4a;font-family:'Inter',sans-serif;font-size:clamp(3.8rem,7.5vw,6.5rem);font-weight:800;line-height:0.82;letter-spacing:-0.04em;margin:0 0 2rem 0; opacity:0; animation:fadeInUp 0.95s ease-out 0.6s forwards; text-shadow:0 2px 8px rgba(31,92,74,0.1);">RASTRILLO<br><span style="font-weight:200;font-style:italic;color:#47a085;">Nuevo Futuro</span></h1>
-        
-        <p class="project-description" style="color:#2d6b59;font-family:'Inter',sans-serif;font-size:clamp(0.85rem,1vw,0.98rem);line-height:1.55;font-weight:300;margin:0 0 3.5rem 0;max-width:570px; opacity:0; animation:fadeInUp 0.9s ease-out 0.75s forwards;">Para la edición <strong style="color:#1f5c4a;font-weight:500;">2024</strong> de <strong style="color:#1f5c4a;font-weight:500;">El Rastrillo de Nuevo Futuro</strong>, desarrollé una <strong style="color:#47a085;font-weight:500;">identidad visual</strong> completa para rejuvenecer este <strong style="color:#1f5c4a;font-weight:500;">evento benéfico</strong> tradicional y conectarlo con un público más <strong style="color:#47a085;font-weight:500;">joven</strong> y <strong style="color:#47a085;font-weight:500;">cultural</strong>. La propuesta gráfica se centra en la interacción entre una <strong style="color:#1f5c4a;font-weight:500;">tipografía serif elegante</strong> y una serie de conceptos clave: <strong style="color:#47a085;font-weight:500;">Memorias</strong>, <strong style="color:#47a085;font-weight:500;">Tesoros</strong>, <strong style="color:#47a085;font-weight:500;">Objetos</strong>, <strong style="color:#47a085;font-weight:500;">Futuro</strong>, creando una composición tipográfica que estructura toda la campaña.<br><br>El elemento distintivo del proyecto es la <strong style="color:#1f5c4a;font-weight:500;">personificación de los objetos</strong> de segunda mano: <strong style="color:#47a085;font-weight:500;">maletas</strong>, <strong style="color:#47a085;font-weight:500;">sillones</strong> y <strong style="color:#47a085;font-weight:500;">relojes</strong> cobran vida a través de ilustraciones lineales de estilo retro que interactúan con el texto. Esta familia de personajes, unificada bajo una potente <strong style="color:#1f5c4a;font-weight:500;">paleta verde menta</strong>, genera un sistema visual flexible y reconocible, capaz de adaptarse desde la monumentalidad de las <strong style="color:#47a085;font-weight:500;">lonas</strong> en la Galería de Cristal hasta <strong style="color:#47a085;font-weight:500;">formatos digitales</strong> y <strong style="color:#47a085;font-weight:500;">merchandising</strong>.</p>
-
-        <div style="width:80px;height:2px;background:linear-gradient(90deg, #1f5c4a 0%, transparent 100%);margin:0 0 3rem 0;opacity:0;animation:fadeInUp 0.8s ease-out 0.8s forwards;"></div>
-
       </div>
-
-      <div class="right-column" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;">
-        
-        <div class="image-container" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:flex-start;opacity:0;animation:fadeInUp 1s ease-out 0.5s forwards;">
-          <img
-            src="img/RASTRILLO_INSTASTORIE2.png"
-            alt="El Rastrillo de Nuevo Futuro Campaign"
-            class="project-hero-img"
-            style="width:96%;height:570px;object-fit:cover;display:block;border-radius:8px;margin-bottom:1.5rem;">
-          
-          <div style="display:flex;gap:2rem;flex-wrap:wrap;width:100%;justify-content:center;opacity:0;animation:fadeInUp 1s ease-out 0.7s forwards;">
-            <div style="flex:0 1 auto;border-left:3px solid #1f5c4a;padding-left:1rem;">
-              <h4 style="color:#1f5c4a;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Role</h4>
-              <p style="color:#47a085;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Graphic Designer</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #47a085;padding-left:1rem;">
-              <h4 style="color:#1f5c4a;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Platform</h4>
-              <p style="color:#47a085;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Social Media</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #66c2a3;padding-left:1rem;">
-              <h4 style="color:#1f5c4a;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Software</h4>
-              <p style="color:#47a085;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Photoshop · Illustrator</p>
-            </div>
-          </div>
+      <div class="proj-hero-visual ph-rise" style="animation-delay:0.30s;">
+        <div class="ph-tilt">
+          <img src="img/RASTRILLO_INSTASTORIE2.png" alt="El Rastrillo de Nuevo Futuro — campaña">
         </div>
-        
       </div>
-      
-    </div>
-    
-  </div>
-  
-  <section style="background:#a8d4c8;padding:8rem 5vw 10rem 5vw;position:relative;overflow:hidden;">
-    
-    <div style="max-width:1100px;margin:0 auto;position:relative;">
-      
-      <div style="display:flex;flex-direction:column;gap:4rem;align-items:center;">
-        
-        <div class="minimal-card card-1" style="width:70%;opacity:0;transform:translateY(100px) rotate(-3deg) scale(0.9);">
-          <div style="position:relative;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,0.15);transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <img src="img/2411_RASTRILLO_MOODBAORD.png" alt="Rastrillo Moodboard" style="width:100%;height:auto;display:block;transition:transform 0.7s ease;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(31,92,74,0) 50%, rgba(31,92,74,0.03) 100%);pointer-events:none;opacity:0;transition:opacity 0.5s ease;"></div>
-          </div>
-        </div>
-        
-        <div class="minimal-card card-2" style="width:70%;opacity:0;transform:translateY(100px) rotate(2deg) scale(0.9);">
-          <div style="position:relative;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,0.15);transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <img src="img/2411_RASTRILLO_MOODBAORD_2.2.png" alt="Rastrillo Moodboard 2" style="width:100%;height:auto;display:block;transition:transform 0.7s ease;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(31,92,74,0) 50%, rgba(31,92,74,0.03) 100%);pointer-events:none;opacity:0;transition:opacity 0.5s ease;"></div>
-          </div>
-        </div>
-        
-        <div class="minimal-card card-3" style="width:70%;opacity:0;transform:translateY(100px) rotate(-2deg) scale(0.9);">
-          <div style="position:relative;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,0.15);transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <img src="img/BOARD_CAMPANA_ELRASTRILLO.webp" alt="Board Campaña" style="width:100%;height:auto;display:block;transition:transform 0.7s ease;">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(31,92,74,0) 50%, rgba(31,92,74,0.03) 100%);pointer-events:none;opacity:0;transition:opacity 0.5s ease;"></div>
-          </div>
-        </div>
-
-        
-      </div>
-      
     </div>
   </section>
-  
-  <style>
-    .minimal-card > div:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 40px 110px rgba(0,0,0,0.2);
-    }
-    
-    .minimal-card:hover img {
-      transform: scale(1.05);
-    }
-    
-    .minimal-card:hover > div > div:last-child {
-      opacity: 1;
-    }
-  </style>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      gsap.registerPlugin(ScrollTrigger);
-      
-      gsap.to('.card-1', {
-        scrollTrigger: {
-          trigger: '.card-1',
-          start: 'top 90%',
-          end: 'top 30%',
-          scrub: 2,
-          toggleActions: 'play reverse play reverse'
-        },
-        opacity: 1,
-        y: 0,
-        rotation: -3,
-        scale: 1,
-        ease: 'power3.out'
-      });
-      
-      gsap.to('.card-2', {
-        scrollTrigger: {
-          trigger: '.card-2',
-          start: 'top 90%',
-          end: 'top 30%',
-          scrub: 2.3,
-          toggleActions: 'play reverse play reverse'
-        },
-        opacity: 1,
-        y: 0,
-        rotation: 2,
-        scale: 1,
-        ease: 'power3.out'
-      });
-      
-      gsap.to('.card-3', {
-        scrollTrigger: {
-          trigger: '.card-3',
-          start: 'top 90%',
-          end: 'top 30%',
-          scrub: 2.6,
-          toggleActions: 'play reverse play reverse'
-        },
-        opacity: 1,
-        y: 0,
-        rotation: -2,
-        scale: 1,
-        ease: 'power3.out'
-      });
-      
-      const cards = document.querySelectorAll('.minimal-card img');
-      
-      cards.forEach(img => {
-        img.style.cursor = 'none';
-        
-        img.addEventListener('click', function(e) {
-          e.stopPropagation();
-          
-          const overlay = document.createElement('div');
-          overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.3s ease;';
-          
-          const expandedImg = document.createElement('img');
-          expandedImg.src = this.src;
-          expandedImg.style.cssText = 'max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 50px 150px rgba(0,0,0,0.5);transform:scale(0.9);transition:transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);';
-          
-          overlay.appendChild(expandedImg);
-          document.body.appendChild(overlay);
-          
-          requestAnimationFrame(() => {
-            overlay.style.opacity = '1';
-            expandedImg.style.transform = 'scale(1)';
-          });
-          
-          overlay.addEventListener('click', function() {
-            overlay.style.opacity = '0';
-            expandedImg.style.transform = 'scale(0.9)';
-            setTimeout(() => overlay.remove(), 300);
-          });
-          
-          const closeOnEsc = (e) => {
-            if (e.key === 'Escape') {
-              overlay.click();
-              document.removeEventListener('keydown', closeOnEsc);
-            }
-          };
-          document.addEventListener('keydown', closeOnEsc);
-        });
-      });
-      
-    });
-  </script>
 
-  <footer style="position: relative; background: linear-gradient(135deg, #1a2e2b 0%, #254a43 50%, #1a2e2b 100%); overflow: hidden; padding: 0;">
-    
-    <div style="position: relative; background: linear-gradient(135deg, #2d4a45 0%, #3a5f56 100%); padding: 4rem 0; overflow: hidden;">
-      
-      <div style="position: absolute; top: -10%; left: -5%; width: 120px; height: 120px; background: rgba(102, 204, 170, 0.08); border-radius: 50%; transform: rotate(45deg);"></div>
-      <div style="position: absolute; bottom: -8%; right: -3%; width: 90px; height: 90px; background: rgba(26, 46, 43, 0.3); border-radius: 15px; transform: rotate(-20deg);"></div>
-      <div style="position: absolute; top: 40%; right: 8%; width: 40px; height: 40px; background: rgba(102, 204, 170, 0.1); border-radius: 50%; animation: float-subtle 8s ease-in-out infinite;"></div>
-      
-      <div style="position: absolute; top: 25%; left: 15%; width: 6px; height: 6px; background: rgba(102, 204, 170, 0.4); border-radius: 50%; animation: float-dot-subtle 5s ease-in-out infinite;"></div>
-      <div style="position: absolute; top: 70%; left: 12%; width: 4px; height: 4px; background: rgba(102, 204, 170, 0.3); border-radius: 50%; animation: float-dot-subtle 4s ease-in-out infinite reverse;"></div>
-      <div style="position: absolute; bottom: 30%; right: 20%; width: 5px; height: 5px; background: rgba(102, 204, 170, 0.2); border-radius: 50%; animation: float-dot-subtle 6s ease-in-out infinite;"></div>
-      
-      <div class="grid-2col" style="max-width: 1400px; margin: 0 auto; padding: 0 5vw; display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center;">
-        
-        <div style="z-index: 2;">
-          <h2 style="font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: #66ccaa; margin: 0 0 1rem 0; line-height: 1.1; letter-spacing: -0.01em;">¿Trabajamos juntos?</h2>
-          <p style="font-family: 'Inter', sans-serif; font-size: clamp(0.95rem, 1.3vw, 1.1rem); color: rgba(102, 204, 170, 0.8); margin: 0 0 2rem 0; line-height: 1.5; font-weight: 300; max-width: 420px;">Siempre estoy abierto a nuevos proyectos creativos y colaboraciones interesantes.</p>
-          
-          <a href="mailto:cesardelvallefuentes@gmail.com" class="cta-button-subtle email-link" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #66ccaa; color: #1a2e2b; padding: 0.9rem 2rem; border-radius: 25px; text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden;" onclick="window.location.href='mailto:cesardelvallefuentes@gmail.com';">
-            <span style="z-index: 2;">Contactar</span>
-            <span style="z-index: 2; font-size: 1rem;">→</span>
-          </a>
-        </div>
+  <section class="gx-section proj-intro" aria-label="La campaña El Rastrillo">
+    <span class="gx-bgnum" aria-hidden="true">04</span>
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal rs-serif">
+        <span class="gx-eyebrow">La campaña</span>
+        <h2 class="gx-title">Objetos que <em>cobran vida</em></h2>
+        <p class="gx-sub">Maletas, sillones y relojes de segunda mano personificados con ilustración lineal retro y una potente paleta verde menta. Tradición rejuvenecida para conectar con un público joven.</p>
+      </div>
+      <blockquote class="rs-quote gx-reveal">
+        Una tradición que vuelve a ser <span class="rs-mark">deseable</span>.
+        <span class="rs-quote-by">El Rastrillo · Nuevo Futuro 2024</span>
+      </blockquote>
+    </div>
+  </section>
 
-        <div class="illustration project-footer-illustration" style="position: relative; width: 200px; height: 200px; z-index: 1;">
-          
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 130px; height: 130px; background: linear-gradient(135deg, rgba(102, 204, 170, 0.2) 0%, rgba(102, 204, 170, 0.1) 100%); border-radius: 50% 25% 50% 25%; animation: morph-subtle 12s ease-in-out infinite; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);"></div>
-          
-          <div style="position: absolute; top: 40%; left: 45%; width: 12px; height: 12px; background: rgba(102, 204, 170, 0.6); border-radius: 50%; animation: bounce-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; top: 65%; left: 60%; width: 8px; height: 8px; background: rgba(102, 204, 170, 0.4); border-radius: 50%; animation: bounce-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-          <div style="position: absolute; top: 15%; right: 25%; width: 18px; height: 18px; background: rgba(102, 204, 170, 0.3); border-radius: 50%; animation: orbit-subtle 10s linear infinite;"></div>
-          <div style="position: absolute; bottom: 20%; left: 15%; width: 15px; height: 15px; background: rgba(102, 204, 170, 0.2); transform: rotate(45deg); animation: float-subtle 6s ease-in-out infinite reverse;"></div>
-          
-          <div style="position: absolute; top: 35%; left: 25%; width: 35px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(102, 204, 170, 0.3) 50%, transparent 100%); transform: rotate(30deg); animation: pulse-line-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; bottom: 45%; right: 20%; width: 28px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(102, 204, 170, 0.2) 50%, transparent 100%); transform: rotate(-20deg); animation: pulse-line-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
+  <section class="proj-cards" aria-label="Galería del proyecto El Rastrillo">
+    <div class="proj-cards-inner">
+      <div class="minimal-card card-1" style="opacity:0;transform:translateY(100px) rotate(-3deg) scale(0.9);">
+        <div>
+          <img src="img/2411_RASTRILLO_MOODBAORD.png" alt="El Rastrillo — moodboard de campaña" loading="lazy" decoding="async">
         </div>
-        
+        <figcaption class="rs-cap"><span class="rs-num">01</span> Concepto</figcaption>
+      </div>
+      <div class="minimal-card card-2" style="opacity:0;transform:translateY(100px) rotate(2deg) scale(0.9);">
+        <div>
+          <img src="img/2411_RASTRILLO_MOODBAORD_2.2.png" alt="El Rastrillo — moodboard de campaña (II)" loading="lazy" decoding="async">
+        </div>
+        <figcaption class="rs-cap"><span class="rs-num">02</span> Dirección de arte</figcaption>
+      </div>
+      <div class="minimal-card card-3" style="opacity:0;transform:translateY(100px) rotate(-2deg) scale(0.9);">
+        <div>
+          <img src="img/BOARD_CAMPANA_ELRASTRILLO.webp" alt="El Rastrillo — board final de campaña" loading="lazy" decoding="async">
+        </div>
+        <figcaption class="rs-cap"><span class="rs-num">03</span> Campaña</figcaption>
       </div>
     </div>
+  </section>
 
-    <div style="background: #1a2e2b; padding: 2.5rem 5vw 1.5rem 5vw; position: relative;">
-      
-      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(102, 204, 170, 0.2) 25%, rgba(102, 204, 170, 0.4) 50%, rgba(102, 204, 170, 0.2) 75%, transparent 100%);"></div>
-      
-      <div style="max-width: 1400px; margin: 0 auto;">
-        
-        <div class="grid-info" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2rem;">
-          
-          <div>
-            <h3 style="color: #66ccaa; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0 0 0.8rem 0; letter-spacing: 0.02em;">Cesar Del Valle</h3>
-            <p style="color: rgba(102, 204, 170, 0.8); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; line-height: 1.5; margin: 0 0 1.2rem 0;">Creative Director & 3D Artist especializado en experiencias audiovisuales.</p>
-            
-            <div class="social-links" style="display: flex; gap: 0.8rem;">
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(102, 204, 170, 0.1); border: 1px solid rgba(102, 204, 170, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(102, 204, 170, 0.8);">
-                  <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(102, 204, 170, 0.1); border: 1px solid rgba(102, 204, 170, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(102, 204, 170, 0.8);">
-                  <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://www.instagram.com/cesardelvallee/" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(102, 204, 170, 0.1); border: 1px solid rgba(102, 204, 170, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(102, 204, 170, 0.8);">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2"/>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" stroke="currentColor" stroke-width="2"/>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
+  <div class="proj-marquee" aria-hidden="true" style="--pm-bg:#1f5c4a; --pm-fg:#d2ece2; --pm-accent:#66c2a3;">
+    <div class="proj-marquee-track">
+      <span class="seg">El Rastrillo <span class="dot">&bull;</span> Branding <span class="dot">&bull;</span> Campaign <span class="dot">&bull;</span> Art Direction <span class="dot">&bull;</span> El Rastrillo <span class="dot">&bull;</span> Branding <span class="dot">&bull;</span> Campaign <span class="dot">&bull;</span> Art Direction <span class="dot">&bull;</span> El Rastrillo <span class="dot">&bull;</span> Branding <span class="dot">&bull;</span> Campaign <span class="dot">&bull;</span> Art Direction <span class="dot">&bull;</span> </span>
+      <span class="seg">El Rastrillo <span class="dot">&bull;</span> Branding <span class="dot">&bull;</span> Campaign <span class="dot">&bull;</span> Art Direction <span class="dot">&bull;</span> El Rastrillo <span class="dot">&bull;</span> Branding <span class="dot">&bull;</span> Campaign <span class="dot">&bull;</span> Art Direction <span class="dot">&bull;</span> El Rastrillo <span class="dot">&bull;</span> Branding <span class="dot">&bull;</span> Campaign <span class="dot">&bull;</span> Art Direction <span class="dot">&bull;</span> </span>
+    </div>
+  </div>
 
-          <div>
-            <h4 style="color: #66ccaa; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Navegación</h4>
-            <nav style="display: flex; flex-direction: column; gap: 0.6rem;">
-              <a href="index.html" class="footer-link-subtle" style="color: rgba(102, 204, 170, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Portfolio</a>
-              <a href="about.html" class="footer-link-subtle" style="color: rgba(102, 204, 170, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Sobre mí</a>
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="footer-link-subtle" style="color: rgba(102, 204, 170, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Contacto</a>
-            </nav>
-          </div>
 
-          <div>
-            <h4 style="color: #66ccaa; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Especialidades</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem;">
-              <li style="color: rgba(102, 204, 170, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(102, 204, 170, 0.5);">•</span>
-                Diseño 3D & Motion
-              </li>
-              <li style="color: rgba(102, 204, 170, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(102, 204, 170, 0.5);">•</span>
-                Spots audiovisuales
-              </li>
-              <li style="color: rgba(102, 204, 170, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(102, 204, 170, 0.5);">•</span>
-                Experiencias digitales
-              </li>
-            </ul>
-          </div>
-          
-        </div>
+  <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#2a1f15; --pn-accent:#8a6f4a;">
+    <div class="pn-wash" aria-hidden="true"></div>
+    <div class="pn-media" aria-hidden="true"><video src="video/LOEWE_GIF.webm" autoplay loop muted playsinline></video></div>
+    <a class="proj-next-link" href="img5.html">
+      <span>
+        <span class="proj-next-eyebrow">Siguiente proyecto</span>
+        <span class="proj-next-title"><span class="pn-num">05</span>Loewe 001</span>
+      </span>
+      <span class="proj-next-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+  </nav>
 
-        <div style="border-top: 1px solid rgba(102, 204, 170, 0.15); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <div style="width: 5px; height: 5px; background: rgba(102, 204, 170, 0.4); border-radius: 50%; animation: pulse-gentle 3s ease-in-out infinite;"></div>
-            <p style="color: rgba(102, 204, 170, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">© 2025 Cesar Del Valle</p>
-          </div>
-          <p style="color: rgba(102, 204, 170, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">Diseñado desde España</p>
-        </div>
-
-      </div>
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Tienes un proyecto en mente?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
     </div>
   </footer>
 
@@ -518,52 +243,73 @@
       window.location.href = 'index.html';
     });
 
+    /* Reveal de la sección editorial. Sin observer o reduced-motion → visible. */
+    (function() {
+      var items = document.querySelectorAll('.gx-reveal');
+      if (!items.length) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) return;
+      items.forEach(function(el) { el.classList.add('gx-hidden'); });
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.remove('gx-hidden'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
+      items.forEach(function(el) { io.observe(el); });
+    })();
+
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
-    const video = document.querySelector("#kaleo-video");
-    
-    gsap.to(video, {
-      scale: 1.2,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "#video-section",
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1,
-        onUpdate: self => {
-          const progress = self.progress;
-          if (video) {
-            try {
-              video.currentTime = video.duration * progress;
-            } catch(e) {
-              console.log('Error updating video time:', e);
-            }
-          }
-        }
-      }
-    });
+    const reduceMo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const scrollItems = document.querySelectorAll('.scroll-item');
-    
-    const scrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.classList.add('visible');
-          }, index * 150);
-        }
+    if (reduceMo) {
+      gsap.set('.minimal-card', { opacity: 1, y: 0, scale: 1, rotation: 0 });
+    } else {
+      [['.card-1', 2, -3], ['.card-2', 2.3, 2], ['.card-3', 2.6, -2]].forEach(function(c) {
+        gsap.to(c[0], {
+          scrollTrigger: { trigger: c[0], start: 'top 90%', end: 'top 30%', scrub: c[1] },
+          opacity: 1, y: 0, scale: 1, rotation: c[2], ease: 'power3.out'
+        });
       });
-    }, {
-      threshold: 0.3,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    
-    scrollItems.forEach(item => {
-      scrollObserver.observe(item);
+    }
+
+    // Lightbox: ampliar moodboard al hacer clic
+    document.querySelectorAll('.minimal-card img').forEach(function(img) {
+      img.style.cursor = 'none';
+      img.addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(16,15,13,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.3s ease;';
+
+        const expandedImg = document.createElement('img');
+        expandedImg.src = this.src;
+        expandedImg.alt = this.alt;
+        expandedImg.style.cssText = 'max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 50px 150px rgba(0,0,0,0.5);transform:scale(0.96);transition:transform 0.4s cubic-bezier(0.22,0.61,0.36,1);';
+
+        overlay.appendChild(expandedImg);
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(function() {
+          overlay.style.opacity = '1';
+          expandedImg.style.transform = 'scale(1)';
+        });
+
+        function close() {
+          overlay.style.opacity = '0';
+          expandedImg.style.transform = 'scale(0.96)';
+          setTimeout(function() { overlay.remove(); }, 300);
+          document.removeEventListener('keydown', onEsc);
+        }
+        overlay.addEventListener('click', close);
+        function onEsc(ev) { if (ev.key === 'Escape') close(); }
+        document.addEventListener('keydown', onEsc);
+      });
     });
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>

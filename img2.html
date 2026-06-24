@@ -4,255 +4,196 @@
   <style>html, body { margin:0!important; padding:0!important; box-sizing:border-box!important; }</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#080808">
-  <title>Proyecto 02</title>
+  <meta name="theme-color" content="#48293a">
+  <meta name="description" content="Ottolinger × Mykita — conceptual 3D eyewear collaboration. Liquid-chrome experimental sunglasses modelled and rendered in Cinema 4D, with an editorial campaign and an audiovisual spot. By César Del Valle.">
+  <meta name="author" content="César Del Valle">
+  <title>Ottolinger × Mykita — Experimental Eyewear (3D) · César Del Valle</title>
+  <link rel="canonical" href="https://cesardelvallee.github.io/PORTFOLIO/img2.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="César Del Valle">
+  <meta property="og:title" content="Ottolinger × Mykita — Experimental Eyewear (3D)">
+  <meta property="og:description" content="Conceptual 3D eyewear collaboration: liquid-chrome experimental sunglasses modelled in Cinema 4D, with editorial campaign and spot.">
+  <meta property="og:url" content="https://cesardelvallee.github.io/PORTFOLIO/img2.html">
+  <meta property="og:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ottolinger × Mykita — Experimental Eyewear (3D)">
+  <meta name="twitter:description" content="Conceptual 3D eyewear collaboration, by César Del Valle.">
+  <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script type="module">
-    import { animate, scroll } from "https://cdn.jsdelivr.net/npm/motion@12.23.24/+esm"
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    const items = document.querySelectorAll(".img-container")
-
-    scroll(
-        animate(".img-group", {
-            transform: ["none", `translateX(-${items.length - 1}00vw)`],
-        }),
-        { target: document.querySelector(".img-group-container") }
-    )
-
-    scroll(animate(".progress", { scaleX: [0, 1] }), {
-        target: document.querySelector(".img-group-container"),
-    })
-  </script>
-  
   <style>
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes rotate-reverse {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.3; }
-      50% { transform: scale(1.1); opacity: 0.6; }
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes fadeInOut {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    
-    @keyframes fadeInUp {
-      from { 
-        opacity: 0; 
-        transform: translateY(30px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
-    }
-    
-    @keyframes scrollPulse {
-      0%, 100% { transform: scaleY(1); opacity: 0.4; }
-      50% { transform: scaleY(1.2); opacity: 1; }
-    }
-    
-    .scroll-item {
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .scroll-item.visible {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-    
-    .top-bar-left,
-    .top-bar-right {
-      color: #1a3d5c !important;
-    }
-    
-    /* RESPONSIVE */
-    
-    /* Tablet (768px - 1024px) */
-    @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr !important;
-        gap: 6vw !important;
-        text-align: center;
-      }
-      
-      .project-info {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3rem !important;
-      }
-    }
-    
-    /* Mobile (max-width: 768px) */
-    @media (max-width: 768px) {
-      .main-section {
-        min-height: 100vh !important;
-        padding: 15vh 4vw 6vh 4vw !important;
-      }
-
-      .main-grid {
-        gap: 4rem !important;
-      }
-      
-      .project-number-category {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 1rem !important;
-      }
-      
-      .project-number-category .divider {
-        width: 60px !important;
-        transform: rotate(90deg);
-      }
-      
-      .project-details-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-        text-align: center;
-      }
-      
-      .technical-info {
-        margin: 2rem 0 !important;
-      }
-      
-      .right-column {
-        padding: 1rem !important;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .main-section {
-        padding: 12vh 3vw 4vh 3vw !important;
-      }
-      
-      .project-info {
-        max-width: 100% !important;
-      }
-      
-      .main-title {
-        font-size: clamp(2.5rem, 12vw, 4rem) !important;
-        line-height: 0.9 !important;
-      }
-      
-      .project-description {
-        font-size: clamp(1rem, 4vw, 1.2rem) !important;
-        margin-bottom: 2rem !important;
-      }
-    }
-
-    #gallery {
-      width: 100vw;
-    }
-
-    #gallery h2 {
-      font-family: "Inter", sans-serif;
-    }
-
-    #gallery h3 {
-      font-family: "Inter", monospace;
-    }
-
-    #gallery header,
-    #gallery footer {
-      height: 70vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .img-group-container {
-      height: 500vh;
+    .top-bar-left, .top-bar-right { color: #e3d2da !important; }
+    /* Hero — lente circular con anillo HUD (encuadra solo las gafas) */
+    .hero-lens-wrap {
       position: relative;
+      width: clamp(240px, 36vw, 430px);
+      aspect-ratio: 1;
+      margin: 0 auto;
     }
-
-    .img-group-container > div {
-      position: sticky;
-      top: 0;
+    /* arco violeta que rota (escáner) */
+    .hero-lens-wrap::before {
+      content: ''; position: absolute; inset: -16px; border-radius: 50%; z-index: 2; pointer-events: none;
+      background: conic-gradient(from 0deg, transparent 0 58%, var(--ph-accent, #b076c9) 80%, transparent 92%);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px));
+              mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px));
+      animation: lens-spin 5.5s linear infinite;
+    }
+    @keyframes lens-spin { to { transform: rotate(360deg); } }
+    .hero-lens {
+      position: absolute; inset: 0;
+      border-radius: 50%;
       overflow: hidden;
-      height: 100vh;
+      box-shadow: inset 0 0 0 1px rgba(235, 223, 228, 0.2), 0 40px 90px -28px rgba(0, 0, 0, 0.55);
+    }
+    .hero-lens video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: 50% 77%;   /* ← sube/baja para centrar las gafas */
+      transform: scale(1.3);       /* ← zoom para ver solo las gafas */
+    }
+    @media (max-width: 560px) {
+      /* img2: hero a pantalla — lente arriba, texto compacto, ficha pegada abajo */
+      .proj-hero { min-height: 100dvh; align-items: stretch; padding: 50px 20px 16px; }
+      .proj-hero-inner { display: flex; flex-direction: column; gap: 0; }
+      .proj-hero-visual { order: -1; flex: 0 0 auto; margin: 0 auto clamp(10px, 1.6vh, 18px); }
+      .hero-lens-wrap { width: min(64vw, 34dvh, 250px); }
+      /* móvil: sube solo el vídeo dentro del marco para centrar las gafas */
+      .hero-lens video { object-position: 50% 50%; transform: translateY(-20%) scale(1.6); }
+      .proj-hero-text { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+      /* tipografía proporcional al alto: rellena en pantallas altas, encoge en bajas */
+      .proj-eyebrow { margin: 0 0 clamp(0.45rem, 1.3dvh, 0.85rem); font-size: clamp(0.58rem, 1.4dvh, 0.74rem); }
+      .proj-title { margin: 0 0 clamp(0.35rem, 1dvh, 0.75rem); font-size: clamp(2.1rem, 6.8dvh, 3.5rem); line-height: 0.98; }
+      .proj-tagline { margin: 0 0 clamp(0.45rem, 1.3dvh, 0.85rem); font-size: clamp(0.9rem, 2.2dvh, 1.25rem); line-height: 1.3; }
+      .proj-desc { margin: 0; font-size: clamp(0.78rem, 1.9dvh, 1.05rem); line-height: 1.45; }
+      .proj-meta { margin-top: clamp(0.55rem, 1.5dvh, 1rem); padding-top: clamp(0.7rem, 1.8dvh, 1.2rem); }
     }
 
-    .img-group {
-      display: flex;
+    /* secciones del proyecto — oscuro editorial */
+    .gx-section { padding: clamp(78px, 13vh, 168px) clamp(24px, 6vw, 80px); }
+    .gx-inner { max-width: 1180px; margin: 0 auto; }
+    .gx-head { margin-bottom: clamp(34px, 6vh, 64px); }
+    .gx-eyebrow {
+      font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.26em; text-transform: uppercase; color: var(--ph-accent, #b076c9);
+    }
+    .gx-title {
+      font-family: 'Inter', sans-serif; font-size: clamp(1.7rem, 3.6vw, 2.7rem);
+      font-weight: 600; letter-spacing: -0.025em; line-height: 1.06;
+      color: var(--ph-ink, #ebdfe4); margin: 0.7rem 0 0; text-wrap: balance;
+    }
+    .gx-title em { font-style: normal; color: var(--ph-accent, #b076c9); }
+    .gx-sub {
+      margin: 0.9rem 0 0; max-width: 54ch;
+      font-family: 'Inter', sans-serif; font-size: clamp(0.9rem, 1vw, 1rem);
+      font-weight: 400; line-height: 1.7;
+      color: color-mix(in srgb, var(--ph-ink, #ebdfe4) 70%, transparent);
     }
 
-    .img-container {
-      display: flex;
-      width: 100vw;
-      height: 100vh;
-      flex: 0 0 auto;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
+    /* campaña — tríptico de pósters */
+    .campaign { background: #48293a; }
+    .campaign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 26px); }
+    .campaign-grid figure { margin: 0; }
+    .campaign-grid img {
+      width: 100%; height: auto; display: block; border-radius: 5px;
+      box-shadow: 0 34px 80px -24px rgba(0, 0, 0, 0.65);
+      transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .campaign-grid figure:hover img { transform: translateY(-7px); }
+    }
+    @media (max-width: 760px) {
+      .campaign-grid { grid-template-columns: 1fr; gap: 6vw; max-width: 440px; margin: 0 auto; }
     }
 
-    .progress {
-      position: fixed;
-      left: 0;
-      right: 0;
-      height: 5px;
-      background: #1a3d5c;
-      bottom: 50px;
-      transform: scaleX(0);
-      transform-origin: left;
-      z-index: 100;
+    /* spot — vídeo cinematográfico */
+    .film { background: #48293a; position: relative; overflow: hidden; }
+    .film .gx-inner { position: relative; z-index: 1; }
+    /* backdrop kinético: nombre gigante desplazándose por detrás */
+    .film-marquee {
+      position: absolute; top: 50%; left: 0; z-index: 0;
+      white-space: nowrap; pointer-events: none; user-select: none;
+      font-family: 'Inter', sans-serif; font-weight: 700;
+      font-size: clamp(4.5rem, 16vw, 15rem); line-height: 1;
+      letter-spacing: -0.03em; text-transform: uppercase;
+      color: var(--ph-ink, #ebdfe4); opacity: 0.07;
+      will-change: transform;
+      animation: film-marquee 42s linear infinite;
+    }
+    @keyframes film-marquee {
+      from { transform: translate(0, -50%); }
+      to { transform: translate(-50%, -50%); }
+    }
+    .film-figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
+    .film-frame {
+      position: relative; display: inline-block; line-height: 0; max-width: 100%;
+      isolation: isolate;
+      transition: transform 0.85s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .film-frame video {
+      display: block;
+      width: auto; height: auto;
+      max-width: 100%; max-height: 80dvh;
+      border-radius: 8px;
+      box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.72);
+    }
+    /* glow violeta que respira detrás del spot */
+    .film-frame::before {
+      content: ''; position: absolute; inset: -12%; z-index: -1;
+      background: radial-gradient(ellipse at 50% 50%, var(--ph-accent, #b076c9), transparent 62%);
+      opacity: 0.16; filter: blur(72px);
+      animation: film-glow 6.5s ease-in-out infinite;
+    }
+    @keyframes film-glow { 0%, 100% { opacity: 0.12; transform: scale(0.95); } 50% { opacity: 0.22; transform: scale(1.06); } }
+    /* marco tipo visor de cámara */
+    .film-corner { position: absolute; width: 20px; height: 20px; pointer-events: none; border: 1.5px solid color-mix(in srgb, var(--ph-ink, #ebdfe4) 48%, transparent); }
+    .film-corner.tl { top: -9px; left: -9px; border-right: 0; border-bottom: 0; }
+    .film-corner.tr { top: -9px; right: -9px; border-left: 0; border-bottom: 0; }
+    .film-corner.bl { bottom: -9px; left: -9px; border-right: 0; border-top: 0; }
+    .film-corner.br { bottom: -9px; right: -9px; border-left: 0; border-top: 0; }
+    /* etiquetas editoriales (estilo póster) */
+    .film-tag {
+      position: absolute; top: -30px; line-height: 1;
+      font-family: 'Inter', sans-serif; font-size: 0.58rem; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #ebdfe4) 55%, transparent);
+      display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    }
+    .film-tag-l { left: 1px; }
+    .film-tag-r { right: 1px; }
+    .film-tag .rec { width: 7px; height: 7px; border-radius: 50%; background: #e0566b; animation: rec-blink 1.5s steps(1) infinite; }
+    @keyframes rec-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0.28; } }
+    /* entrada: el spot escala suave al revelarse */
+    .film-figure.gx-hidden .film-frame { transform: scale(0.92); }
+    .film-cap {
+      margin-top: 1.5rem; text-align: center;
+      font-family: 'Inter', sans-serif; font-size: 0.64rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #ebdfe4) 52%, transparent);
+    }
+    @media (max-width: 560px) {
+      .film-tag { display: none; }
+      .film-corner { width: 13px; height: 13px; }
     }
 
-    @media (max-width: 768px) {
-      .img-container img {
-        width: 300px !important;
-        height: 375px !important;
-      }
-      
-      #gallery header h2 {
-        font-size: clamp(2.5rem, 10vw, 4rem) !important;
-      }
-      
-      .img-container h3 {
-        font-size: clamp(2rem, 8vw, 3rem) !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .img-container img {
-        width: 250px !important;
-        height: 320px !important;
-      }
-      
-      #gallery header h2 {
-        font-size: clamp(2rem, 12vw, 3rem) !important;
-      }
-      
-      .img-container h3 {
-        font-size: clamp(1.5rem, 10vw, 2.5rem) !important;
-      }
-    }
+    /* reveal al scroll — visible por defecto; solo se oculta si el JS lo gestiona */
+    .gx-reveal { transition: opacity 0.75s cubic-bezier(0.22,0.61,0.36,1), transform 0.75s cubic-bezier(0.22,0.61,0.36,1); }
+    .gx-reveal.gx-hidden { opacity: 0; transform: translateY(26px); }
+    .campaign-grid .gx-reveal.gx-hidden { transform: translateY(34px); }
+    .campaign-grid .gx-reveal:nth-child(2) { transition-delay: 0.08s; }
+    .campaign-grid .gx-reveal:nth-child(3) { transition-delay: 0.16s; }
   </style>
 </head>
-<body>
+<body style="--ph-bg:#48293a; --ph-ink:#ebdfe4; --ph-accent:#b076c9; --ph-line:rgba(235,223,228,0.16);">
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
   <a href="index.html" class="back-btn" title="Volver al inicio">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -260,210 +201,103 @@
   </a>
   <div class="top-bar">
       <a href="index.html" class="top-bar-left back-top-link" id="home-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
-      <div class="top-bar-right">3D DESIGN</div>
+      <div class="top-bar-right">EXPERIMENTAL EYEWEAR</div>
     </div>
-  <div class="main-section" style="min-height:80vh;background:#b8d4eb;display:flex;align-items:center;justify-content:center;padding:10vh 5vw 4vh 5vw;">
-    
-    <div class="main-grid" style="max-width:1400px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:center;">
-      
-      <div class="project-info" style="opacity:0; animation:fadeInUp 0.9s ease-out 0.4s forwards; position:relative;">
-        
-        <div style="position:absolute; top:-20px; left:-30px; width:4px; height:60px; background:linear-gradient(180deg, #1a3d5c 0%, transparent 100%); border-radius:2px; opacity:0; animation:fadeInUp 1s ease-out 0.3s forwards;"></div>
-        
-        <div class="project-number-category" style="display:flex;align-items:center;margin-bottom:2.5rem; opacity:0; animation:fadeInUp 0.9s ease-out 0.45s forwards;">
-          <span style="color:#1a3d5c;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:600;letter-spacing:0.25em;text-transform:uppercase;">Project 02</span>
-          <div class="divider" style="width:50px;height:1px;background:linear-gradient(90deg, #2e5984 0%, #4a7bb8 100%);margin:0 1.8rem;"></div>
-          <span style="color:#4a7bb8;font-family:'Inter',sans-serif;font-size:clamp(0.75rem,0.9vw,0.85rem);font-weight:400;letter-spacing:0.15em; opacity:0; animation:fadeInUp 0.9s ease-out 0.5s forwards;">3D Modeling</span>
+  <section class="proj-hero" style="--ph-bg:#48293a; --ph-ink:#ebdfe4; --ph-accent:#b076c9; --ph-line:rgba(235,223,228,0.16); --ph-num:'02';">
+    <div class="proj-hero-inner">
+      <div class="proj-hero-text">
+        <p class="proj-eyebrow ph-rise" style="animation-delay:0.10s;"><span class="n">Project 02</span><span class="bar"></span>3D · Motion · Eyewear</p>
+        <h1 class="proj-title ph-rise" style="animation-delay:0.18s;">Ottolinger × Mykita</h1>
+        <p class="proj-tagline ph-rise" style="animation-delay:0.26s;">Liquid Vision — eyewear experimental modelado en 3D. No diseñado para encajar, sino para <em>destacar</em>.</p>
+        <p class="proj-desc ph-rise" style="animation-delay:0.34s;">Colaboración conceptual entre <strong>Ottolinger</strong> y <strong>Mykita</strong>: una serie limitada de gafas experimentales modeladas y renderizadas íntegramente en <strong>Cinema 4D</strong>. Cromo líquido, lentes violeta y una dirección de arte editorial, con un <strong>spot audiovisual</strong> que lleva la pieza del render al movimiento.</p>
+        <div class="proj-meta ph-rise" style="animation-delay:0.42s;">
+          <div><span class="m-label">Rol</span><span class="m-value">3D Artist · Art Direction</span></div>
+          <div><span class="m-label">Colab</span><span class="m-value">Ottolinger × Mykita</span></div>
+          <div><span class="m-label">Software</span><span class="m-value">Cinema 4D · Redshift · After Effects</span></div>
         </div>
-
-        <h1 class="main-title" style="color:#1a3d5c;font-family:'Inter',sans-serif;font-size:clamp(3.8rem,7.5vw,6.5rem);font-weight:800;line-height:0.82;letter-spacing:-0.04em;margin:0 0 2rem 0; opacity:0; animation:fadeInUp 0.95s ease-out 0.6s forwards; text-shadow:0 2px 8px rgba(26,61,92,0.1);">LEMON<br><span style="font-weight:200;font-style:italic;color:#4a7bb8;">3D Candy Pack</span></h1>
-
-        <p class="project-description" style="color:#2d4b6b;font-family:'Inter',sans-serif;font-size:clamp(1.15rem,1.9vw,1.5rem);line-height:1.6;font-weight:300;margin:0 0 3.5rem 0;max-width:520px; opacity:0; animation:fadeInUp 0.9s ease-out 0.75s forwards;">Diseño 3D de packaging para <strong style="font-weight:500;color:#1a3d5c;">dulces de limón</strong> con un enfoque moderno y colorido. Modelado completo en <em style="color:#4a7bb8;">Cinema 4D</em> con renders fotorrealistas que capturan la esencia fresca y juvenil del producto.</p>
-
-        <div style="width:80px;height:2px;background:linear-gradient(90deg, #1a3d5c 0%, transparent 100%);margin:0 0 3rem 0;opacity:0;animation:fadeInUp 0.8s ease-out 0.8s forwards;"></div>
-
       </div>
-
-      <div class="right-column" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;">
-        
-        <div class="image-container" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:flex-start;opacity:0;animation:fadeInUp 1s ease-out 0.5s forwards;">
-          <img
-            src="img/3d-pixel-lemon-candy-pack.png"
-            alt="3D Lemon Candy Pack"
-            class="project-hero-img"
-            style="width:100%;height:650px;object-fit:cover;display:block;margin-bottom:1.5rem;">
-          
-          <div style="display:flex;gap:2rem;flex-wrap:wrap;width:100%;opacity:0;animation:fadeInUp 1s ease-out 0.7s forwards;">
-            <div style="flex:0 1 auto;border-left:3px solid #1a3d5c;padding-left:1rem;">
-              <h4 style="color:#1a3d5c;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Role</h4>
-              <p style="color:#4a7bb8;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">3D Designer · Product Visualization</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #4a7bb8;padding-left:1rem;">
-              <h4 style="color:#1a3d5c;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Product</h4>
-              <p style="color:#4a7bb8;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Lemon Candy Pack</p>
-            </div>
-            <div style="flex:0 1 auto;border-left:3px solid #6ba3e3;padding-left:1rem;">
-              <h4 style="color:#1a3d5c;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 0.3rem 0;">Software</h4>
-              <p style="color:#4a7bb8;font-family:'Inter',sans-serif;font-size:0.8rem;line-height:1.3;margin:0;font-weight:300;">Cinema 4D · Octane Render</p>
-            </div>
+      <div class="proj-hero-visual ph-rise" style="animation-delay:0.30s;">
+        <div class="hero-lens-wrap">
+          <div class="hero-lens">
+            <video class="project-hero-video" autoplay loop muted playsinline>
+              <source src="video/OTTOLINGER_GIF_1.mp4" type="video/mp4">
+              Tu navegador no soporta el elemento video.
+            </video>
           </div>
         </div>
-        
       </div>
-      
     </div>
-    
+  </section>
+
+  <section class="gx-section campaign" aria-label="Campaña Ottolinger × Mykita">
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">Campaña</span>
+        <h2 class="gx-title">Limited <em>Rave Series</em> Edition</h2>
+        <p class="gx-sub">Tres piezas de la serie experimental: cromo líquido, lentes violeta y una paleta que viaja del aubergine al magenta.</p>
+      </div>
+      <div class="campaign-grid">
+        <figure class="gx-reveal"><img src="img/POSTER_GAFAS_1_web.jpg" alt="Ottolinger × Mykita — póster de campaña 01" loading="lazy" decoding="async"></figure>
+        <figure class="gx-reveal"><img src="img/POSTER_GAFAS_2_web.jpg" alt="Ottolinger × Mykita — póster de campaña 02 (macro)" loading="lazy" decoding="async"></figure>
+        <figure class="gx-reveal"><img src="img/POSTER_GAFAS_3_web.jpg" alt="Ottolinger × Mykita — póster de campaña 03 (pódium)" loading="lazy" decoding="async"></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="gx-section film" aria-label="Spot del proyecto">
+    <div class="film-marquee" aria-hidden="true">OTTOLINGER&nbsp;×&nbsp;MYKITA&nbsp;·&nbsp;OTTOLINGER&nbsp;×&nbsp;MYKITA&nbsp;·&nbsp;OTTOLINGER&nbsp;×&nbsp;MYKITA&nbsp;·&nbsp;OTTOLINGER&nbsp;×&nbsp;MYKITA&nbsp;·&nbsp;OTTOLINGER&nbsp;×&nbsp;MYKITA&nbsp;·&nbsp;OTTOLINGER&nbsp;×&nbsp;MYKITA&nbsp;·&nbsp;</div>
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">El spot</span>
+        <h2 class="gx-title">Del render al <em>movimiento</em></h2>
+      </div>
+      <figure class="film-figure gx-reveal">
+        <div class="film-frame">
+          <span class="film-tag film-tag-l" aria-hidden="true">Liquid Vision</span>
+          <span class="film-tag film-tag-r" aria-hidden="true"><i class="rec"></i> Rec · 2025</span>
+          <video src="video/SPOT_GAFAS.mp4" autoplay loop muted playsinline preload="metadata"></video>
+          <span class="film-corner tl" aria-hidden="true"></span>
+          <span class="film-corner tr" aria-hidden="true"></span>
+          <span class="film-corner bl" aria-hidden="true"></span>
+          <span class="film-corner br" aria-hidden="true"></span>
+        </div>
+        <figcaption class="film-cap">Spot 3D · Cinema 4D · After Effects</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="proj-marquee" aria-hidden="true" style="--pm-bg:#2c1922; --pm-fg:#e9d6de; --pm-accent:#b787cb;">
+    <div class="proj-marquee-track">
+      <span class="seg">Ottolinger × Mykita <span class="dot">&bull;</span> Experimental Eyewear <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> Liquid Vision <span class="dot">&bull;</span> Rave Series 2025 <span class="dot">&bull;</span> Ottolinger × Mykita <span class="dot">&bull;</span> Experimental Eyewear <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> Liquid Vision <span class="dot">&bull;</span> Rave Series 2025 <span class="dot">&bull;</span> Ottolinger × Mykita <span class="dot">&bull;</span> Experimental Eyewear <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> Liquid Vision <span class="dot">&bull;</span> Rave Series 2025 <span class="dot">&bull;</span> </span>
+      <span class="seg">Ottolinger × Mykita <span class="dot">&bull;</span> Experimental Eyewear <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> Liquid Vision <span class="dot">&bull;</span> Rave Series 2025 <span class="dot">&bull;</span> Ottolinger × Mykita <span class="dot">&bull;</span> Experimental Eyewear <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> Liquid Vision <span class="dot">&bull;</span> Rave Series 2025 <span class="dot">&bull;</span> Ottolinger × Mykita <span class="dot">&bull;</span> Experimental Eyewear <span class="dot">&bull;</span> Cinema 4D <span class="dot">&bull;</span> Liquid Vision <span class="dot">&bull;</span> Rave Series 2025 <span class="dot">&bull;</span> </span>
+    </div>
   </div>
-  
-  <article id="gallery" style="width:100vw;background:#b8d4eb;">
-    <header style="height:70vh;display:flex;justify-content:center;align-items:center;">
-      <h2 style="font-size:clamp(3rem,8vw,5.5rem);font-weight:700;letter-spacing:-3px;line-height:1.2;text-align:center;margin:0;color:#1a3d5c;font-family:'Inter',sans-serif;">CAFÉ PREMIUM</h2>
-    </header>
-    
-    <section class="img-group-container" style="height:500vh;position:relative;">
-      <div style="position:sticky;top:0;overflow:hidden;height:100vh;">
-        <ul class="img-group" style="display:flex;list-style:none;padding:0;margin:0;">
-          <li class="img-container" style="display:flex;width:100vw;height:100vh;flex:0 0 auto;align-items:center;justify-content:center;flex-direction:column;">
-            <img src="img/CAFE_1.png" style="width:400px;height:500px;object-fit:cover;border-radius:15px;box-shadow:0 15px 35px rgba(26,61,92,0.2);" alt="Café Premium - Imagen 1" />
-            <h3 style="margin:0;font-size:clamp(2.5rem,6vw,4rem);font-weight:700;letter-spacing:-3px;line-height:1.2;position:relative;bottom:30px;display:inline-block;color:#1a3d5c;font-family:'Inter',sans-serif;">#001</h3>
-          </li>
-          <li class="img-container" style="display:flex;width:100vw;height:100vh;flex:0 0 auto;align-items:center;justify-content:center;flex-direction:column;">
-            <img src="img/CAFE_2.png" style="width:400px;height:500px;object-fit:cover;border-radius:15px;box-shadow:0 15px 35px rgba(26,61,92,0.2);" alt="Café Premium - Imagen 2" />
-            <h3 style="margin:0;font-size:clamp(2.5rem,6vw,4rem);font-weight:700;letter-spacing:-3px;line-height:1.2;position:relative;bottom:30px;display:inline-block;color:#1a3d5c;font-family:'Inter',sans-serif;">#002</h3>
-          </li>
-          <li class="img-container" style="display:flex;width:100vw;height:100vh;flex:0 0 auto;align-items:center;justify-content:center;flex-direction:column;">
-            <img src="img/CAFE_3.png" style="width:400px;height:500px;object-fit:cover;border-radius:15px;box-shadow:0 15px 35px rgba(26,61,92,0.2);" alt="Café Premium - Imagen 3" />
-            <h3 style="margin:0;font-size:clamp(2.5rem,6vw,4rem);font-weight:700;letter-spacing:-3px;line-height:1.2;position:relative;bottom:30px;display:inline-block;color:#1a3d5c;font-family:'Inter',sans-serif;">#003</h3>
-          </li>
-        </ul>
-      </div>
-    </section>
-    
-    <footer style="height:70vh;display:flex;justify-content:center;align-items:center;">
-      <p style="font-size:clamp(1.2rem,2.5vw,1.8rem);color:#4a7bb8;font-family:'Inter',sans-serif;font-weight:300;text-align:center;margin:0;">
-        Diseño de packaging creado por
-        <a target="_blank" href="mailto:cesardelvallefuentes@gmail.com" style="color:#1a3d5c;text-decoration:none;font-weight:500;border-bottom:2px solid #1a3d5c;padding-bottom:2px;">Cesar Del Valle</a>
-      </p>
-    </footer>
-  </article>
-  <div class="progress" style="position:fixed;left:0;right:0;height:5px;background:#1a3d5c;bottom:50px;transform:scaleX(0);transform-origin:left;"></div>
 
-  <footer style="position: relative; background: linear-gradient(135deg, #151a1f 0%, #1e252b 50%, #151a1f 100%); overflow: hidden; padding: 0;">
-    
-    <div style="position: relative; background: linear-gradient(135deg, #2a3a45 0%, #35424d 100%); padding: 4rem 0; overflow: hidden;">
-      
-      <div style="position: absolute; top: -10%; left: -5%; width: 120px; height: 120px; background: rgba(100, 149, 237, 0.08); border-radius: 50%; transform: rotate(45deg);"></div>
-      <div style="position: absolute; bottom: -8%; right: -3%; width: 90px; height: 90px; background: rgba(20, 25, 30, 0.3); border-radius: 15px; transform: rotate(-20deg);"></div>
-      <div style="position: absolute; top: 40%; right: 8%; width: 40px; height: 40px; background: rgba(100, 149, 237, 0.1); border-radius: 50%; animation: float-subtle 8s ease-in-out infinite;"></div>
-      
-      <div style="position: absolute; top: 25%; left: 15%; width: 6px; height: 6px; background: rgba(100, 149, 237, 0.4); border-radius: 50%; animation: float-dot-subtle 5s ease-in-out infinite;"></div>
-      <div style="position: absolute; top: 70%; left: 12%; width: 4px; height: 4px; background: rgba(100, 149, 237, 0.3); border-radius: 50%; animation: float-dot-subtle 4s ease-in-out infinite reverse;"></div>
-      <div style="position: absolute; bottom: 30%; right: 20%; width: 5px; height: 5px; background: rgba(100, 149, 237, 0.2); border-radius: 50%; animation: float-dot-subtle 6s ease-in-out infinite;"></div>
-      
-      <div class="project-footer-cta" style="max-width: 1400px; margin: 0 auto; padding: 0 5vw; display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center;">
+  <nav class="proj-next" aria-label="Siguiente proyecto" style="--ph-ink:#2c1922; --ph-bg:#ebdfe4; --pn-ink:#1f4a3d; --pn-accent:#2f7a5c;">
+    <div class="pn-wash" aria-hidden="true"></div>
+    <div class="pn-media" aria-hidden="true"><img src="img/MOCKUP_ATUN_02.webp" alt="" loading="lazy" decoding="async"></div>
+    <a class="proj-next-link" href="img3.html">
+      <span>
+        <span class="proj-next-eyebrow">Siguiente proyecto</span>
+        <span class="proj-next-title"><span class="pn-num">03</span>Catalalata</span>
+      </span>
+      <span class="proj-next-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+  </nav>
 
-        <div style="z-index: 2;">
-          <h2 style="font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: #6495ed; margin: 0 0 1rem 0; line-height: 1.1; letter-spacing: -0.01em;">¿Trabajamos juntos?</h2>
-          <p style="font-family: 'Inter', sans-serif; font-size: clamp(0.95rem, 1.3vw, 1.1rem); color: rgba(100, 149, 237, 0.8); margin: 0 0 2rem 0; line-height: 1.5; font-weight: 300; max-width: 420px;">Siempre estoy abierto a nuevos proyectos creativos y colaboraciones interesantes.</p>
-          
-          <a href="mailto:cesardelvallefuentes@gmail.com" class="cta-button-subtle email-link" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #6495ed; color: #1e252b; padding: 0.9rem 2rem; border-radius: 25px; text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden;" onclick="window.location.href='mailto:cesardelvallefuentes@gmail.com';">
-            <span style="z-index: 2;">Contactar</span>
-            <span style="z-index: 2; font-size: 1rem;">→</span>
-          </a>
-        </div>
-
-        <div class="project-footer-illustration" style="position: relative; width: 200px; height: 200px; z-index: 1;">
-
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 130px; height: 130px; background: linear-gradient(135deg, rgba(100, 149, 237, 0.2) 0%, rgba(100, 149, 237, 0.1) 100%); border-radius: 50% 25% 50% 25%; animation: morph-subtle 12s ease-in-out infinite; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);"></div>
-          
-          <div style="position: absolute; top: 40%; left: 45%; width: 12px; height: 12px; background: rgba(100, 149, 237, 0.6); border-radius: 50%; animation: bounce-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; top: 65%; left: 60%; width: 8px; height: 8px; background: rgba(100, 149, 237, 0.4); border-radius: 50%; animation: bounce-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-          <div style="position: absolute; top: 15%; right: 25%; width: 18px; height: 18px; background: rgba(100, 149, 237, 0.3); border-radius: 50%; animation: orbit-subtle 10s linear infinite;"></div>
-          <div style="position: absolute; bottom: 20%; left: 15%; width: 15px; height: 15px; background: rgba(100, 149, 237, 0.2); transform: rotate(45deg); animation: float-subtle 6s ease-in-out infinite reverse;"></div>
-          
-          <div style="position: absolute; top: 35%; left: 25%; width: 35px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(100, 149, 237, 0.3) 50%, transparent 100%); transform: rotate(30deg); animation: pulse-line-subtle 4s ease-in-out infinite;"></div>
-          <div style="position: absolute; bottom: 45%; right: 20%; width: 28px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(100, 149, 237, 0.2) 50%, transparent 100%); transform: rotate(-20deg); animation: pulse-line-subtle 3.5s ease-in-out infinite reverse;"></div>
-          
-        </div>
-        
-      </div>
-    </div>
-
-    <div style="background: #1e252b; padding: 2.5rem 5vw 1.5rem 5vw; position: relative;">
-      
-      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(100, 149, 237, 0.2) 25%, rgba(100, 149, 237, 0.4) 50%, rgba(100, 149, 237, 0.2) 75%, transparent 100%);"></div>
-      
-      <div style="max-width: 1400px; margin: 0 auto;">
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2rem;">
-          
-          <div>
-            <h3 style="color: #6495ed; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0 0 0.8rem 0; letter-spacing: 0.02em;">Cesar Del Valle</h3>
-            <p style="color: rgba(100, 149, 237, 0.8); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; line-height: 1.5; margin: 0 0 1.2rem 0;">Creative Director & 3D Artist especializado en experiencias audiovisuales.</p>
-            
-            <div style="display: flex; gap: 0.8rem;">
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(100, 149, 237, 0.1); border: 1px solid rgba(100, 149, 237, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(100, 149, 237, 0.8);">
-                  <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(100, 149, 237, 0.1); border: 1px solid rgba(100, 149, 237, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(100, 149, 237, 0.8);">
-                  <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="https://www.instagram.com/cesardelvallee/" target="_blank" class="social-subtle" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(100, 149, 237, 0.1); border: 1px solid rgba(100, 149, 237, 0.2); border-radius: 10px; text-decoration: none; transition: all 0.3s ease; position: relative;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: rgba(100, 149, 237, 0.8);">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2"/>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" stroke="currentColor" stroke-width="2"/>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <h4 style="color: #6495ed; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Navegación</h4>
-            <nav style="display: flex; flex-direction: column; gap: 0.6rem;">
-              <a href="index.html" class="footer-link-subtle" style="color: rgba(100, 149, 237, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Portfolio</a>
-              <a href="about.html" class="footer-link-subtle" style="color: rgba(100, 149, 237, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Sobre mí</a>
-              <a href="mailto:cesardelvallefuentes@gmail.com" class="footer-link-subtle" style="color: rgba(100, 149, 237, 0.7); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.01em; transition: all 0.3s ease; position: relative; display: inline-block; width: fit-content;">Contacto</a>
-            </nav>
-          </div>
-
-          <div>
-            <h4 style="color: #6495ed; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; margin: 0 0 1rem 0; letter-spacing: 0.02em;">Especialidades</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem;">
-              <li style="color: rgba(100, 149, 237, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(100, 149, 237, 0.5);">•</span>
-                Diseño 3D & Motion
-              </li>
-              <li style="color: rgba(100, 149, 237, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(100, 149, 237, 0.5);">•</span>
-                Spots audiovisuales
-              </li>
-              <li style="color: rgba(100, 149, 237, 0.7); font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; position: relative; padding-left: 1rem;">
-                <span style="position: absolute; left: 0; top: 0.1rem; color: rgba(100, 149, 237, 0.5);">•</span>
-                Experiencias digitales
-              </li>
-            </ul>
-          </div>
-          
-        </div>
-
-        <div style="border-top: 1px solid rgba(100, 149, 237, 0.15); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <div style="width: 5px; height: 5px; background: rgba(100, 149, 237, 0.4); border-radius: 50%; animation: pulse-gentle 3s ease-in-out infinite;"></div>
-            <p style="color: rgba(100, 149, 237, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">© 2025 Cesar Del Valle</p>
-          </div>
-          <p style="color: rgba(100, 149, 237, 0.6); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 300; margin: 0; letter-spacing: 0.01em;">Diseñado desde España</p>
-        </div>
-
-      </div>
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Tienes un proyecto en mente?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
     </div>
   </footer>
 
@@ -473,29 +307,24 @@
       window.location.href = 'index.html';
     });
 
-    gsap.registerPlugin(ScrollTrigger);
-
-    const scrollItems = document.querySelectorAll('.scroll-item');
-    
-    const scrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.classList.add('visible');
-          }, index * 150);
-        }
-      });
-    }, {
-      threshold: 0.3,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    
-    scrollItems.forEach(item => {
-      scrollObserver.observe(item);
-    });
+    /* Reveal de las secciones (campaña + spot). Si el observer no está
+       disponible o hay reduced-motion, los elementos quedan visibles. */
+    (function() {
+      var items = document.querySelectorAll('.gx-reveal');
+      if (!items.length) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) return;
+      items.forEach(function(el) { el.classList.add('gx-hidden'); });
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.remove('gx-hidden'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+      items.forEach(function(el) { io.observe(el); });
+    })();
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>
