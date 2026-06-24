@@ -23,7 +23,7 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/style.css?v=17">
   <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -95,9 +95,10 @@
       display: block;
     }
     /* en móvil mostramos el packaging completo (sin recorte agresivo) */
+    /* en móvil la bolsa llena la pantalla (cover recorta solo el margen vacío) */
     @media (max-width: 768px) {
-      .cafe-slide { box-sizing: border-box; padding: 13vw 7vw; }
-      .cafe-slide img { object-fit: contain; }
+      .cafe-slide { box-sizing: border-box; padding: 4vw 0; }
+      .cafe-slide img { object-fit: cover; }
     }
 
     /* Intro editorial de la colección (chicha) */
@@ -154,7 +155,7 @@
       <a href="index.html" class="top-bar-left back-top-link" id="home-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
       <div class="top-bar-right">CAFÉ PREMIUM</div>
     </div>
-  <section class="proj-hero" style="--ph-bg:#c4d1a8; --ph-ink:#2d4a1f; --ph-accent:#a87d22; --ph-line:rgba(45,74,31,0.18); --ph-num:'01'; --ph-img:url('img/CAFE_PACKAGING_EXTERIOR.png');">
+  <section class="proj-hero" style="--ph-bg:#c4d1a8; --ph-ink:#2d4a1f; --ph-accent:#a87d22; --ph-line:rgba(45,74,31,0.18); --ph-num:'01'; --ph-img:url('img/CAFE_PACKAGING_EXTERIOR_web.png');">
     <div class="proj-hero-inner">
       <div class="proj-hero-text">
         <p class="proj-eyebrow ph-rise" style="animation-delay:0.10s;"><span class="n">Project 01</span><span class="bar"></span>Branding &amp; Packaging</p>
@@ -169,7 +170,7 @@
       </div>
       <div class="proj-hero-visual ph-rise" style="animation-delay:0.30s;">
         <div class="ph-tilt">
-          <img src="img/CAFE_PACKAGING_EXTERIOR.png" alt="Coffee Rituals — packaging exterior">
+          <img src="img/CAFE_PACKAGING_EXTERIOR_web.png" alt="Coffee Rituals — packaging exterior">
         </div>
       </div>
     </div>
@@ -196,12 +197,12 @@
 
   <section class="cafe-scroll-container" aria-label="Galería del proyecto Coffee Rituals">
     <div class="cafe-scroll-wrapper">
-      <div class="cafe-slide"><img src="img/CAFE_1.png" alt="Coffee Rituals — pieza de packaging 1" /></div>
-      <div class="cafe-slide"><img src="img/CAFE_2.png" alt="Coffee Rituals — pieza de packaging 2" loading="lazy" decoding="async" /></div>
-      <div class="cafe-slide"><img src="img/CAFE_3.png" alt="Coffee Rituals — pieza de packaging 3" loading="lazy" decoding="async" /></div>
-      <div class="cafe-slide"><img src="img/CAFE_4.png" alt="Coffee Rituals — pieza de packaging 4" loading="lazy" decoding="async" /></div>
-      <div class="cafe-slide"><img src="img/CAFE_5.png" alt="Coffee Rituals — pieza de packaging 5" loading="lazy" decoding="async" /></div>
-      <div class="cafe-slide"><img src="img/CAFE_6.png" alt="Coffee Rituals — pieza de packaging 6" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_1_web.jpg" alt="Coffee Rituals — pieza de packaging 1" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_2_web.jpg" alt="Coffee Rituals — pieza de packaging 2" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_3_web.jpg" alt="Coffee Rituals — pieza de packaging 3" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_4_web.jpg" alt="Coffee Rituals — pieza de packaging 4" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_5_web.jpg" alt="Coffee Rituals — pieza de packaging 5" loading="lazy" decoding="async" /></div>
+      <div class="cafe-slide"><img src="img/CAFE_6_web.jpg" alt="Coffee Rituals — pieza de packaging 6" loading="lazy" decoding="async" /></div>
     </div>
   </section>
 

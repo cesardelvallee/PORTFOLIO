@@ -23,7 +23,7 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/style.css?v=17">
   <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,6 +35,7 @@
 
     /* Sección de vídeo (spot) con pin + scale al hacer scroll */
     #video-section { min-height: 500vh; background: #e8dab0; padding-bottom: 4rem; }
+    @media (max-width: 768px) { #video-section { min-height: 260vh; } }
     .video-figure {
       margin: 0;
       width: 100%;
@@ -237,7 +238,7 @@
 
   <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#2d4a1f; --pn-accent:#a87d22;">
     <div class="pn-wash" aria-hidden="true"></div>
-    <div class="pn-media" aria-hidden="true"><img src="img/CAFE_PACKAGING_EXTERIOR.png" alt="" loading="lazy" decoding="async"></div>
+    <div class="pn-media" aria-hidden="true"><img src="img/CAFE_PACKAGING_EXTERIOR_web.png" alt="" loading="lazy" decoding="async"></div>
     <a class="proj-next-link" href="img1.html">
       <span>
         <span class="proj-next-eyebrow">Volver al primero</span>
@@ -325,7 +326,7 @@
         {
           scale: 0.92,
           ease: "power3.out",
-          scrollTrigger: { trigger: "#video-section", start: "top top", end: "+=350%", scrub: 1.5 }
+          scrollTrigger: { trigger: "#video-section", start: "top top", end: (window.matchMedia && window.matchMedia('(max-width: 768px)').matches ? "+=160%" : "+=350%"), scrub: 1.5 }
         }
       );
     }

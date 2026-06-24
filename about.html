@@ -29,10 +29,22 @@
 
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=17">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Trayectoria — experiencia y formación */
+    .abx-path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 72px); }
+    .abx-path-block { border-top: 1px solid rgba(236, 230, 218, 0.16); padding-top: clamp(18px, 2.6vh, 30px); }
+    .abx-path-kicker { display: inline-block; font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: #c7b299; margin-bottom: clamp(0.7rem, 2vh, 1.1rem); }
+    .abx-path-org { font-family: 'Inter', sans-serif; font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 600; letter-spacing: -0.025em; color: #ece6da; margin: 0; line-height: 1.05; }
+    .abx-path-role { font-family: 'Inter', sans-serif; font-size: clamp(0.85rem, 1vw, 0.98rem); font-weight: 400; line-height: 1.55; color: rgba(236, 230, 218, 0.6); margin: 0.55rem 0 0; }
+    @media (max-width: 640px) {
+      .abx-path-grid { grid-template-columns: 1fr; gap: 0; }
+      .abx-path-block + .abx-path-block { margin-top: clamp(26px, 5vh, 44px); }
+    }
+  </style>
 </head>
 <body class="about-page">
 <div id="page-fx" aria-hidden="true"></div>
@@ -91,10 +103,30 @@
       </div>
     </div>
 
+    <!-- TRAYECTORIA — experiencia y formación -->
+    <section class="abx-section abx-path">
+      <header class="abx-sec-head">
+        <span class="abx-sec-idx">01 — Trayectoria</span>
+        <h2 class="abx-sec-title">Experiencia y formación</h2>
+      </header>
+      <div class="abx-path-grid">
+        <article class="abx-path-block">
+          <span class="abx-path-kicker">Experiencia</span>
+          <h3 class="abx-path-org">Interbrand</h3>
+          <p class="abx-path-role">Prácticas — Diseño gráfico</p>
+        </article>
+        <article class="abx-path-block">
+          <span class="abx-path-kicker">Formación</span>
+          <h3 class="abx-path-org">UDIT</h3>
+          <p class="abx-path-role">Diseño Multimedia y Gráfico — Universidad de Diseño, Innovación y Tecnología</p>
+        </article>
+      </div>
+    </section>
+
     <!-- TOOLBOX — barras de competencia -->
     <section class="abx-section abx-tools">
       <header class="abx-sec-head">
-        <span class="abx-sec-idx">01 — Toolbox</span>
+        <span class="abx-sec-idx">02 — Toolbox</span>
         <h2 class="abx-sec-title">Las herramientas del oficio</h2>
       </header>
       <div class="abx-bars">
@@ -134,7 +166,7 @@
     <!-- EXPERTISE -->
     <section class="abx-section abx-expertise">
       <header class="abx-sec-head">
-        <span class="abx-sec-idx">02 — Expertise</span>
+        <span class="abx-sec-idx">03 — Expertise</span>
         <h2 class="abx-sec-title">En qué puedo ayudarte</h2>
       </header>
       <ul class="abx-exp-list">
@@ -182,7 +214,7 @@
         </div>
         <div class="abx-fact">
           <span class="abx-fact-label">Education</span>
-          <span class="abx-fact-value">Multimedia &amp; Graphic Design Degree</span>
+          <span class="abx-fact-value">UDIT — Multimedia &amp; Graphic Design</span>
         </div>
         <div class="abx-fact">
           <span class="abx-fact-label">Availability</span>

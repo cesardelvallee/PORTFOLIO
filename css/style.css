@@ -4058,3 +4058,43 @@ body.about-page { background: #100f0d; }
 }
 
 
+/* ============================================================
+   PULIDO FINAL — detalles premium globales
+   selección · scrollbar · tap móvil · underline footer · marquee
+   ============================================================ */
+
+/* Selección de texto en tono cálido de la casa (no el azul del navegador) */
+::selection { background: rgba(46, 40, 32, 0.92); color: #f3ede1; }
+::-moz-selection { background: rgba(46, 40, 32, 0.92); color: #f3ede1; }
+
+/* Sin destello azul al tocar en móvil */
+a, button, [role="button"], .img-drag, .control-btn, .player-toggle, .top-bar-left {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrollbar fina y neutra que combina con cualquier fondo del sitio */
+html { scrollbar-width: thin; scrollbar-color: rgba(140, 120, 95, 0.5) transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 120, 95, 0.45);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(140, 120, 95, 0.72); background-clip: padding-box; }
+
+/* Underline animado en los enlaces del footer (coherente con el del mail) */
+.site-footer .sf-nav a { position: relative; }
+.site-footer .sf-nav a::after {
+  content: ''; position: absolute; left: 0; bottom: -4px;
+  width: 0; height: 1px; background: currentColor;
+  transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .site-footer .sf-nav a:hover::after { width: 100%; }
+  /* el marquee de proyecto se pausa al pasar el cursor (para poder leerlo) */
+  .proj-marquee:hover .proj-marquee-track { animation-play-state: paused; }
+}
+
+
