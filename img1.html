@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="css/style.css?v=17">
   <link rel="stylesheet" href="css/project.css?v=7">
   <link rel="stylesheet" href="css/dragme.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
@@ -40,6 +40,11 @@
       const slides = gsap.utils.toArray('.cafe-slide');
 
       if (!container || !wrapper || slides.length === 0) return;
+
+      /* En táctil el pin + scrub se siente torpe: carrusel nativo con
+         scroll-snap (gesto propio del sistema) en vez del scroll secuestrado. */
+      const coarse = (window.matchMedia && (window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches)) || window.innerWidth <= 768;
+      if (coarse) { container.classList.add('is-swipe'); return; }
 
       const getScrollAmount = () => {
         const wrapperWidth = wrapper.scrollWidth;
@@ -94,11 +99,31 @@
       object-fit: cover;
       display: block;
     }
-    /* en móvil mostramos el packaging completo (sin recorte agresivo) */
-    /* en móvil la bolsa llena la pantalla (cover recorta solo el margen vacío) */
-    @media (max-width: 768px) {
-      .cafe-slide { box-sizing: border-box; padding: 4vw 0; }
-      .cafe-slide img { object-fit: cover; }
+    /* Táctil: carrusel nativo con scroll-snap (la clase la pone el JS).
+       Tarjetas a 86vw con "peek" de la siguiente como pista de gesto. */
+    .cafe-scroll-container.is-swipe {
+      height: auto;
+      padding: clamp(12px, 2vh, 22px) 0 clamp(28px, 4vh, 44px);
+    }
+    .cafe-scroll-container.is-swipe .cafe-scroll-wrapper {
+      width: auto;
+      height: auto;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap: 12px;
+      padding: 0 7vw;
+      scrollbar-width: none;
+    }
+    .cafe-scroll-container.is-swipe .cafe-scroll-wrapper::-webkit-scrollbar { display: none; }
+    .cafe-scroll-container.is-swipe .cafe-slide {
+      width: 86vw;
+      height: min(62dvh, 118vw);
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 18px 44px -20px rgba(45, 74, 31, 0.4);
     }
 
     /* Intro editorial de la colección (chicha) */
@@ -136,10 +161,10 @@
       .proj-hero-visual img { max-height: 40dvh; }
       .proj-hero-text { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
       .proj-eyebrow { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.56rem, 1.3dvh, 0.72rem); }
-      .proj-title { margin: 0 0 clamp(0.3rem, 0.9dvh, 0.65rem); font-size: clamp(2rem, 6.2dvh, 3.1rem); line-height: 0.98; }
-      .proj-tagline { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.86rem, 2dvh, 1.15rem); line-height: 1.3; max-width: none; }
-      .proj-desc { margin: 0; font-size: clamp(0.74rem, 1.7dvh, 0.95rem); line-height: 1.42; }
-      .proj-meta { margin-top: clamp(0.5rem, 1.4dvh, 0.95rem); padding-top: clamp(0.65rem, 1.7dvh, 1.1rem); }
+      .proj-title { margin: 0 0 clamp(0.35rem, 1dvh, 0.7rem); font-size: clamp(2.25rem, 6.6dvh, 3.3rem); line-height: 0.96; }
+      .proj-tagline { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.9rem, 2.1dvh, 1.18rem); line-height: 1.32; max-width: none; }
+      .proj-desc { margin: 0; font-size: clamp(0.8rem, 1.8dvh, 1rem); line-height: 1.5; }
+      .proj-meta { margin-top: clamp(0.7rem, 1.8dvh, 1.1rem); padding-top: 0; }
     }
   </style>
 </head>

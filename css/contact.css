@@ -195,19 +195,70 @@
   .c-card--primary:hover { background: rgba(199, 178, 153, 0.15); }
 }
 
+/* ---------- Meta: copiar email + hora local ---------- */
+.contact-meta {
+  margin-top: clamp(28px, 5vh, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 22px;
+  flex-wrap: wrap;
+}
+
+.copy-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: 100px;
+  background: transparent;
+  border: 1px solid rgba(236, 230, 218, 0.18);
+  color: rgba(236, 230, 218, 0.72);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1),
+              border-color 0.35s ease, color 0.35s ease, background 0.35s ease;
+}
+.copy-email:active { transform: scale(0.96); }
+.copy-email .ce-ico { display: block; flex-shrink: 0; }
+.copy-email .ce-ico-check { display: none; }
+.copy-email.is-copied {
+  border-color: rgba(182, 199, 154, 0.55);
+  color: #b6c79a;
+}
+.copy-email.is-copied .ce-ico-copy { display: none; }
+.copy-email.is-copied .ce-ico-check { display: block; }
+
+@media (hover: hover) and (pointer: fine) {
+  .copy-email:hover {
+    border-color: rgba(199, 178, 153, 0.5);
+    color: #e6d8c0;
+    background: rgba(199, 178, 153, 0.07);
+  }
+}
+
 .contact-foot {
-  margin: clamp(28px, 5vh, 44px) 0 0 0;
+  margin: 0;
   font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   font-weight: 300;
   letter-spacing: 0.02em;
   color: rgba(236, 230, 218, 0.4);
 }
+.contact-foot #madrid-now {
+  color: rgba(236, 230, 218, 0.66);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---------- Entrance ---------- */
 .contact-intro,
 .c-card,
-.contact-foot {
+.contact-meta {
   opacity: 0;
   animation: c-rise 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
@@ -215,7 +266,7 @@
 .contact-cards .c-card:nth-child(1) { animation-delay: 0.16s; }
 .contact-cards .c-card:nth-child(2) { animation-delay: 0.26s; }
 .contact-cards .c-card:nth-child(3) { animation-delay: 0.36s; }
-.contact-foot { animation-delay: 0.48s; }
+.contact-meta { animation-delay: 0.48s; }
 
 @keyframes c-rise {
   from { opacity: 0; transform: translateY(26px); }
@@ -235,4 +286,7 @@
   .c-icon svg { width: 20px; height: 20px; }
   .c-value { font-size: 0.96rem; white-space: normal; word-break: break-word; }
   .c-label { font-size: 0.64rem; }
+  .contact-meta { flex-direction: column; align-items: flex-start; }
+  /* despeja el botón de menú flotante */
+  .contact-container { padding-bottom: 110px; }
 }

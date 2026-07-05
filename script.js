@@ -962,6 +962,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.body.classList.contains('about-page')) {
       sel = [
         '.abx-sec-head',
+        '.abx-path-block',
         '.abx-bar',
         '.abx-exp',
         '.abx-fact',
@@ -1061,6 +1062,98 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       requestAnimationFrame(loop);
     })();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   MENÚ GLOBAL — botón flotante + overlay de navegación.
+   Se inyecta aquí para que todas las páginas compartan una única
+   fuente de verdad. Los enlaces .html pasan por PageFX (cortina)
+   gracias al interceptor global de clics.
+   ============================================================ */
+(function() {
+  function init() {
+    if (document.getElementById('site-menu')) return;
+
+    var PAGES = [
+      { href: 'index.html',   label: 'Inicio' },
+      { href: 'about.html',   label: 'Sobre mí' },
+      { href: 'contact.html', label: 'Contacto' }
+    ];
+    var WORK = [
+      { href: 'img1.html', n: '01', t: 'Coffee Rituals',      c: 'Packaging' },
+      { href: 'img2.html', n: '02', t: 'Ottolinger × Mykita', c: '3D · Motion' },
+      { href: 'img3.html', n: '03', t: 'Catalalata',          c: 'Packaging' },
+      { href: 'img4.html', n: '04', t: 'El Rastrillo',        c: 'Campaña' },
+      { href: 'img5.html', n: '05', t: 'Loewe 001',           c: '3D · Spot' }
+    ];
+    var here = location.pathname.split('/').pop() || 'index.html';
+    function cur(href) { return href === here ? ' aria-current="page"' : ''; }
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'menu-btn';
+    btn.setAttribute('aria-label', 'Abrir menú');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'site-menu');
+    btn.innerHTML = '<span class="mb-ico" aria-hidden="true"></span>';
+    // en el index desktop la esquina inferior derecha es del reproductor
+    if (document.querySelector('.content-drag-area')) btn.classList.add('only-mobile');
+
+    var menu = document.createElement('nav');
+    menu.id = 'site-menu';
+    menu.setAttribute('aria-label', 'Menú del sitio');
+    menu.setAttribute('aria-hidden', 'true');
+
+    var html = '<div class="sm-grid"><div class="sm-primary"><span class="sm-label sm-anim">Menú</span>';
+    PAGES.forEach(function(p) {
+      html += '<a class="sm-link sm-anim" href="' + p.href + '"' + cur(p.href) + '>' + p.label + '</a>';
+    });
+    html += '</div><div class="sm-work"><span class="sm-label sm-anim">Selected work</span><div class="sm-work-list">';
+    WORK.forEach(function(w) {
+      html += '<a class="sm-proj sm-anim" href="' + w.href + '"' + cur(w.href) + '><span class="sm-n">' + w.n + '</span>' + w.t + '<span class="sm-cat">' + w.c + '</span></a>';
+    });
+    html += '</div></div></div>';
+    html += '<div class="sm-foot sm-anim">'
+      + '<a class="sm-mail" href="mailto:cesardelvallefuentes@gmail.com">cesardelvallefuentes@gmail.com</a>'
+      + '<div class="sm-social">'
+      + '<a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>'
+      + '<a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>'
+      + '</div></div>';
+    menu.innerHTML = html;
+
+    document.body.appendChild(menu);
+    document.body.appendChild(btn);
+
+    // stagger de entrada (el delay solo aplica al abrir; ver .sm-anim en CSS)
+    Array.prototype.forEach.call(menu.querySelectorAll('.sm-anim'), function(el, i) {
+      el.style.setProperty('--d', (140 + i * 45) + 'ms');
+    });
+
+    function isOpen() { return document.body.classList.contains('menu-open'); }
+    function setOpen(open) {
+      document.body.classList.toggle('menu-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+      menu.setAttribute('aria-hidden', String(!open));
+    }
+
+    btn.addEventListener('click', function() { setOpen(!isOpen()); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); }
+    });
+    // clic en la página actual: solo cierra el menú (sin recargar)
+    menu.addEventListener('click', function(e) {
+      var a = e.target.closest && e.target.closest('a');
+      if (a && a.getAttribute('aria-current') === 'page') {
+        e.preventDefault();
+        setOpen(false);
+      }
+    });
+    // si se vuelve por bfcache, que no quede abierto
+    window.addEventListener('pageshow', function() { setOpen(false); });
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
