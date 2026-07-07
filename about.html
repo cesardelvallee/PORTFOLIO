@@ -29,10 +29,11 @@
 
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=25">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/RETRATO.JPG">
   <style>
     /* Trayectoria — experiencia y formación */
     .abx-path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 72px); }
@@ -90,6 +91,13 @@
               <span>César Del Valle</span>
               <span>Spain · ’25</span>
             </figcaption>
+            <a class="abx-badge" href="contact.html" aria-label="Disponible para proyectos — ir a contacto">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <defs><path id="ab-circ" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs>
+                <text><textPath href="#ab-circ" textLength="276" lengthAdjust="spacingAndGlyphs">OPEN TO WORK · DISPONIBLE ·&#160;</textPath></text>
+              </svg>
+              <span class="ab-core" aria-hidden="true">↗</span>
+            </a>
           </figure>
         </div>
       </div>
@@ -239,6 +247,6 @@
 
   <div id="egg-cursor"></div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=18"></script>
 </body>
 </html>

@@ -23,10 +23,11 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=17">
-  <link rel="stylesheet" href="css/project.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=25">
+  <link rel="stylesheet" href="css/project.css?v=8">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/CAFE_PACKAGING_EXTERIOR_web.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
@@ -41,17 +42,20 @@
 
       if (!container || !wrapper || slides.length === 0) return;
 
-      /* En táctil el pin + scrub se siente torpe: carrusel nativo con
-         scroll-snap (gesto propio del sistema) en vez del scroll secuestrado. */
-      const coarse = (window.matchMedia && (window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches)) || window.innerWidth <= 768;
-      if (coarse) { container.classList.add('is-swipe'); return; }
-
       const getScrollAmount = () => {
         const wrapperWidth = wrapper.scrollWidth;
         return -(wrapperWidth - window.innerWidth);
       };
 
       gsap.set(wrapper, { x: 0 });
+
+      /* contador + línea de progreso de la galería (overlay editorial) */
+      const ui = document.createElement('div');
+      ui.className = 'cafe-ui';
+      ui.innerHTML = '<span class="cafe-count"><b>01</b>&nbsp;&mdash;&nbsp;0' + slides.length + '</span><span class="cafe-line"><i></i></span>';
+      container.appendChild(ui);
+      const cafeNum = ui.querySelector('b');
+      const cafeBar = ui.querySelector('.cafe-line i');
 
       gsap.to(wrapper, {
         x: getScrollAmount,
@@ -62,7 +66,13 @@
           scrub: 1,
           start: "top top",
           end: () => `+=${wrapper.scrollWidth - window.innerWidth}`,
-          invalidateOnRefresh: true
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const p = self.progress;
+            cafeBar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+            const n = 1 + Math.round(p * (slides.length - 1));
+            cafeNum.textContent = (n < 10 ? '0' : '') + n;
+          }
         }
       });
 
@@ -74,10 +84,46 @@
     .top-bar-left, .top-bar-right { color: #2d4a1f !important; }
 
     .cafe-scroll-container {
+      position: relative;
       width: 100%;
       height: 100dvh;
       overflow: hidden;
       background: #c4d1a8;
+    }
+    /* contador + línea de progreso (lo crea el JS en desktop) */
+    .cafe-ui {
+      position: absolute;
+      left: 6vw;
+      right: 6vw;
+      bottom: 30px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      pointer-events: none;
+    }
+    .cafe-count {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: #2d4a1f;
+      white-space: nowrap;
+    }
+    .cafe-count b { font-weight: 800; font-variant-numeric: tabular-nums; }
+    .cafe-line {
+      flex: 1;
+      height: 2px;
+      border-radius: 2px;
+      background: rgba(45, 74, 31, 0.2);
+      overflow: hidden;
+    }
+    .cafe-line i {
+      display: block;
+      height: 100%;
+      background: #2d4a1f;
+      transform: scaleX(0);
+      transform-origin: left;
     }
     .cafe-scroll-wrapper {
       display: flex;
@@ -99,31 +145,12 @@
       object-fit: cover;
       display: block;
     }
-    /* Táctil: carrusel nativo con scroll-snap (la clase la pone el JS).
-       Tarjetas a 86vw con "peek" de la siguiente como pista de gesto. */
-    .cafe-scroll-container.is-swipe {
-      height: auto;
-      padding: clamp(12px, 2vh, 22px) 0 clamp(28px, 4vh, 44px);
-    }
-    .cafe-scroll-container.is-swipe .cafe-scroll-wrapper {
-      width: auto;
-      height: auto;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap: 12px;
-      padding: 0 7vw;
-      scrollbar-width: none;
-    }
-    .cafe-scroll-container.is-swipe .cafe-scroll-wrapper::-webkit-scrollbar { display: none; }
-    .cafe-scroll-container.is-swipe .cafe-slide {
-      width: 86vw;
-      height: min(62dvh, 118vw);
-      flex: 0 0 auto;
-      scroll-snap-align: center;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 18px 44px -20px rgba(45, 74, 31, 0.4);
+    /* En móvil la bolsa llena la pantalla (cover recorta solo el margen
+       vacío) y el contador se separa de los botones flotantes */
+    @media (max-width: 768px) {
+      .cafe-slide { box-sizing: border-box; padding: 4vw 0; }
+      .cafe-slide img { object-fit: cover; }
+      .cafe-ui { left: 74px; right: 74px; bottom: 38px; }
     }
 
     /* Intro editorial de la colección (chicha) */
@@ -290,6 +317,6 @@
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=12"></script>
+  <script src="script.js?v=18"></script>
 </body>
 </html>

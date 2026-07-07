@@ -70,7 +70,7 @@
   gap: 22px;
   max-width: 1040px;
   margin: 0 auto;
-  padding: clamp(36px, 6vh, 60px) clamp(24px, 6vw, 80px);
+  padding: clamp(48px, 9vh, 84px) clamp(24px, 6vw, 80px);
   text-decoration: none;
   color: inherit;
 }
@@ -87,10 +87,10 @@
 .proj-next-title {
   display: block;
   font-family: 'Inter', sans-serif;
-  font-size: clamp(1.35rem, 3vw, 2rem);
-  font-weight: 600;
+  font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+  font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   margin: 0;
   transition: transform 0.5s var(--proj-ease);
 }
@@ -132,10 +132,26 @@
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+/* Táctil: sin hover no hay teaser — la imagen del próximo proyecto
+   pasa a ser un fondo atenuado permanente (presencia visual) */
+@media (hover: none), (pointer: coarse) {
+  .proj-next .pn-media {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    transform: none;
+    opacity: 0.14;
+    border-radius: 0;
+    box-shadow: none;
+    transition: none;
+  }
+}
 @media (max-width: 560px) {
-  .proj-next-link { padding: 36px 22px; gap: 16px; }
+  .proj-next-link { padding: 48px 22px; gap: 16px; }
   .proj-next-eyebrow { margin-bottom: 0.6rem; }
-  .proj-next-title { font-size: clamp(1.25rem, 6vw, 1.6rem); }
+  .proj-next-title { font-size: clamp(1.35rem, 6.4vw, 1.8rem); }
   .proj-next-arrow { width: 38px; height: 38px; }
 }
 

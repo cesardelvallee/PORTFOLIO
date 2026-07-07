@@ -112,6 +112,14 @@ body, html {
   overflow-y: auto;
   height: auto;
 }
+/* El scroll de página vive en <html>. El body NO debe ser un segundo
+   contenedor de scroll: con overflow auto, cualquier desborde visual
+   (p. ej. reveals con translateY aún ocultos) pinta una doble barra
+   y atasca la rueda. clip recorta sin crear scroll. */
+body {
+  overflow-x: clip;
+  overflow-y: visible;
+}
 body.about-page .hero-title,
 body.about-page .hero-subtitle {
   opacity: 1 !important;
@@ -892,7 +900,11 @@ body {
 }
 
 html, body {
+  /* clip con fallback hidden: en el body, hidden forzaría overflow-y:auto
+     y crearía una segunda barra de scroll (ver nota junto a la regla body
+     de más arriba). En html, clip computa a hidden y no cambia nada. */
   overflow-x: hidden;
+  overflow-x: clip;
   height: auto;
 }
 
@@ -3063,7 +3075,7 @@ select:focus-visible {
 }
 /* subtle warm wordmark centred on the curtain (only visible while it covers) */
 #page-fx::before {
-  content: 'CÉSAR DEL VALLE';
+  content: attr(data-label);  /* el JS pone la página actual o el destino */
   position: absolute;
   left: 0; right: 0; top: 50%;
   transform: translateY(-50%);
@@ -3073,6 +3085,15 @@ select:focus-visible {
   font-weight: 800;
   letter-spacing: 0.08em;
   color: rgba(236, 230, 218, 0.14);
+}
+/* filo cálido en el borde inferior: la línea que "barre" la pantalla
+   al cubrir y al revelar (viaja con la cortina, coste cero) */
+#page-fx::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 4px;
+  background: #c7b299;
 }
 
 
@@ -3386,6 +3407,28 @@ body.theme-light .hero-btn:hover {
   .proj-hero::before { font-size: 28vh; top: 1.5%; }
 }
 
+/* sello editorial al pie del hero: índice del proyecto (solo desktop;
+   en móvil el hero va justo de altura y las esquinas son de los botones).
+   A la izquierda, alineado con la columna: el centro es de la cue SCROLL. */
+@media (min-width: 901px) {
+  .proj-hero::after {
+    content: 'Nº ' var(--ph-num, '––') ' / 05';
+    position: absolute;
+    /* anclado al borde visible del viewport: el hero puede medir más de
+       100vh y un bottom quedaría bajo el pliegue */
+    top: calc(100dvh - 34px);
+    left: clamp(76px, 6vw, 90px);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--ph-ink, #2d4a1f);
+    opacity: 0.48;
+    pointer-events: none;
+  }
+}
+
 /* halo/glow detrás del producto (respira) */
 .proj-hero-visual::before {
   content: '';
@@ -3478,12 +3521,51 @@ body.theme-light .hero-btn:hover {
 .site-footer {
   background: #100f0d;
   color: #ece6da;
-  padding: clamp(60px, 9vh, 104px) clamp(24px, 6vw, 90px) 40px;
+  padding: clamp(60px, 9vh, 104px) clamp(24px, 6vw, 90px) clamp(96px, 14vh, 170px);
   position: relative;
   z-index: 2;
   text-align: center;
+  overflow: hidden;
 }
-.site-footer .sf-inner { max-width: 760px; margin: 0 auto; }
+/* marca de agua editorial: wordmark gigante en trazo, asomando abajo.
+   DOS CAPAS: los glifos de Inter tienen contornos internos que se
+   solapan (la pierna de la R, el ápice de la A…) y con text-stroke
+   esos cruces se dibujan. La capa ::after repite el texto RELLENO del
+   color del fondo encima del trazo: tapa los cruces internos y deja
+   visible solo la mitad exterior del contorno, limpia. */
+.site-footer::before,
+.site-footer::after {
+  content: 'CÉSAR DEL VALLE';
+  position: absolute;
+  left: 50%;
+  bottom: -0.24em;
+  transform: translateX(-50%) translateY(0.35em);
+  z-index: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(3.2rem, 10.2vw, 9.5rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/* capa 1: el trazo (color ya mezclado y opaco, sin dobles brillos) */
+.site-footer::before {
+  color: transparent;
+  -webkit-text-stroke: 2.5px #2d2b28;
+}
+/* capa 2: relleno del color del fondo que limpia el interior */
+.site-footer::after {
+  color: #100f0d;
+}
+/* asoma (sube) cuando el contenido del footer se revela al hacer scroll */
+.site-footer:has(.sf-inner.is-revealed)::before,
+.site-footer:has(.sf-inner.is-revealed)::after {
+  transform: translateX(-50%) translateY(0);
+}
+.site-footer .sf-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
 .site-footer .sf-eyebrow {
   font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
@@ -3578,6 +3660,8 @@ body.theme-light .hero-btn:hover {
   .proj-meta .m-label { display: inline; margin-bottom: 0; font-size: 0.54rem; }
   .proj-meta .m-value { display: inline; font-size: 0.72rem; }
   .site-footer .sf-nav { gap: 14px 18px; }
+  /* despeja los botones flotantes (atrás + menú) al final de la página */
+  .site-footer { padding-bottom: 96px; }
   .proj-marquee { padding: 8px 0; }
 }
 
@@ -3651,6 +3735,86 @@ body.theme-light .click-ripple { border-color: rgba(60, 50, 38, 0.55); }
   filter: none;
 }
 
+/* --- Cursor contextual: etiqueta dentro del halo ([data-cursor]) --- */
+#cursor-ring::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.32rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f3ede1;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#cursor-ring.has-label {
+  background-color: rgba(16, 15, 13, 0.82);
+  border-color: rgba(199, 178, 153, 0.35);
+}
+#cursor-ring.has-label::after { opacity: 1; }
+
+/* --- Titulares: reveal por palabras/letras enmascaradas (JS envuelve) ---
+   El padding + margen negativo agranda la caja de recorte para no cortar
+   ascendentes/descendentes con line-heights tan prietos como 0.85. */
+.tsplit-w {
+  display: inline-block;
+  overflow: hidden;
+  padding: 0.2em 0.06em 0.24em;
+  margin: -0.2em -0.06em -0.24em;
+}
+.tsplit-i {
+  display: inline-block;
+  transform: translateY(150%);
+  will-change: transform;
+}
+.tsplit-run .tsplit-i {
+  transform: translateY(0);
+  transition: transform var(--tdur, 850ms) cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--td, 0ms);
+}
+/* al trocear, el titular deja de usar su animación de bloque original */
+.is-split, .abx-hero-text > .is-split {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* las imágenes dentro de un reveal llegan un pelín ampliadas y "asientan"
+   al posarse (la transición ya la definen las galerías de cada página) */
+.gx-reveal.gx-hidden img { transform: scale(1.045); }
+
+/* --- Wipe de entrada del visual del hero (clases desde el JS) --- */
+.proj-hero-visual.ph-wipe { clip-path: inset(100% 0 0 0); }
+.proj-hero-visual.ph-wipe img,
+.proj-hero-visual.ph-wipe > video {
+  transform: scale(1.07);
+  transform-origin: 50% 88%;
+}
+.proj-hero-visual.ph-wipe-run {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.05s cubic-bezier(0.22, 0.61, 0.36, 1) 0.25s;
+}
+.proj-hero-visual.ph-wipe-run img,
+.proj-hero-visual.ph-wipe-run > video {
+  transform: none;
+  transition: transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1) 0.25s;
+}
+/* al terminar, sin clip: no debe recortar el glow ni el tilt 3D */
+.proj-hero-visual.ph-wipe-done { clip-path: none; transition: none; }
+
+/* tras aterrizar, las palabras del titular responden al cursor */
+.tsplit-done .tsplit-i {
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: 0ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tsplit-done .tsplit-w:hover .tsplit-i { transform: translateY(-5%); }
+}
+
 /* Ocultar extras de cursor en punteros táctiles / gruesos */
 @media (hover: none), (pointer: coarse) {
   #cursor-ring, .click-ripple { display: none !important; }
@@ -3665,6 +3829,7 @@ body.theme-light .click-ripple { border-color: rgba(60, 50, 38, 0.55); }
     filter: none !important;
     transition: none !important;
   }
+  .tsplit-i { transform: none !important; transition: none !important; }
 }
 
 /* ================================================
@@ -3675,7 +3840,10 @@ body.about-page { background: #100f0d; }
   background: #100f0d;
   color: #ece6da;
   min-height: 100vh;
+  /* clip, no hidden: hidden en un eje fuerza overflow-y:auto y crea una
+     segunda barra de scroll cuando los reveals (translateY) desbordan */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 @keyframes abx-rise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
@@ -3689,6 +3857,8 @@ body.about-page { background: #100f0d; }
   max-width: 1280px;
   margin: 0 auto;
   padding: clamp(118px, 17vh, 200px) clamp(24px, 6vw, 90px) clamp(56px, 9vh, 118px);
+  /* recorta el parallax de salida sin crear contenedor de scroll */
+  overflow: clip;
 }
 .abx-hero-inner {
   display: grid;
@@ -3815,6 +3985,61 @@ body.about-page { background: #100f0d; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(236, 230, 218, 0.4);
+}
+
+/* ---- Badge giratorio "open to work" (enlaza a contacto) ---- */
+.abx-badge {
+  position: absolute;
+  right: -28px;
+  bottom: 54px;
+  z-index: 2;
+  width: 116px;
+  height: 116px;
+  display: block;
+  border-radius: 50%;
+  background: #100f0d;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(199, 178, 153, 0.35);
+  cursor: none;
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.4s ease;
+}
+.abx-badge svg {
+  position: absolute;
+  inset: 8px;
+  overflow: visible;
+  animation: abx-badge-spin 16s linear infinite;
+}
+.abx-badge text {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  fill: #c7b299;
+}
+.abx-badge .ab-core {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ece6da;
+  font-size: 1.1rem;
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@keyframes abx-badge-spin { to { transform: rotate(360deg); } }
+.abx-badge:active { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) {
+  .abx-badge:hover {
+    transform: scale(1.06);
+    box-shadow: 0 24px 54px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(199, 178, 153, 0.6);
+  }
+  .abx-badge:hover svg { animation-play-state: paused; }
+  .abx-badge:hover .ab-core { transform: translate(2px, -2px); }
+}
+@media (max-width: 900px) {
+  .abx-badge { width: 94px; height: 94px; right: -10px; bottom: 42px; }
+  .abx-badge text { font-size: 12.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .abx-badge svg { animation: none !important; }
 }
 
 /* ---- Marquee del about (reutiliza .proj-marquee) ---- */
@@ -4177,11 +4402,12 @@ html { scrollbar-width: thin; scrollbar-color: rgba(140, 120, 95, 0.5) transpare
 .menu-btn .mb-ico::after { transform: translateY(2.5px); }
 body.menu-open .menu-btn .mb-ico::before { transform: translateY(-0.85px) rotate(45deg); }
 body.menu-open .menu-btn .mb-ico::after { transform: translateY(-0.85px) rotate(-45deg); }
-/* En el index desktop esa esquina es del reproductor: botón solo en móvil */
-.menu-btn.only-mobile { display: none; }
+/* En el index la esquina derecha es del reproductor: botón a la izquierda
+   (en las demás páginas esa esquina la ocupa el .back-btn) */
+.menu-btn.mb-left { right: auto; left: 28px; }
 @media (max-width: 768px) {
   .menu-btn { bottom: 20px; right: 16px; cursor: pointer; }
-  .menu-btn.only-mobile { display: flex; }
+  .menu-btn.mb-left { right: auto; left: 16px; }
 }
 
 /* ---- Overlay ---- */
@@ -4209,7 +4435,34 @@ body.menu-open #site-menu {
   transform: translateY(0);
   transition: transform 0.62s cubic-bezier(0.76, 0, 0.24, 1);
 }
-body.menu-open { overflow: hidden; }
+/* marca de agua en trazo al pie del menú (eco del footer; dos capas
+   como allí para tapar los cruces internos de los glifos de Inter) */
+#site-menu::before,
+#site-menu::after {
+  content: 'CÉSAR DEL VALLE';
+  position: absolute;
+  left: 50%;
+  bottom: -0.24em;
+  transform: translateX(-50%);
+  z-index: -1;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(3.2rem, 10.2vw, 9.5rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+#site-menu::before {
+  color: transparent;
+  -webkit-text-stroke: 2.5px #242320;
+}
+#site-menu::after {
+  color: #100f0d;
+}
+/* el scroll de página vive en <html>, así que el candado va ahí */
+html.menu-open { overflow: hidden; }
 
 .sm-grid {
   display: grid;
@@ -4368,6 +4621,97 @@ body.menu-open .sm-anim {
   body.menu-open #site-menu { opacity: 1; transition: opacity 0.25s ease; }
   .sm-anim { opacity: 1 !important; transform: none !important; transition: none !important; }
   .menu-btn .mb-ico::before, .menu-btn .mb-ico::after { transition: none; }
+  .sm-preview { display: none !important; }
+}
+
+/* preview flotante de proyecto en el menú (solo desktop; lo mueve el JS) */
+.sm-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: clamp(180px, 19vw, 264px);
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: clip;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  box-shadow: 0 30px 70px -18px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+.sm-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.08);
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.sm-preview.is-on { opacity: 1; }
+.sm-preview.is-on img { transform: scale(1); }
+
+
+/* ============================================================
+   DETALLES GLOBALES — footer meta + pausa de marquees offscreen
+   ============================================================ */
+
+/* marquees pausados fuera de pantalla (lo gestiona script.js) */
+.proj-marquee-track.is-paused,
+.cafe-ticker-track.is-paused,
+.film-marquee.is-paused { animation-play-state: paused !important; }
+
+/* fila meta del footer: hora local + volver arriba (inyectada) */
+.site-footer .sf-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  margin-top: 1.9rem;
+}
+.site-footer .sf-clock {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 218, 0.4);
+}
+.site-footer .sf-clock b {
+  font-weight: 600;
+  color: rgba(236, 230, 218, 0.72);
+  font-variant-numeric: tabular-nums;
+}
+.site-footer .sf-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 100px;
+  background: transparent;
+  border: 1px solid rgba(236, 230, 218, 0.16);
+  color: rgba(236, 230, 218, 0.62);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1),
+              border-color 0.35s ease, color 0.35s ease, background 0.35s ease;
+}
+.site-footer .sf-top svg { width: 13px; height: 13px; display: block; }
+.site-footer .sf-top:active { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) {
+  .site-footer .sf-top:hover {
+    border-color: rgba(199, 178, 153, 0.5);
+    color: #e6d8c0;
+    background: rgba(199, 178, 153, 0.07);
+  }
+}
+@media (max-width: 560px) {
+  .site-footer .sf-top { cursor: pointer; }
 }
 
 

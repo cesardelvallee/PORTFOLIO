@@ -2,12 +2,30 @@
 /* ============================================================
    PAGE TRANSITION (curtain) — fluid navigation between pages.
    Defined first so it works even if later scripts (GSAP) fail.
+   La cortina anuncia el DESTINO: al salir hacia una página, su
+   ::before muestra el nombre de donde vas (attr(data-label)).
    ============================================================ */
 (function() {
+  var LABELS = {
+    'index.html':   'CÉSAR DEL VALLE',
+    'about.html':   'SOBRE MÍ',
+    'contact.html': 'CONTACTO',
+    'img1.html':    'COFFEE RITUALS',
+    'img2.html':    'OTTOLINGER × MYKITA',
+    'img3.html':    'CATALALATA',
+    'img4.html':    'EL RASTRILLO',
+    'img5.html':    'LOEWE 001'
+  };
   function fx() { return document.getElementById('page-fx'); }
+  function setLabel(el, url) {
+    var file = (url || '').split(/[?#]/)[0].split('/').pop() || 'index.html';
+    el.setAttribute('data-label', LABELS[file] || 'CÉSAR DEL VALLE');
+  }
   window.PageFX = {
     reveal: function() {
       var el = fx(); if (!el) return;
+      // al llegar, la cortina lleva el nombre de la página actual
+      if (!el.getAttribute('data-label')) setLabel(el, location.pathname);
       requestAnimationFrame(function() { el.classList.add('fx-anim'); el.classList.add('fx-reveal'); });
     },
     leave: function(url) {
@@ -15,6 +33,7 @@
       if (!el) { window.location.href = url; return; }
       var done = false;
       var go = function() { if (done) return; done = true; window.location.href = url; };
+      setLabel(el, url); // la cortina cae con el nombre del destino
       el.classList.add('fx-anim');
       void el.offsetWidth;
       el.classList.remove('fx-reveal'); // drop the curtain to cover
@@ -137,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = document.querySelector('.hero-title');
     const btn = document.querySelector('.hero-btn');
     const subtitle = document.querySelector('.hero-subtitle');
+    if (!title || typeof gsap === 'undefined') return; // páginas sin hero de la home / sin GSAP
     gsap.set(title, {opacity: 0, y: 80, scale: 0.98, filter: 'blur(16px)', pointerEvents: 'none'});
     gsap.set(btn, {opacity: 0, y: 60, scale: 0.92, filter: 'blur(10px)'});
     gsap.set(subtitle, {opacity: 0, y: 40, scale: 0.98, filter: 'blur(10px)', visibility: 'hidden'});
@@ -191,24 +211,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // La burbuja "DRAG ME" solo existe en la home: guard para el resto de páginas
   const dragmeBubble = document.getElementById('dragme-bubble');
-  document.addEventListener('mousemove', e => {
-    const target = e.target;
-    if (target.classList && target.classList.contains('img-drag')) {
-      dragmeBubble.style.opacity = '1'; dragmeBubble.style.visibility = 'visible'; dragmeBubble.style.left = (e.clientX + 8) + 'px'; dragmeBubble.style.top = (e.clientY + 8) + 'px';
-    } else { dragmeBubble.style.opacity = '0'; dragmeBubble.style.visibility = 'hidden'; }
-  });
-
-  (function() {
-    const bubble = document.getElementById('dragme-bubble');
-    let isGrabbing = false;
-    document.addEventListener('mousedown', function(e) { if (e.target.classList.contains('img-drag')) { isGrabbing = true; } });
-    document.addEventListener('mouseup', function() { isGrabbing = false; });
-    document.addEventListener('mousemove', function(e) {
-      if (e.target.classList.contains('img-drag') || isGrabbing) { bubble.style.display = 'block'; bubble.style.left = (e.clientX + 8) + 'px'; bubble.style.top = (e.clientY + 8) + 'px'; } else { bubble.style.display = 'none'; }
+  if (dragmeBubble) {
+    document.addEventListener('mousemove', e => {
+      const target = e.target;
+      if (target.classList && target.classList.contains('img-drag')) {
+        dragmeBubble.style.opacity = '1'; dragmeBubble.style.visibility = 'visible'; dragmeBubble.style.left = (e.clientX + 8) + 'px'; dragmeBubble.style.top = (e.clientY + 8) + 'px';
+      } else { dragmeBubble.style.opacity = '0'; dragmeBubble.style.visibility = 'hidden'; }
     });
-  })();
+
+    (function() {
+      const bubble = dragmeBubble;
+      let isGrabbing = false;
+      document.addEventListener('mousedown', function(e) { if (e.target.classList && e.target.classList.contains('img-drag')) { isGrabbing = true; } });
+      document.addEventListener('mouseup', function() { isGrabbing = false; });
+      document.addEventListener('mousemove', function(e) {
+        if ((e.target.classList && e.target.classList.contains('img-drag')) || isGrabbing) { bubble.style.display = 'block'; bubble.style.left = (e.clientX + 8) + 'px'; bubble.style.top = (e.clientY + 8) + 'px'; } else { bubble.style.display = 'none'; }
+      });
+    })();
+  }
 });
+
+/* Draggables de la home — SOLO si GSAP + plugins están cargados (index).
+   En las demás páginas estos globals no existen y una ReferenceError aquí
+   mataría todo el JS posterior (cursor, reveals, tilt, menú…). */
+if (typeof gsap !== 'undefined' && typeof Draggable !== 'undefined' && typeof InertiaPlugin !== 'undefined') {
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
 
@@ -256,6 +284,8 @@ class DraggableImg {
 }
 
 let draggables = gsap.utils.toArray(".img-drag").map(el => new DraggableImg(el));
+
+}
 
 window.addEventListener('DOMContentLoaded', function() {
   const canvas = document.getElementById('animated-bg-canvas');
@@ -719,7 +749,8 @@ document.addEventListener('DOMContentLoaded', function() {});
 
   function showNotification(message) { const notification = document.createElement('div'); notification.style.cssText = `position: fixed; bottom: 90px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.75rem; z-index: 4000; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);`; notification.textContent = message; document.body.appendChild(notification); setTimeout(() => notification.style.opacity = '1', 10); setTimeout(() => { notification.style.opacity = '0'; setTimeout(() => notification.remove(), 300); }, 3000); }
 
-  document.addEventListener('DOMContentLoaded', () => { setTimeout(initPlayer, 500); });
+  // El reproductor solo existe en la home: en el resto de páginas no se inicializa
+  document.addEventListener('DOMContentLoaded', () => { if (musicWidget && audio) setTimeout(initPlayer, 500); });
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -927,8 +958,12 @@ document.addEventListener('DOMContentLoaded', function() {
       mx = e.clientX; my = e.clientY;
       if (!shown) { shown = true; ring.classList.add('is-visible'); }
       var hot = e.target.closest && e.target.closest(HOT);
-      ring.classList.toggle('is-hot', !!hot);
-      if (targetS !== 0.8) targetS = hot ? 1.4 : 1;
+      // etiqueta contextual: el halo crece y muestra el texto de [data-cursor]
+      var lab = e.target.closest && e.target.closest('[data-cursor]');
+      if (lab) ring.setAttribute('data-label', lab.getAttribute('data-cursor') || '');
+      ring.classList.toggle('has-label', !!lab);
+      ring.classList.toggle('is-hot', !!hot && !lab);
+      if (targetS !== 0.8) targetS = lab ? 2 : (hot ? 1.4 : 1);
     }, { passive: true });
 
     document.documentElement.addEventListener('mouseleave', function() { ring.classList.remove('is-visible'); });
@@ -944,7 +979,8 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() { if (r.parentNode) r.parentNode.removeChild(r); }, 640);
     });
     document.addEventListener('mouseup', function() {
-      targetS = ring.classList.contains('is-hot') ? 1.4 : 1;
+      targetS = ring.classList.contains('has-label') ? 2
+              : ring.classList.contains('is-hot') ? 1.4 : 1;
     });
 
     (function loop() {
@@ -1099,8 +1135,8 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-controls', 'site-menu');
     btn.innerHTML = '<span class="mb-ico" aria-hidden="true"></span>';
-    // en el index desktop la esquina inferior derecha es del reproductor
-    if (document.querySelector('.content-drag-area')) btn.classList.add('only-mobile');
+    // en el index la esquina derecha es del reproductor: botón a la izquierda
+    if (document.querySelector('.content-drag-area')) btn.classList.add('mb-left');
 
     var menu = document.createElement('nav');
     menu.id = 'site-menu';
@@ -1132,9 +1168,68 @@ document.addEventListener('DOMContentLoaded', function() {
       el.style.setProperty('--d', (140 + i * 45) + 'ms');
     });
 
+    var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // botón magnético (mismo factor que .back-btn; se inyecta tarde y no
+    // llega al binding del bloque de micro-interacciones)
+    if (fine) {
+      btn.addEventListener('mousemove', function(e) {
+        var r = btn.getBoundingClientRect();
+        var mx = e.clientX - (r.left + r.width / 2);
+        var my = e.clientY - (r.top + r.height / 2);
+        btn.style.transform = 'translate(' + (mx * 0.25).toFixed(1) + 'px,' + (my * 0.25).toFixed(1) + 'px)';
+      });
+      btn.addEventListener('mouseleave', function() { btn.style.transform = ''; });
+    }
+
+    // preview flotante del proyecto al pasar por "Selected work" (solo desktop)
+    if (fine && !reduce) {
+      var PREVIEWS = {
+        'img1.html': 'img/CAFE_BOLSAS_web.jpg',
+        'img2.html': 'img/POSTER_GAFAS_1_web.jpg',
+        'img3.html': 'img/MOCKUP_ATUN_02.webp',
+        'img4.html': 'img/RASTRILLO_INSTASTORIE2.webp',
+        'img5.html': 'img/WhatsApp-Image-2025-09-24-at-15.47.46.webp'
+      };
+      var prev = document.createElement('div');
+      prev.className = 'sm-preview';
+      prev.setAttribute('aria-hidden', 'true');
+      var pimg = document.createElement('img');
+      pimg.alt = '';
+      pimg.decoding = 'async';
+      prev.appendChild(pimg);
+      menu.appendChild(prev);
+
+      var px = 0, py = 0, vx = -1e4, vy = 0;
+      menu.addEventListener('mousemove', function(e) { px = e.clientX; py = e.clientY; }, { passive: true });
+      Array.prototype.forEach.call(menu.querySelectorAll('.sm-proj'), function(a) {
+        a.addEventListener('mouseenter', function() {
+          var src = PREVIEWS[a.getAttribute('href')];
+          if (!src) return;
+          if (pimg.getAttribute('src') !== src) pimg.setAttribute('src', src);
+          prev.classList.add('is-on');
+        });
+        a.addEventListener('mouseleave', function() { prev.classList.remove('is-on'); });
+      });
+      (function pvLoop() {
+        if (document.body.classList.contains('menu-open')) {
+          if (vx < -9000) { vx = px; vy = py; }  // primer frame: sin viaje desde 0,0
+          vx += (px - vx) * 0.16;
+          vy += (py - vy) * 0.16;
+          prev.style.transform = 'translate(' + (vx + 28).toFixed(1) + 'px,' + (vy - 96).toFixed(1) + 'px)';
+        } else {
+          vx = -1e4;
+        }
+        requestAnimationFrame(pvLoop);
+      })();
+    }
+
     function isOpen() { return document.body.classList.contains('menu-open'); }
     function setOpen(open) {
       document.body.classList.toggle('menu-open', open);
+      // candado de scroll en <html>, que es el contenedor que scrollea
+      document.documentElement.classList.toggle('menu-open', open);
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
       menu.setAttribute('aria-hidden', String(!open));
@@ -1158,3 +1253,379 @@ document.addEventListener('DOMContentLoaded', function() {
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
 })();
+
+/* ============================================================
+   HERO — salida con parallax al hacer scroll (proyectos + about).
+   El contenido del hero "se queda atrás" y se funde al salir.
+   Solo transform/opacity, escritorio con hover, sin reduced-motion.
+   El .proj-hero ya recorta (overflow hidden); .abx-hero usa clip.
+   ============================================================ */
+(function() {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (reduce || !fine) return;
+
+  function init() {
+    var hero = document.querySelector('.proj-hero') || document.querySelector('.abx-hero');
+    if (!hero) return;
+    var inner = hero.querySelector('.proj-hero-inner') || hero.querySelector('.abx-hero-inner');
+    if (!inner) return;
+
+    var h = 1, cur = 0;
+    function measure() { h = Math.max(1, hero.offsetHeight); }
+    measure();
+    window.addEventListener('resize', measure);
+
+    (function loop() {
+      var sc = Math.min(Math.max(window.scrollY, 0), h);
+      cur += ((sc * 0.24) - cur) * 0.12;
+      var p = Math.min(1, sc / h);
+      inner.style.transform = 'translateY(' + cur.toFixed(2) + 'px)';
+      inner.style.opacity = (1 - p * 0.55).toFixed(3);
+      requestAnimationFrame(loop);
+    })();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   ABOUT — count-up de los números del toolbox al revelarse.
+   Acompaña al llenado de la barra (misma duración y curva).
+   ============================================================ */
+(function() {
+  function init() {
+    if (!document.body.classList.contains('about-page')) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return;
+
+    var bars = document.querySelectorAll('.abx-bar');
+    if (!bars.length) return;
+
+    function countUp(num) {
+      var target = parseInt(num.textContent, 10);
+      if (!target) return;
+      var t0 = null;
+      var DUR = 1150;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        var t = Math.min(1, (ts - t0) / DUR);
+        var eased = 1 - Math.pow(1 - t, 3); // ease-out cúbico, como la barra
+        num.textContent = Math.round(target * eased);
+        if (t < 1) requestAnimationFrame(step);
+      }
+      num.textContent = '0';
+      requestAnimationFrame(step);
+    }
+
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(en) {
+        if (!en.isIntersecting) return;
+        var num = en.target.querySelector('.abx-bar-num');
+        if (num && !en.target.__counted) { en.target.__counted = true; countUp(num); }
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.4 });
+    bars.forEach(function(b) { io.observe(b); });
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   RENDIMIENTO — pausa marquees y vídeos autoplay fuera de
+   pantalla (nada visible cambia; se ahorra CPU/batería).
+   ============================================================ */
+(function() {
+  function init() {
+    if (!('IntersectionObserver' in window)) return;
+
+    var tracks = document.querySelectorAll('.proj-marquee-track, .cafe-ticker-track, .film-marquee');
+    if (tracks.length) {
+      var iom = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          en.target.classList.toggle('is-paused', !en.isIntersecting);
+        });
+      }, { rootMargin: '90px 0px' });
+      tracks.forEach(function(t) { iom.observe(t); });
+    }
+
+    var vids = document.querySelectorAll('video[autoplay]');
+    if (vids.length) {
+      var iov = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          var v = en.target;
+          if (en.isIntersecting) {
+            var p = v.play();
+            if (p && p.catch) p.catch(function() {});
+          } else {
+            v.pause();
+          }
+        });
+      }, { rootMargin: '140px 0px' });
+      vids.forEach(function(v) { iov.observe(v); });
+    }
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   FOOTER — fila meta inyectada: hora local de Madrid + volver
+   arriba. Solo en páginas con .site-footer (proyectos).
+   ============================================================ */
+(function() {
+  function init() {
+    var inner = document.querySelector('.site-footer .sf-inner');
+    if (!inner || inner.querySelector('.sf-meta')) return;
+
+    var row = document.createElement('div');
+    row.className = 'sf-meta';
+    row.innerHTML =
+      '<span class="sf-clock">Madrid · <b>--:--</b></span>' +
+      '<button type="button" class="sf-top">Volver arriba' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>' +
+      '</button>';
+    inner.insertBefore(row, inner.querySelector('.sf-copy'));
+
+    var b = row.querySelector('.sf-clock b');
+    if (window.Intl && Intl.DateTimeFormat) {
+      var fmt = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
+      var tick = function() { b.textContent = fmt.format(new Date()); };
+      tick();
+      setInterval(tick, 30000);
+    }
+
+    row.querySelector('.sf-top').addEventListener('click', function() {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   TITULARES — reveal por palabras/letras con máscara (heroes).
+   Progresivo: si no corre (reduced-motion, sin JS), el titular
+   conserva su animación de bloque original o queda visible.
+   ============================================================ */
+(function() {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  /* envuelve cada palabra (o letra) en una máscara .tsplit-w > .tsplit-i,
+     respetando la estructura interna (em, strong…) del titular */
+  function wrapWords(root, mode) {
+    var count = 0;
+    function mask(text) {
+      var w = document.createElement('span');
+      w.className = 'tsplit-w';
+      var i = document.createElement('span');
+      i.className = 'tsplit-i';
+      i.setAttribute('data-ti', count++);
+      i.textContent = text;
+      w.appendChild(i);
+      return w;
+    }
+    function walk(node) {
+      if (node.nodeType === 3) {
+        if (!node.textContent.trim()) return;
+        var frag = document.createDocumentFragment();
+        node.textContent.split(/(\s+)/).forEach(function(part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          if (mode === 'letter') {
+            var word = document.createElement('span');
+            word.style.whiteSpace = 'nowrap';
+            part.split('').forEach(function(ch) { word.appendChild(mask(ch)); });
+            frag.appendChild(word);
+          } else {
+            frag.appendChild(mask(part));
+          }
+        });
+        node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === 1 && !node.classList.contains('tsplit-w')) {
+        Array.prototype.slice.call(node.childNodes).forEach(walk);
+      }
+    }
+    Array.prototype.slice.call(root.childNodes).forEach(walk);
+    return count;
+  }
+
+  function split(el, mode, base, step, dur) {
+    if (!el || el.classList.contains('is-split')) return;
+    var n = wrapWords(el, mode);
+    if (!n) return;
+    Array.prototype.forEach.call(el.querySelectorAll('.tsplit-i'), function(i) {
+      i.style.setProperty('--td', (base + (parseInt(i.getAttribute('data-ti'), 10) || 0) * step) + 'ms');
+      i.style.setProperty('--tdur', dur + 'ms');
+    });
+    el.classList.add('is-split');
+    // doble rAF: el estado oculto se pinta antes de disparar la transición
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { el.classList.add('tsplit-run'); });
+    });
+    // cuando la última palabra aterriza, las palabras pasan a responder
+    // al cursor (transición corta, sin los delays de entrada)
+    setTimeout(function() { el.classList.add('tsplit-done'); }, base + n * step + dur + 80);
+  }
+
+  function init() {
+    split(document.querySelector('.proj-title'), 'word', 160, 70, 850);
+    split(document.querySelector('.abx-name'), 'word', 140, 95, 900);
+    split(document.querySelector('.contact-title'), 'letter', 110, 30, 750);
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   WIPE DEL HERO — el visual del proyecto se revela con una máscara
+   que sube (clip-path, compositable) mientras la foto asienta de
+   1.07 a 1. Sustituye al ph-rise del visual; el parallax se arma
+   igualmente por su red de seguridad de 1700 ms.
+   ============================================================ */
+(function() {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  function init() {
+    var v = document.querySelector('.proj-hero-visual');
+    if (!v) return;
+    v.style.animation = 'none';        // el wipe reemplaza su ph-rise
+    v.classList.add('ph-wipe');
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { v.classList.add('ph-wipe-run'); });
+    });
+    // al terminar, fuera el clip (no debe recortar el glow ni el tilt)
+    v.addEventListener('transitionend', function te(e) {
+      if (e.target !== v) return;
+      v.classList.add('ph-wipe-done');
+      v.removeEventListener('transitionend', te);
+    });
+    setTimeout(function() { v.classList.add('ph-wipe-done'); }, 1800);
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   MARQUESINAS VIVAS — las bandas .proj-marquee-track pasan a
+   moverse por JS y aceleran con la velocidad del scroll (se
+   sienten conectadas a la mano). Con reduced-motion no corre y
+   queda la animación CSS (que el reduce global ya detiene).
+   ============================================================ */
+(function() {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  function init() {
+    var tracks = document.querySelectorAll('.proj-marquee-track');
+    if (!tracks.length) return;
+
+    var items = Array.prototype.map.call(tracks, function(t) {
+      t.style.animation = 'none';      // JS toma el control
+      var it = { el: t, x: 0, w: 0, hover: false };
+      var parent = t.closest('.proj-marquee') || t;
+      parent.addEventListener('mouseenter', function() { it.hover = true; });
+      parent.addEventListener('mouseleave', function() { it.hover = false; });
+      return it;
+    });
+    function measure() {
+      items.forEach(function(it) { it.w = it.el.scrollWidth / 2; });
+    }
+    measure();
+    window.addEventListener('resize', measure, { passive: true });
+
+    var lastY = window.scrollY || 0, vel = 0, lastT = 0;
+    (function loop(ts) {
+      var dt = lastT ? Math.min(48, ts - lastT) : 16;
+      lastT = ts;
+      var y = window.scrollY || 0;
+      vel += ((y - lastY) - vel) * 0.12;    // suavizado
+      lastY = y;
+      items.forEach(function(it) {
+        if (!it.w) return;
+        // base ≈ paridad con la animación CSS (w/2 en 24 s) + boost por scroll
+        var base = it.w / 24000;                        // px por ms
+        var boost = Math.min(2.5, Math.abs(vel) * 0.05); // hasta ~3.5× al scrollear
+        var speed = it.hover ? 0 : base * (1 + boost);
+        it.x -= speed * dt;
+        if (it.x <= -it.w) it.x += it.w;
+        it.el.style.transform = 'translate3d(' + it.x.toFixed(1) + 'px,0,0)';
+      });
+      requestAnimationFrame(loop);
+    })(0);
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   PARALLAX DE SCROLL — el visual del hero y los números fantasma
+   se desplazan un poco más lento que la página (profundidad).
+   Solo desktop con puntero fino y sin reduced-motion. Transform
+   directo sobre cada elemento (GPU) e interrumpible por diseño.
+   ============================================================ */
+(function() {
+  function mq(q) { return window.matchMedia && window.matchMedia(q).matches; }
+  function init() {
+    if (mq('(prefers-reduced-motion: reduce)')) return;
+    if (mq('(hover: none)') || mq('(pointer: coarse)') || window.innerWidth <= 900) return;
+
+    var hero = document.querySelector('.proj-hero');
+    var heroV = document.querySelector('.proj-hero-visual');
+    var bgnums = document.querySelectorAll('.gx-bgnum');
+    if (!(hero && heroV) && !bgnums.length) return;
+
+    var items = [];
+    // números gigantes de fondo (mantienen su translateY(-50%) propio)
+    Array.prototype.forEach.call(bgnums, function(el) {
+      items.push({ el: el, box: el.parentElement, speed: 0.13, base: 'translateY(-50%) ' });
+    });
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      items.forEach(function(it) {
+        var r = it.box.getBoundingClientRect();
+        if (r.bottom < -80 || r.top > vh + 80) return;   // fuera de vista
+        var d = (r.top + r.height / 2) - vh / 2;          // distancia al centro
+        // signo negativo: el elemento "se queda atrás" respecto al scroll
+        it.el.style.transform = it.base + 'translate3d(0,' + (-d * it.speed).toFixed(1) + 'px,0)';
+      });
+    }
+    function tick() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener('scroll', tick, { passive: true });
+    window.addEventListener('resize', tick, { passive: true });
+
+    // el visual del hero entra cuando termina su ph-rise: la animación
+    // (fill both) pisaría el transform inline mientras siga aplicada
+    if (hero && heroV) {
+      var armed = false;
+      var arm = function(e) {
+        if (armed) return;
+        if (e && e.animationName && e.animationName !== 'ph-rise') return;
+        armed = true;
+        heroV.style.animation = 'none';
+        items.push({ el: heroV, box: hero, speed: 0.09, base: '' });
+        update();
+      };
+      heroV.addEventListener('animationend', arm);
+      setTimeout(arm, 1700);   // red de seguridad (bfcache / animación perdida)
+    }
+    update();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* Firma en consola (guiño profesional, inofensivo) */
+try {
+  console.log(
+    '%cCésar Del Valle %c— Graphic Designer\n%cBranding · Packaging · 3D · Motion   ·   cesardelvallefuentes@gmail.com',
+    'font:800 14px Inter,sans-serif;color:#c7b299;',
+    'font:300 14px Inter,sans-serif;color:#8d857a;',
+    'font:400 11px Inter,sans-serif;color:#8d857a;'
+  );
+} catch (e) {}

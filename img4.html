@@ -23,10 +23,11 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=17">
-  <link rel="stylesheet" href="css/project.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=25">
+  <link rel="stylesheet" href="css/project.css?v=8">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/RASTRILLO_INSTASTORIE2_web.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
@@ -277,11 +278,13 @@
     // Lightbox: ampliar moodboard al hacer clic
     document.querySelectorAll('.minimal-card img').forEach(function(img) {
       img.style.cursor = 'none';
+      img.setAttribute('data-cursor', 'Ampliar');   // etiqueta en el halo del cursor
       img.addEventListener('click', function(e) {
         e.stopPropagation();
 
         const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(16,15,13,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.3s ease;';
+        overlay.setAttribute('data-cursor', 'Cerrar');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(16,15,13,0.94);z-index:9400;display:flex;align-items:center;justify-content:center;cursor:none;opacity:0;transition:opacity 0.3s ease;';
 
         const expandedImg = document.createElement('img');
         expandedImg.src = this.src;
@@ -310,6 +313,6 @@
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=12"></script>
+  <script src="script.js?v=18"></script>
 </body>
 </html>

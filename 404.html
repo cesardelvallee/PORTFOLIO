@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Página no encontrada — César Del Valle, graphic designer.">
+  <meta name="author" content="César Del Valle">
+  <meta name="theme-color" content="#100f0d">
+  <title>404 — Página no encontrada · César Del Valle</title>
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=25">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body.nf-page { background: #100f0d; }
+    .nf {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 96px 24px 120px;
+      color: #ece6da;
+      text-align: center;
+    }
+    .nf-inner { max-width: 720px; }
+    .nf-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(236, 230, 218, 0.5);
+      margin: 0 0 1.4rem;
+    }
+    .nf-eyebrow::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #c7b299;
+    }
+    .nf-title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(6.5rem, 26vw, 13rem);
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      line-height: 0.82;
+      margin: 0 0 1.6rem;
+      color: #ece6da;
+    }
+    .nf-title em { font-style: normal; font-weight: 200; color: #c7b299; }
+    .nf-lead {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.95rem, 1.3vw, 1.08rem);
+      font-weight: 300;
+      line-height: 1.65;
+      color: rgba(236, 230, 218, 0.6);
+      max-width: 42ch;
+      margin: 0 auto 2.4rem;
+      text-wrap: balance;
+    }
+    .nf-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px 26px;
+      flex-wrap: wrap;
+    }
+    .nf-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 24px;
+      border-radius: 100px;
+      border: 1px solid rgba(199, 178, 153, 0.4);
+      background: rgba(199, 178, 153, 0.08);
+      color: #ece6da;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: none;
+      transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1),
+                  background 0.35s ease, border-color 0.35s ease;
+    }
+    .nf-home:active { transform: scale(0.96); }
+    .nf-work {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(236, 230, 218, 0.55);
+      text-decoration: none;
+      cursor: none;
+      position: relative;
+      padding-bottom: 4px;
+      transition: color 0.3s ease;
+    }
+    .nf-work::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 100%; height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .nf-home:hover { background: rgba(199, 178, 153, 0.16); border-color: rgba(199, 178, 153, 0.65); }
+      .nf-work:hover { color: #c7b299; }
+      .nf-work:hover::after { transform: scaleX(1); }
+    }
+    /* entrada escalonada */
+    .nf-inner > * { opacity: 0; animation: nf-rise 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    .nf-eyebrow { animation-delay: 0.05s; }
+    .nf-title { animation-delay: 0.12s; }
+    .nf-lead { animation-delay: 0.22s; }
+    .nf-actions { animation-delay: 0.32s; }
+    @keyframes nf-rise {
+      from { opacity: 0; transform: translateY(26px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .nf-inner > * { opacity: 1; animation: none; }
+    }
+  </style>
+</head>
+<body class="nf-page">
+<div id="page-fx" aria-hidden="true"></div>
+<script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar-left nav-link back-top-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
+    <div class="top-bar-center"></div>
+    <div class="top-bar-right">
+      <a href="contact.html" class="contact-link nav-link">CONTACT ME</a>
+    </div>
+  </div>
+
+  <main class="nf">
+    <div class="nf-inner">
+      <p class="nf-eyebrow">Error 404</p>
+      <h1 class="nf-title">4<em>0</em>4</h1>
+      <p class="nf-lead">Esta página no existe — o se perdió en el proceso creativo. El trabajo de verdad está a un clic.</p>
+      <div class="nf-actions">
+        <a class="nf-home" href="index.html">Volver al inicio</a>
+        <a class="nf-work" href="img1.html">Ver los proyectos</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="egg-cursor"></div>
+  <script src="script.js?v=18"></script>
+</body>
+</html>
