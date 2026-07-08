@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <link rel="stylesheet" href="css/project.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=32">
+  <link rel="stylesheet" href="css/project.css?v=10">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -77,7 +77,7 @@
     }
 
     /* secciones del proyecto — oscuro editorial */
-    .gx-section { padding: clamp(78px, 13vh, 168px) clamp(24px, 6vw, 80px); }
+    .gx-section { padding: clamp(84px, 15vh, 190px) clamp(24px, 6vw, 90px); }
     .gx-inner { max-width: 1180px; margin: 0 auto; }
     .gx-head { margin-bottom: clamp(34px, 6vh, 64px); }
     .gx-eyebrow {
@@ -97,8 +97,64 @@
       color: color-mix(in srgb, var(--ph-ink, #ebdfe4) 70%, transparent);
     }
 
-    /* campaña — tríptico de pósters */
-    .campaign { background: #48293a; }
+    /* campaña — tríptico de pósters (aprieta el hueco con la ficha) */
+    .campaign { background: #48293a; padding-bottom: clamp(48px, 9vh, 120px); }
+    /* pies numerados (mismo patrón que Loewe y El Rastrillo) */
+    .ot-cap {
+      margin-top: 0.85rem; display: flex; align-items: baseline; gap: 0.6rem;
+      font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #ebdfe4) 55%, transparent);
+    }
+    .ot-num { font-weight: 700; letter-spacing: 0.04em; color: var(--ph-accent, #b076c9); }
+
+    /* especificaciones — ficha de materia (tipográfica) */
+    .specs {
+      background: #48293a;
+      padding-top: clamp(48px, 9vh, 120px);
+      padding-bottom: clamp(48px, 9vh, 120px);
+    }
+    .ot-specs {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(18px, 2.4vw, 34px);
+    }
+    .ot-specs li {
+      border-top: 1px solid rgba(235, 223, 228, 0.16);
+      padding-top: clamp(14px, 2vh, 22px);
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ph-ink, #ebdfe4);
+    }
+    .ot-specs b {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--ph-accent, #b076c9);
+      margin-bottom: clamp(0.9rem, 2.4vh, 1.6rem);
+      font-variant-numeric: tabular-nums;
+    }
+    .ot-specs span {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #ebdfe4) 48%, transparent);
+      margin-bottom: 0.5rem;
+    }
+    .ot-specs .gx-reveal:nth-child(2) { transition-delay: 0.07s; }
+    .ot-specs .gx-reveal:nth-child(3) { transition-delay: 0.14s; }
+    .ot-specs .gx-reveal:nth-child(4) { transition-delay: 0.21s; }
+    @media (max-width: 760px) {
+      .ot-specs { grid-template-columns: repeat(2, 1fr); gap: 24px 18px; }
+    }
     .campaign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 26px); }
     .campaign-grid figure { margin: 0; }
     .campaign-grid img {
@@ -114,7 +170,7 @@
     }
 
     /* spot — vídeo cinematográfico */
-    .film { background: #48293a; position: relative; overflow: hidden; }
+    .film { background: #48293a; position: relative; overflow: hidden; padding-top: clamp(48px, 9vh, 120px); }
     .film .gx-inner { position: relative; z-index: 1; }
     /* backdrop kinético: nombre gigante desplazándose por detrás */
     .film-marquee {
@@ -237,10 +293,35 @@
         <p class="gx-sub">Tres piezas de la serie experimental: cromo líquido, lentes violeta y una paleta que viaja del aubergine al magenta.</p>
       </div>
       <div class="campaign-grid">
-        <figure class="gx-reveal"><img src="img/POSTER_GAFAS_1_web.jpg" alt="Ottolinger × Mykita — póster de campaña 01" loading="lazy" decoding="async"></figure>
-        <figure class="gx-reveal"><img src="img/POSTER_GAFAS_2_web.jpg" alt="Ottolinger × Mykita — póster de campaña 02 (macro)" loading="lazy" decoding="async"></figure>
-        <figure class="gx-reveal"><img src="img/POSTER_GAFAS_3_web.jpg" alt="Ottolinger × Mykita — póster de campaña 03 (pódium)" loading="lazy" decoding="async"></figure>
+        <figure class="gx-reveal">
+          <img src="img/POSTER_GAFAS_1_web.jpg" alt="Ottolinger × Mykita — póster de campaña 01" loading="lazy" decoding="async" data-lightbox>
+          <figcaption class="ot-cap"><span class="ot-num">01</span> Editorial</figcaption>
+        </figure>
+        <figure class="gx-reveal">
+          <img src="img/POSTER_GAFAS_2_web.jpg" alt="Ottolinger × Mykita — póster de campaña 02 (macro)" loading="lazy" decoding="async" data-lightbox>
+          <figcaption class="ot-cap"><span class="ot-num">02</span> Macro</figcaption>
+        </figure>
+        <figure class="gx-reveal">
+          <img src="img/POSTER_GAFAS_3_web.jpg" alt="Ottolinger × Mykita — póster de campaña 03 (pódium)" loading="lazy" decoding="async" data-lightbox>
+          <figcaption class="ot-cap"><span class="ot-num">03</span> Pódium</figcaption>
+        </figure>
       </div>
+    </div>
+  </section>
+
+  <section class="gx-section specs" aria-label="La materia de la pieza">
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">La materia</span>
+        <h2 class="gx-title">Cromo líquido, lente <em>violeta</em></h2>
+        <p class="gx-sub">Una pieza pensada como objeto: metal que no termina de solidificar, lentes espejadas y un acabado que responde a la luz del entorno.</p>
+      </div>
+      <ul class="ot-specs">
+        <li class="gx-reveal"><b>01</b><span>Montura</span>Cromo líquido</li>
+        <li class="gx-reveal"><b>02</b><span>Lente</span>Violeta espejo</li>
+        <li class="gx-reveal"><b>03</b><span>Render</span>C4D · Redshift</li>
+        <li class="gx-reveal"><b>04</b><span>Edición</span>Rave Series ’25</li>
+      </ul>
     </div>
   </section>
 
@@ -273,6 +354,20 @@
     </div>
   </div>
 
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
+    </div>
+  </footer>
+
   <nav class="proj-next" aria-label="Siguiente proyecto" style="--ph-ink:#2c1922; --ph-bg:#ebdfe4; --pn-ink:#1f4a3d; --pn-accent:#2f7a5c;">
     <div class="pn-wash" aria-hidden="true"></div>
     <div class="pn-media" aria-hidden="true"><img src="img/MOCKUP_ATUN_02.webp" alt="" loading="lazy" decoding="async"></div>
@@ -287,19 +382,6 @@
     </a>
   </nav>
 
-  <footer class="site-footer">
-    <div class="sf-inner">
-      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
-      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
-      <nav class="sf-nav">
-        <a href="index.html">Inicio</a>
-        <a href="about.html">Sobre mí</a>
-        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
-      </nav>
-      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
-    </div>
-  </footer>
 
   <script>
     document.getElementById('home-link').addEventListener('click', function(e) {
@@ -325,6 +407,6 @@
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=18"></script>
+  <script src="script.js?v=26"></script>
 </body>
 </html>

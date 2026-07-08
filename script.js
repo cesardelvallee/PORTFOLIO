@@ -6,26 +6,35 @@
    ::before muestra el nombre de donde vas (attr(data-label)).
    ============================================================ */
 (function() {
-  var LABELS = {
-    'index.html':   'CÉSAR DEL VALLE',
-    'about.html':   'SOBRE MÍ',
-    'contact.html': 'CONTACTO',
-    'img1.html':    'COFFEE RITUALS',
-    'img2.html':    'OTTOLINGER × MYKITA',
-    'img3.html':    'CATALALATA',
-    'img4.html':    'EL RASTRILLO',
-    'img5.html':    'LOEWE 001'
+  /* Cortina teatral en paleta corporativa (tinta + beige): anuncia el
+     destino con su nombre en grande; el rótulo viaja con parallax
+     interno y el filo beige barre la pantalla. */
+  var PAGES_FX = {
+    'index.html':   { label: 'CÉSAR DEL VALLE' },
+    'about.html':   { label: 'SOBRE MÍ' },
+    'contact.html': { label: 'CONTACTO' },
+    '404.html':     { label: 'CÉSAR DEL VALLE' },
+    'img1.html':    { label: 'COFFEE RITUALS' },
+    'img2.html':    { label: 'OTTOLINGER × MYKITA' },
+    'img3.html':    { label: 'CATALALATA' },
+    'img4.html':    { label: 'EL RASTRILLO' },
+    'img5.html':    { label: 'LOEWE 001' }
   };
   function fx() { return document.getElementById('page-fx'); }
-  function setLabel(el, url) {
+  function pageOf(url) {
     var file = (url || '').split(/[?#]/)[0].split('/').pop() || 'index.html';
-    el.setAttribute('data-label', LABELS[file] || 'CÉSAR DEL VALLE');
+    return PAGES_FX[file] || PAGES_FX['index.html'];
+  }
+  function dress(el, p) {
+    el.setAttribute('data-label', p.label);
+    var n = el.querySelector('.fx-num');
+    if (n) n.remove();   // limpieza por si quedó de una versión anterior (bfcache)
   }
   window.PageFX = {
     reveal: function() {
       var el = fx(); if (!el) return;
-      // al llegar, la cortina lleva el nombre de la página actual
-      if (!el.getAttribute('data-label')) setLabel(el, location.pathname);
+      // al llegar (o volver por bfcache) la cortina viste la página actual
+      dress(el, pageOf(location.pathname));
       requestAnimationFrame(function() { el.classList.add('fx-anim'); el.classList.add('fx-reveal'); });
     },
     leave: function(url) {
@@ -33,12 +42,12 @@
       if (!el) { window.location.href = url; return; }
       var done = false;
       var go = function() { if (done) return; done = true; window.location.href = url; };
-      setLabel(el, url); // la cortina cae con el nombre del destino
+      dress(el, pageOf(url)); // la cortina cae con el nombre del destino
       el.classList.add('fx-anim');
       void el.offsetWidth;
       el.classList.remove('fx-reveal'); // drop the curtain to cover
       el.addEventListener('transitionend', go, { once: true });
-      setTimeout(go, 760); // safety fallback
+      setTimeout(go, 860); // safety fallback
     }
   };
   // Reveal on load and on back/forward (bfcache) restore
@@ -76,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isGrabbing) {
         eggCursor.style.backgroundImage = "url('img/GRAB.svg')";
       } else {
-        const selectable = e.target.closest('.img-drag, a, button, input, textarea, .top-bar-left, .hero-btn, .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar, .genre-trigger, .genre-option, .volume-slider, .contact-link, .contact-card, .cta-button, .card-link, .minimal-card img');
+        const selectable = e.target.closest('.img-drag, a, button, input, textarea, .top-bar-left, .hero-btn, .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar, .genre-trigger, .genre-option, .volume-slider, .contact-link, .contact-card, .cta-button, .card-link, .minimal-card img, [data-lightbox]');
         eggCursor.style.backgroundImage = selectable ? "url('img/HOVER.svg')" : "url('img/DEFAULT.svg')";
       }
     });
@@ -949,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var HOT = '.img-drag, a, button, input, textarea, select, .top-bar-left, .hero-btn,'
             + ' .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar,'
             + ' .genre-trigger, .genre-option, .volume-slider, .contact-link, .c-card, .cta-button, .card-link,'
-            + ' .minimal-card img, .sf-mail, .sf-nav a, .back-btn';
+            + ' .minimal-card img, .sf-mail, .sf-nav a, .back-btn, [data-lightbox]';
 
     var mx = window.innerWidth / 2, my = window.innerHeight / 2;
     var rx = mx, ry = my, rs = 1, targetS = 1, shown = false;
@@ -1056,48 +1065,73 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 /* ============================================================
-   PROJECT — "siguiente proyecto" como teaser inmersivo: la imagen
-   del próximo proyecto sigue al cursor con parallax y aparece un
-   lavado con su color. Aditivo, gated por hover/reduced-motion.
+   PROJECT · TAKEOVER — el final de la página entrega el siguiente
+   proyecto: panel sticky, la imagen del siguiente de fondo, su
+   color subiendo con el scroll y una barra de progreso. Al llegar
+   al fondo (y mantenerse un instante) navega solo con la cortina.
+   El clic directo sigue funcionando en cualquier momento.
    ============================================================ */
 (function() {
+  function mq(q) { return window.matchMedia && window.matchMedia(q).matches; }
   function init() {
     var next = document.querySelector('.proj-next');
     if (!next) return;
+    var link = next.querySelector('.proj-next-link');
+    if (!link) return;
     var media = next.querySelector('.pn-media');
+    var wash = next.querySelector('.pn-wash');
+    // la imagen y el lavado viven DENTRO del panel sticky
+    if (media) link.appendChild(media);
+    if (wash) link.appendChild(wash);
 
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var coarse = (window.matchMedia && (window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches)) || ('ontouchstart' in window);
-    if (!media || reduce || coarse) return;
+    var reduce = mq('(prefers-reduced-motion: reduce)');
 
-    var rect = null, cx = 0, cy = 0, tx = 0, ty = 0, active = false;
+    var prog = document.createElement('span');
+    prog.className = 'pn-progress';
+    prog.setAttribute('aria-hidden', 'true');
+    prog.innerHTML = '<span class="pp-txt">Sigue bajando</span><span class="pp-line"><i></i></span>';
+    link.appendChild(prog);
+    var bar = prog.querySelector('i');
+    var txt = prog.querySelector('.pp-txt');
 
-    next.addEventListener('mouseenter', function() {
-      active = true;
-      rect = next.getBoundingClientRect();
-      next.classList.add('is-hover');
-    });
-    next.addEventListener('mouseleave', function() {
-      active = false;
-      next.classList.remove('is-hover');
-      media.style.transform = '';
-    });
-    next.addEventListener('mousemove', function(e) {
-      rect = next.getBoundingClientRect();
-      cx = e.clientX - rect.left;
-      cy = e.clientY - rect.top;
-      next.style.setProperty('--mx', ((cx / rect.width) * 100).toFixed(1) + '%');
-      next.style.setProperty('--my', ((cy / rect.height) * 100).toFixed(1) + '%');
-    }, { passive: true });
+    var done = false;
+    var dwell = null;
+    var hasScrolled = false;   // evita el disparo si se llega ya al fondo (bfcache)
+    var ticking = false;
 
-    (function loop() {
-      if (active && rect) {
-        tx += ((cx - rect.width / 2) - tx) * 0.12;
-        ty += ((cy - rect.height / 2) - ty) * 0.12;
-        media.style.transform = 'translate(calc(-50% + ' + tx.toFixed(1) + 'px), calc(-50% + ' + ty.toFixed(1) + 'px)) scale(1)';
+    function update() {
+      ticking = false;
+      var r = next.getBoundingClientRect();
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var total = r.height - vh;
+      var p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0;
+
+      bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      if (media && !reduce) media.style.transform = 'scale(' + (1.1 - p * 0.1).toFixed(4) + ')';
+      if (wash) wash.style.opacity = (p * 0.55).toFixed(3);
+
+      if (!reduce && !done && hasScrolled) {
+        if (p >= 0.995) {
+          if (!dwell) {
+            dwell = setTimeout(function() {
+              done = true;
+              txt.textContent = 'Entrando';
+              window.PageFX.leave(link.getAttribute('href'));
+            }, 280);
+          }
+        } else if (dwell) {
+          clearTimeout(dwell);
+          dwell = null;
+        }
       }
-      requestAnimationFrame(loop);
-    })();
+      if (!done) txt.textContent = p >= 0.995 ? 'Entrando' : 'Sigue bajando';
+    }
+    function tick() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener('scroll', function() { hasScrolled = true; tick(); }, { passive: true });
+    window.addEventListener('resize', tick, { passive: true });
+    // si se vuelve por bfcache, rearmar sin navegar
+    window.addEventListener('pageshow', function() { done = false; hasScrolled = false; tick(); });
+    update();
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
@@ -1471,10 +1505,47 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() { el.classList.add('tsplit-done'); }, base + n * step + dur + 80);
   }
 
+  /* como split(), pero arranca cuando el titular entra en el viewport
+     (para los títulos de sección; conviven con el rise del contenedor) */
+  function splitOnView(el, mode, base, step, dur) {
+    if (!el || el.classList.contains('is-split')) return;
+    var n = wrapWords(el, mode);
+    if (!n) return;
+    Array.prototype.forEach.call(el.querySelectorAll('.tsplit-i'), function(i) {
+      i.style.setProperty('--td', (base + (parseInt(i.getAttribute('data-ti'), 10) || 0) * step) + 'ms');
+      i.style.setProperty('--tdur', dur + 'ms');
+    });
+    el.classList.add('is-split');
+    var ran = false;
+    function run() {
+      if (ran) return;
+      ran = true;
+      el.classList.add('tsplit-run');
+      setTimeout(function() { el.classList.add('tsplit-done'); }, base + n * step + dur + 80);
+    }
+    var r = el.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    if (!('IntersectionObserver' in window) || (r.top < vh && r.bottom > 0)) {
+      // sin observer o ya visible al cargar: arranca directamente
+      requestAnimationFrame(function() { requestAnimationFrame(run); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(en) {
+        if (en.isIntersecting) { io.disconnect(); run(); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    io.observe(el);
+  }
+
   function init() {
     split(document.querySelector('.proj-title'), 'word', 160, 70, 850);
     split(document.querySelector('.abx-name'), 'word', 140, 95, 900);
     split(document.querySelector('.contact-title'), 'letter', 110, 30, 750);
+    // títulos de sección de las páginas de proyecto, al entrar en vista
+    Array.prototype.forEach.call(document.querySelectorAll('.gx-title'), function(t) {
+      splitOnView(t, 'word', 150, 60, 750);
+    });
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
@@ -1578,9 +1649,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!(hero && heroV) && !bgnums.length) return;
 
     var items = [];
-    // números gigantes de fondo (mantienen su translateY(-50%) propio)
+    // números gigantes de fondo (mantienen su translateY(-50%) propio);
+    // con fade: sus secciones sí recortan (overflow hidden)
     Array.prototype.forEach.call(bgnums, function(el) {
-      items.push({ el: el, box: el.parentElement, speed: 0.13, base: 'translateY(-50%) ' });
+      items.push({ el: el, box: el.parentElement, speed: 0.13, base: 'translateY(-50%) ', fade: true });
     });
 
     var ticking = false;
@@ -1591,8 +1663,15 @@ document.addEventListener('DOMContentLoaded', function() {
         var r = it.box.getBoundingClientRect();
         if (r.bottom < -80 || r.top > vh + 80) return;   // fuera de vista
         var d = (r.top + r.height / 2) - vh / 2;          // distancia al centro
+        // fade: en secciones que recortan, el desfase decae a cero al salir
+        // (el hero no lo necesita: su overflow es visible y sangra sin corte)
+        var k = 1;
+        if (it.fade) {
+          var vis = Math.max(0, Math.min(1, r.bottom / vh));
+          k = vis * vis;
+        }
         // signo negativo: el elemento "se queda atrás" respecto al scroll
-        it.el.style.transform = it.base + 'translate3d(0,' + (-d * it.speed).toFixed(1) + 'px,0)';
+        it.el.style.transform = it.base + 'translate3d(0,' + (-d * it.speed * k).toFixed(1) + 'px,0)';
       });
     }
     function tick() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
@@ -1600,7 +1679,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', tick, { passive: true });
 
     // el visual del hero entra cuando termina su ph-rise: la animación
-    // (fill both) pisaría el transform inline mientras siga aplicada
+    // (fill both) pisaría el transform inline mientras siga aplicada.
+    // Si el wipe ya la sustituyó (clase ph-wipe), se arma al instante
+    // (evita el salto si el usuario scrollea en el primer segundo).
     if (hero && heroV) {
       var armed = false;
       var arm = function(e) {
@@ -1611,10 +1692,94 @@ document.addEventListener('DOMContentLoaded', function() {
         items.push({ el: heroV, box: hero, speed: 0.09, base: '' });
         update();
       };
-      heroV.addEventListener('animationend', arm);
-      setTimeout(arm, 1700);   // red de seguridad (bfcache / animación perdida)
+      if (heroV.classList.contains('ph-wipe')) {
+        arm();
+      } else {
+        heroV.addEventListener('animationend', arm);
+        setTimeout(arm, 1700);   // red de seguridad (bfcache / animación perdida)
+      }
     }
     update();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   LIGHTBOX COMPARTIDO — cualquier imagen con [data-lightbox] se
+   amplía al hacer clic. Overlay con cursor "Cerrar", cierre por
+   clic o Escape, candado de scroll y foco devuelto al origen.
+   ============================================================ */
+(function() {
+  function init() {
+    var imgs = document.querySelectorAll('img[data-lightbox]');
+    if (!imgs.length) return;
+    Array.prototype.forEach.call(imgs, function(img) {
+      img.setAttribute('data-cursor', 'Ampliar');
+    });
+
+    document.addEventListener('click', function(e) {
+      var img = e.target.closest && e.target.closest('img[data-lightbox]');
+      if (!img) return;
+      e.stopPropagation();
+
+      var opener = img;
+      var overlay = document.createElement('div');
+      overlay.className = 'lightbox';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', img.alt || 'Imagen ampliada');
+      overlay.setAttribute('data-cursor', 'Cerrar');
+      overlay.tabIndex = -1;
+
+      var big = document.createElement('img');
+      big.src = img.currentSrc || img.src;
+      big.alt = img.alt || '';
+      big.decoding = 'async';
+      overlay.appendChild(big);
+      document.body.appendChild(overlay);
+      document.documentElement.classList.add('lightbox-open');
+      overlay.focus({ preventScroll: true });
+
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { overlay.classList.add('is-on'); });
+      });
+
+      function close() {
+        overlay.classList.remove('is-on');
+        document.documentElement.classList.remove('lightbox-open');
+        document.removeEventListener('keydown', onEsc);
+        setTimeout(function() { overlay.remove(); }, 320);
+        if (opener && opener.focus) opener.focus({ preventScroll: true });
+      }
+      function onEsc(ev) { if (ev.key === 'Escape') close(); }
+      overlay.addEventListener('click', close);
+      document.addEventListener('keydown', onEsc);
+    });
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   SKIP-LINK — accesibilidad de teclado: primer tab salta al
+   contenido principal (invisible para ratón y táctil).
+   ============================================================ */
+(function() {
+  function init() {
+    if (document.querySelector('.skip-link')) return;
+    var skip = document.createElement('a');
+    skip.className = 'skip-link';
+    skip.href = '#';
+    skip.textContent = 'Saltar al contenido';
+    document.body.insertBefore(skip, document.body.firstChild);
+    skip.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector('main, .proj-hero, h1');
+      if (!target) return;
+      target.setAttribute('tabindex', '-1');
+      target.focus();
+    });
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);

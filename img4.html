@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <link rel="stylesheet" href="css/project.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=32">
+  <link rel="stylesheet" href="css/project.css?v=10">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="img/RASTRILLO_INSTASTORIE2_web.png">
@@ -183,19 +183,19 @@
     <div class="proj-cards-inner">
       <div class="minimal-card card-1" style="opacity:0;transform:translateY(100px) rotate(-3deg) scale(0.9);">
         <div>
-          <img src="img/2411_RASTRILLO_MOODBAORD_web.jpg" alt="El Rastrillo — moodboard de campaña" loading="lazy" decoding="async">
+          <img src="img/2411_RASTRILLO_MOODBAORD_web.jpg" alt="El Rastrillo — moodboard de campaña" loading="lazy" decoding="async" data-lightbox>
         </div>
         <figcaption class="rs-cap"><span class="rs-num">01</span> Concepto</figcaption>
       </div>
       <div class="minimal-card card-2" style="opacity:0;transform:translateY(100px) rotate(2deg) scale(0.9);">
         <div>
-          <img src="img/2411_RASTRILLO_MOODBAORD_2.2_web.jpg" alt="El Rastrillo — moodboard de campaña (II)" loading="lazy" decoding="async">
+          <img src="img/2411_RASTRILLO_MOODBAORD_2.2_web.jpg" alt="El Rastrillo — moodboard de campaña (II)" loading="lazy" decoding="async" data-lightbox>
         </div>
         <figcaption class="rs-cap"><span class="rs-num">02</span> Dirección de arte</figcaption>
       </div>
       <div class="minimal-card card-3" style="opacity:0;transform:translateY(100px) rotate(-2deg) scale(0.9);">
         <div>
-          <img src="img/BOARD_CAMPANA_ELRASTRILLO.webp" alt="El Rastrillo — board final de campaña" loading="lazy" decoding="async">
+          <img src="img/BOARD_CAMPANA_ELRASTRILLO.webp" alt="El Rastrillo — board final de campaña" loading="lazy" decoding="async" data-lightbox>
         </div>
         <figcaption class="rs-cap"><span class="rs-num">03</span> Campaña</figcaption>
       </div>
@@ -209,6 +209,20 @@
     </div>
   </div>
 
+
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
+    </div>
+  </footer>
 
   <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#2a1f15; --pn-accent:#8a6f4a;">
     <div class="pn-wash" aria-hidden="true"></div>
@@ -224,19 +238,6 @@
     </a>
   </nav>
 
-  <footer class="site-footer">
-    <div class="sf-inner">
-      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
-      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
-      <nav class="sf-nav">
-        <a href="index.html">Inicio</a>
-        <a href="about.html">Sobre mí</a>
-        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
-      </nav>
-      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
-    </div>
-  </footer>
 
   <script>
     document.getElementById('home-link').addEventListener('click', function(e) {
@@ -275,44 +276,11 @@
       });
     }
 
-    // Lightbox: ampliar moodboard al hacer clic
-    document.querySelectorAll('.minimal-card img').forEach(function(img) {
-      img.style.cursor = 'none';
-      img.setAttribute('data-cursor', 'Ampliar');   // etiqueta en el halo del cursor
-      img.addEventListener('click', function(e) {
-        e.stopPropagation();
-
-        const overlay = document.createElement('div');
-        overlay.setAttribute('data-cursor', 'Cerrar');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(16,15,13,0.94);z-index:9400;display:flex;align-items:center;justify-content:center;cursor:none;opacity:0;transition:opacity 0.3s ease;';
-
-        const expandedImg = document.createElement('img');
-        expandedImg.src = this.src;
-        expandedImg.alt = this.alt;
-        expandedImg.style.cssText = 'max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 50px 150px rgba(0,0,0,0.5);transform:scale(0.96);transition:transform 0.4s cubic-bezier(0.22,0.61,0.36,1);';
-
-        overlay.appendChild(expandedImg);
-        document.body.appendChild(overlay);
-
-        requestAnimationFrame(function() {
-          overlay.style.opacity = '1';
-          expandedImg.style.transform = 'scale(1)';
-        });
-
-        function close() {
-          overlay.style.opacity = '0';
-          expandedImg.style.transform = 'scale(0.96)';
-          setTimeout(function() { overlay.remove(); }, 300);
-          document.removeEventListener('keydown', onEsc);
-        }
-        overlay.addEventListener('click', close);
-        function onEsc(ev) { if (ev.key === 'Escape') close(); }
-        document.addEventListener('keydown', onEsc);
-      });
-    });
+    // Lightbox: lo gestiona el motor compartido de script.js
+    // (las imágenes llevan data-lightbox en el markup)
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=18"></script>
+  <script src="script.js?v=26"></script>
 </body>
 </html>

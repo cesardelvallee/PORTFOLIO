@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <link rel="stylesheet" href="css/project.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=32">
+  <link rel="stylesheet" href="css/project.css?v=10">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -95,7 +95,7 @@
     }
 
     /* Tríptico de imágenes de campaña (mismo estilo que la sección de las gafas) */
-    .gx-section { padding: clamp(78px, 13vh, 168px) clamp(24px, 6vw, 80px); }
+    .gx-section { padding: clamp(84px, 15vh, 190px) clamp(24px, 6vw, 90px); }
     .gx-inner { max-width: 1180px; margin: 0 auto; }
     .gx-head { margin-bottom: clamp(34px, 6vh, 64px); }
     .gx-eyebrow {
@@ -114,6 +114,47 @@
       font-weight: 400; line-height: 1.7;
       color: color-mix(in srgb, var(--ph-ink, #2a1f15) 70%, transparent);
     }
+    /* Intro editorial del concepto (respiro entre el hero y el spot) */
+    .lw-intro { background: #e8dab0; position: relative; overflow: hidden; }
+    .lw-intro .gx-inner { position: relative; z-index: 1; }
+    .gx-bgnum {
+      position: absolute; top: 50%; right: -3%; transform: translateY(-50%);
+      z-index: 0; pointer-events: none; user-select: none;
+      /* tres dígitos ("001", eco del watermark de la galería): algo menor */
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(11rem, 32vw, 40rem);
+      line-height: 0.72; letter-spacing: -0.05em; color: var(--ph-ink, #2a1f15); opacity: 0.05;
+    }
+    .lw-specs {
+      list-style: none;
+      margin: clamp(38px, 6vh, 64px) 0 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(18px, 2.4vw, 34px);
+    }
+    .lw-specs li {
+      border-top: 1px solid rgba(42, 31, 21, 0.18);
+      padding-top: clamp(13px, 1.8vh, 20px);
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--ph-ink, #2a1f15);
+    }
+    .lw-specs span {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--ph-ink, #2a1f15) 52%, transparent);
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 760px) {
+      .lw-specs { grid-template-columns: repeat(2, 1fr); gap: 22px 16px; }
+    }
+
     .lw-gallery { background: #e8dab0; position: relative; overflow: hidden; }
     .lw-gallery .gx-inner { position: relative; z-index: 1; }
     /* número gigante de fondo (eco del watermark del hero) — personalidad editorial */
@@ -191,6 +232,23 @@
     </div>
   </section>
 
+  <section class="gx-section lw-intro" aria-label="El concepto de Loewe 001">
+    <span class="gx-bgnum" aria-hidden="true">001</span>
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">El concepto</span>
+        <h2 class="gx-title">Elegancia tranquila, <em>en movimiento</em></h2>
+        <p class="gx-sub">Un lenguaje mínimo y delicado: la botella sobre piedra, movimientos lentos de cámara y reflejos que apenas rozan el vidrio. Nada grita; todo permanece.</p>
+      </div>
+      <ul class="lw-specs gx-reveal">
+        <li><span>Materia</span>Piedra · Vidrio</li>
+        <li><span>Luz</span>Cálida, lateral</li>
+        <li><span>Cámara</span>Movimientos lentos</li>
+        <li><span>Render</span>Cinema 4D</li>
+      </ul>
+    </div>
+  </section>
+
   <section id="video-section" aria-label="Spot del proyecto Loewe 001">
     <div class="video__content">
       <figure class="video-figure">
@@ -213,15 +271,15 @@
       </div>
       <div class="lw-grid">
         <figure class="gx-reveal">
-          <img src="img/LOEWE_IMG_001_web.jpg" alt="Loewe 001 — key visual de campaña 01" loading="lazy" decoding="async">
+          <img src="img/LOEWE_IMG_001_web.jpg" alt="Loewe 001 — key visual de campaña 01" loading="lazy" decoding="async" data-lightbox>
           <figcaption class="lw-cap"><span class="lw-num">01</span> Reposo</figcaption>
         </figure>
         <figure class="gx-reveal">
-          <img src="img/LOEWE_IMG_002_web.jpg" alt="Loewe 001 — key visual de campaña 02" loading="lazy" decoding="async">
+          <img src="img/LOEWE_IMG_002_web.jpg" alt="Loewe 001 — key visual de campaña 02" loading="lazy" decoding="async" data-lightbox>
           <figcaption class="lw-cap"><span class="lw-num">02</span> Materia</figcaption>
         </figure>
         <figure class="gx-reveal">
-          <img src="img/LOEWE_IMG_004_web.jpg" alt="Loewe 001 — key visual de campaña 03" loading="lazy" decoding="async">
+          <img src="img/LOEWE_IMG_004_web.jpg" alt="Loewe 001 — key visual de campaña 03" loading="lazy" decoding="async" data-lightbox>
           <figcaption class="lw-cap"><span class="lw-num">03</span> Luz</figcaption>
         </figure>
       </div>
@@ -235,20 +293,6 @@
     </div>
   </div>
 
-
-  <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#2d4a1f; --pn-accent:#a87d22;">
-    <div class="pn-wash" aria-hidden="true"></div>
-    <div class="pn-media" aria-hidden="true"><img src="img/CAFE_PACKAGING_EXTERIOR_web.png" alt="" loading="lazy" decoding="async"></div>
-    <a class="proj-next-link" href="img1.html">
-      <span>
-        <span class="proj-next-eyebrow">Volver al primero</span>
-        <span class="proj-next-title"><span class="pn-num">01</span>Coffee Rituals</span>
-      </span>
-      <span class="proj-next-arrow" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-  </nav>
 
   <footer class="site-footer">
     <div class="sf-inner">
@@ -264,8 +308,23 @@
     </div>
   </footer>
 
+  <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#2d4a1f; --pn-accent:#a87d22;">
+    <div class="pn-wash" aria-hidden="true"></div>
+    <div class="pn-media" aria-hidden="true"><img src="img/CAFE_PACKAGING_EXTERIOR_web.png" alt="" loading="lazy" decoding="async"></div>
+    <a class="proj-next-link" href="img1.html">
+      <span>
+        <span class="proj-next-eyebrow">Volver al primero</span>
+        <span class="proj-next-title"><span class="pn-num">01</span>Coffee Rituals</span>
+      </span>
+      <span class="proj-next-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+  </nav>
+
+
   <div id="egg-cursor"></div>
-  <script src="script.js?v=18"></script>
+  <script src="script.js?v=26"></script>
   <script>
     document.getElementById('home-link').addEventListener('click', function(e) {
       e.preventDefault();

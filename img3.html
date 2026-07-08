@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <link rel="stylesheet" href="css/project.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=32">
+  <link rel="stylesheet" href="css/project.css?v=10">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="img/MOCKUP_ATUN_02.jpg">
@@ -33,9 +33,24 @@
 
   <style>
     .top-bar-left, .top-bar-right { color: #1f4a3d !important; }
+    /* recorrido de la pila de latas: sin scroll muerto tras la última */
+    #pinned-images-section { min-height: 420vh; }
+    @media (max-width: 768px) {
+      #pinned-images-section { min-height: 320vh; }
+    }
     @media (max-width: 600px) {
       .pinned-image { width: 88% !important; height: 300px !important; }
     }
+    /* rótulo narrativo de la pila (lo actualiza el ScrollTrigger) */
+    .cl-ui {
+      position: absolute; left: 6vw; bottom: 34px; z-index: 5;
+      display: flex; align-items: baseline; gap: 12px;
+      font-family: 'Inter', sans-serif; color: #1f4a3d;
+      pointer-events: none;
+    }
+    .cl-ui b { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2em; font-variant-numeric: tabular-nums; }
+    .cl-ui span { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.75; }
+    @media (max-width: 768px) { .cl-ui { left: 74px; bottom: 38px; } }
 
     /* Intro editorial de la línea (chicha) */
     .gx-section { position: relative; overflow: hidden; padding: clamp(84px, 15vh, 190px) clamp(24px, 6vw, 90px); }
@@ -149,9 +164,11 @@
     </div>
   </section>
 
-  <section id="pinned-images-section" aria-label="Galería del proyecto Catalalata" style="min-height: 500vh; background: #a8d4c8;">
+  <section id="pinned-images-section" aria-label="Galería del proyecto Catalalata" style="background: #a8d4c8;">
 
     <div class="pinned-container" style="position: sticky; top: 0; width: 100%; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
+
+      <div class="cl-ui" aria-hidden="true"><b>01</b><span>Atún Claro</span></div>
 
       <div class="images-center" style="position: relative; width: 100%; height: 60%; display: flex; align-items: center; justify-content: center;">
 
@@ -180,6 +197,20 @@
   </div>
 
 
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
+      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
+      <nav class="sf-nav">
+        <a href="index.html">Inicio</a>
+        <a href="about.html">Sobre mí</a>
+        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
+    </div>
+  </footer>
+
   <nav class="proj-next" aria-label="Siguiente proyecto" style="--pn-ink:#1f5c4a; --pn-accent:#2f8a6b;">
     <div class="pn-wash" aria-hidden="true"></div>
     <div class="pn-media" aria-hidden="true"><img src="img/RASTRILLO_INSTASTORIE2.webp" alt="" loading="lazy" decoding="async"></div>
@@ -194,19 +225,6 @@
     </a>
   </nav>
 
-  <footer class="site-footer">
-    <div class="sf-inner">
-      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
-      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
-      <nav class="sf-nav">
-        <a href="index.html">Inicio</a>
-        <a href="about.html">Sobre mí</a>
-        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
-      </nav>
-      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
-    </div>
-  </footer>
 
   <script>
     document.getElementById('home-link').addEventListener('click', function(e) {
@@ -280,6 +298,12 @@
     const pinnedImages = document.querySelectorAll('.pinned-image');
     const pinnedSection = document.querySelector('#pinned-images-section');
 
+    // rótulo narrativo: número + nombre de la lata que está llegando
+    const clUi = document.querySelector('.cl-ui');
+    const clNum = clUi ? clUi.querySelector('b') : null;
+    const clName = clUi ? clUi.querySelector('span') : null;
+    const CL_NAMES = ['Atún Claro', 'Mejillones', 'Sardinillas'];
+
     ScrollTrigger.create({
       trigger: pinnedSection,
       start: "top top",
@@ -290,6 +314,12 @@
       onUpdate: self => {
         const progress = self.progress;
         const totalImages = pinnedImages.length;
+
+        if (clNum) {
+          const idx = Math.max(0, Math.min(totalImages - 1, Math.floor(progress / (0.8 / totalImages))));
+          clNum.textContent = '0' + (idx + 1);
+          clName.textContent = CL_NAMES[idx] || '';
+        }
 
         pinnedImages.forEach((image, index) => {
           const totalScrollRange = 0.8;
@@ -376,6 +406,6 @@
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=18"></script>
+  <script src="script.js?v=26"></script>
 </body>
 </html>
