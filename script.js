@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isGrabbing) {
         eggCursor.style.backgroundImage = "url('img/GRAB.svg')";
       } else {
-        const selectable = e.target.closest('.img-drag, a, button, input, textarea, .top-bar-left, .hero-btn, .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar, .genre-trigger, .genre-option, .volume-slider, .contact-link, .contact-card, .cta-button, .card-link, .minimal-card img, [data-lightbox]');
+        const selectable = e.target.closest && e.target.closest('.img-drag, a, button, input, textarea, .top-bar-left, .hero-btn, .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar, .genre-trigger, .genre-option, .volume-slider, .contact-link, .contact-card, .cta-button, .card-link, .minimal-card img, [data-lightbox]');
         eggCursor.style.backgroundImage = selectable ? "url('img/HOVER.svg')" : "url('img/DEFAULT.svg')";
       }
     });
@@ -154,27 +154,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
-  if (subtitle) {
-    if (!isMobile()) {
-      subtitle.addEventListener('mouseenter', () => { subtitle.classList.remove('animate'); void subtitle.offsetWidth; subtitle.classList.add('animate'); });
-      subtitle.addEventListener('mouseleave', () => { subtitle.classList.remove('animate'); });
-    }
-  }
+  /* (sin hover en el subtítulo: la animación de rebote solo en la entrada) */
 
   function playHeroTitleAnimation() {
     const title = document.querySelector('.hero-title');
     const btn = document.querySelector('.hero-btn');
     const subtitle = document.querySelector('.hero-subtitle');
     if (!title || typeof gsap === 'undefined') return; // páginas sin hero de la home / sin GSAP
-    gsap.set(title, {opacity: 0, y: 80, scale: 0.98, filter: 'blur(16px)', pointerEvents: 'none'});
     gsap.set(btn, {opacity: 0, y: 60, scale: 0.92, filter: 'blur(10px)'});
     gsap.set(subtitle, {opacity: 0, y: 40, scale: 0.98, filter: 'blur(10px)', visibility: 'hidden'});
     const tl = gsap.timeline();
-    tl.to(title, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.32, ease: 'expo.out',
-      onStart: () => { title.style.pointerEvents = 'none'; },
-      onComplete: () => { title.style.pointerEvents = 'auto'; }
-    })
-      .to(subtitle, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', visibility: 'visible', duration: 0.18, ease: 'power3.out',
+    const letters = title.querySelectorAll('.ht-l');
+    if (letters.length) {
+      // desktop: cascada letra a letra (la onda cinética espera con la
+      // bandera "entering" para no pisar los transforms de la entrada)
+      title.dataset.entering = '1';
+      gsap.set(title, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', pointerEvents: 'none'});
+      gsap.set(letters, {yPercent: 115, opacity: 0});
+      tl.to(letters, {yPercent: 0, opacity: 1, duration: 0.6, stagger: 0.045, ease: 'expo.out',
+        onComplete: () => {
+          delete title.dataset.entering;
+          gsap.set(letters, {clearProps: 'transform,opacity'});
+          title.style.pointerEvents = 'auto';
+        }
+      });
+    } else {
+      // móvil / sin letras: entrada en bloque de siempre
+      gsap.set(title, {opacity: 0, y: 80, scale: 0.98, filter: 'blur(16px)', pointerEvents: 'none'});
+      tl.to(title, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.32, ease: 'expo.out',
+        onStart: () => { title.style.pointerEvents = 'none'; },
+        onComplete: () => { title.style.pointerEvents = 'auto'; }
+      });
+    }
+    tl.to(subtitle, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', visibility: 'visible', duration: 0.18, ease: 'power3.out',
         onStart: () => { subtitle.style.pointerEvents = 'none'; subtitle.style.visibility = 'visible'; },
         onComplete: () => { subtitle.style.pointerEvents = 'auto'; }
       }, '-=0.12')
@@ -392,7 +404,8 @@ window.addEventListener('DOMContentLoaded', function() {
     const setProgress = (value) => {
       const v = Math.max(0, Math.min(100, value));
       loadingProgress.style.width = v + '%';
-      if (loadingPercent) loadingPercent.textContent = Math.round(v) + '%';
+      // número desnudo: el contador gigante no lleva símbolo
+      if (loadingPercent) loadingPercent.textContent = Math.round(v);
     };
     // easeInOutCubic — slow start, fluid middle, gentle settle
     const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -852,6 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mv) mv.removeAttribute('auto-rotate');
     var mt = 0;
     var tx = 0, ty = 0, sx = 0, sy = 0, bx = 0, by = 0, px = 0, py = 0;
+    var t0 = performance.now();
     document.addEventListener('mousemove', function(e) {
       px = (e.clientX / window.innerWidth - 0.5);
       py = (e.clientY / window.innerHeight - 0.5);
@@ -860,7 +874,10 @@ document.addEventListener('DOMContentLoaded', function() {
       tx += ((px * 16) - tx) * 0.06; ty += ((py * 16) - ty) * 0.06;
       sx += ((px * 36) - sx) * 0.06; sy += ((py * 36) - sy) * 0.06;
       bx += ((px * -14) - bx) * 0.05; by += ((py * -14) - by) * 0.05;
-      text.style.transform = 'translate(-50%,-50%) translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px)';
+      // respiración en reposo: el wordmark flota ±5px en un ciclo de ~7 s,
+      // en sintonía con el modelo (se suma al parallax del cursor)
+      var bob = Math.sin((performance.now() - t0) / 1150) * 5;
+      text.style.transform = 'translate(-50%,-50%) translate(' + tx.toFixed(2) + 'px,' + (ty + bob).toFixed(2) + 'px)';
       if (stack) stack.style.transform = 'translate(-50%,-50%) translate(' + sx.toFixed(2) + 'px,' + sy.toFixed(2) + 'px)';
       var bg = document.querySelector('.bg-drift');
       if (bg) bg.style.transform = 'translate(' + bx.toFixed(2) + 'px,' + by.toFixed(2) + 'px)';
@@ -1542,6 +1559,8 @@ document.addEventListener('DOMContentLoaded', function() {
     split(document.querySelector('.proj-title'), 'word', 160, 70, 850);
     split(document.querySelector('.abx-name'), 'word', 140, 95, 900);
     split(document.querySelector('.contact-title'), 'letter', 110, 30, 750);
+    // nombre del loader del index: letra a letra sobre el telón
+    split(document.querySelector('.loader-name'), 'letter', 300, 45, 800);
     // títulos de sección de las páginas de proyecto, al entrar en vista
     Array.prototype.forEach.call(document.querySelectorAll('.gx-title'), function(t) {
       splitOnView(t, 'word', 150, 60, 750);
@@ -1780,6 +1799,82 @@ document.addEventListener('DOMContentLoaded', function() {
       target.setAttribute('tabindex', '-1');
       target.focus();
     });
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   HERO KINÉTICO (home) — las letras de PORTFOLIO responden a la
+   proximidad del cursor con una onda suave que se asienta sola.
+   Solo desktop con puntero fino y sin reduced-motion; transform
+   puro sobre cada letra, interrumpible por diseño.
+   ============================================================ */
+(function() {
+  function mq(q) { return window.matchMedia && window.matchMedia(q).matches; }
+  function init() {
+    if (mq('(prefers-reduced-motion: reduce)') || mq('(hover: none)') || mq('(pointer: coarse)') || window.innerWidth <= 900) return;
+
+    var letters = [];
+
+    /* trocea el texto en letras (los espacios quedan como texto normal) */
+    function arm(el, lift, radius) {
+      if (!el || el.dataset.kinetic) return;
+      el.dataset.kinetic = '1';
+      var text = el.textContent;
+      el.textContent = '';
+      for (var i = 0; i < text.length; i++) {
+        if (text[i] === ' ') { el.appendChild(document.createTextNode(' ')); continue; }
+        var s = document.createElement('span');
+        s.className = 'ht-l';
+        s.textContent = text[i];
+        el.appendChild(s);
+        letters.push({ el: s, y: 0, cx: 0, cy: 0, lift: lift, r: radius });
+      }
+    }
+    var titleRef = document.querySelector('.hero-title');
+    arm(titleRef, 16, 190);
+    arm(document.querySelector('.hero-subtitle'), 7, 130);
+    if (!letters.length) return;
+
+    var measured = false;
+    function measure() {
+      var ok = false;
+      letters.forEach(function(l) {
+        var r = l.el.getBoundingClientRect();
+        l.cx = r.left + r.width / 2;
+        l.cy = r.top + r.height / 2;
+        if (r.width > 0) ok = true;
+      });
+      measured = ok;
+    }
+    window.addEventListener('resize', function() { measured = false; }, { passive: true });
+    window.addEventListener('scroll', function() { measured = false; }, { passive: true });
+
+    var mx = -1e4, my = -1e4;
+    document.addEventListener('mousemove', function(e) {
+      mx = e.clientX;
+      my = e.clientY;
+      if (!measured) measure();
+    }, { passive: true });
+
+    (function loop() {
+      // durante la cascada de entrada, GSAP es dueño de los transforms
+      var hold = titleRef && titleRef.dataset.entering;
+      if (measured && !hold) {
+        for (var i = 0; i < letters.length; i++) {
+          var l = letters[i];
+          var dx = mx - l.cx;
+          var dy = my - l.cy;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          var t = Math.max(0, 1 - d / l.r);
+          var target = -t * t * l.lift;
+          l.y += (target - l.y) * 0.14;         // se asienta con suavidad
+          l.el.style.transform = (l.y > -0.01) ? '' : 'translateY(' + l.y.toFixed(2) + 'px)';
+        }
+      }
+      requestAnimationFrame(loop);
+    })();
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);

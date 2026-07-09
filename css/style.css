@@ -690,12 +690,8 @@ body.about-page .hero-subtitle {
   transform: scale(0);
 }
 .hero-subtitle {
-  background: linear-gradient(90deg, #ece6da, #ece6da);
-  background-size: 400% 400%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradientMove 4s ease-in-out infinite;
+  /* color plano (el gradiente recortado anterior era de un solo color) */
+  color: #e6d6ad;
   font-size: 3vw;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -723,13 +719,28 @@ body.about-page .hero-subtitle {
   align-items: center;
   z-index: 0;
 }
+/* letras del wordmark y subtítulo: onda cinética por proximidad (JS) */
+.hero-title .ht-l,
+.hero-subtitle .ht-l {
+  display: inline-block;
+  will-change: transform;
+}
+/* scrim sutil solo en noche (apenas perceptible, asienta el texto
+   sobre los brillos del modelo) */
+.center-hero-text::after {
+  content: '';
+  position: absolute;
+  inset: -22% -34%;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(8, 8, 8, 0.5), rgba(8, 8, 8, 0) 72%);
+}
+/* Día: sin scrim (el oscuro de arriba solo aplica en noche) */
+body.theme-light .center-hero-text::after { background: none; }
 .hero-title {
-  background: linear-gradient(90deg, #ece6da, #ece6da);
-  background-size: 400% 400%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradientMove 4s ease-in-out infinite;
+  /* color plano (el gradiente recortado anterior era de un solo color);
+     sand #e6d6ad: el valor efectivo de siempre en modo noche */
+  color: #e6d6ad;
   font-size: 6.3vw;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -738,7 +749,7 @@ body.about-page .hero-subtitle {
   font-family: 'Inter', Arial, sans-serif;
   position: relative;
   z-index: 2;
-  will-change: transform, opacity, filter, background-position;
+  will-change: transform, opacity, filter;
   opacity: 0;
   pointer-events: none;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
@@ -2897,17 +2908,10 @@ html { scroll-behavior: smooth; }
 @keyframes bg-drift-3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(11%,-12%) scale(1.16); } }
 
 /* ── MODO CLARO (cuando el fondo "Claro" está activo) ── */
-/* Hero wordmark — beige clarito en noche */
-.hero-title,
-.hero-subtitle {
-  background-image: linear-gradient(90deg, #e6d6ad, #e6d6ad);
-}
-/* Hero wordmark — beige/marrón oscuro en día */
+/* Hero wordmark — día: marrón medio, un punto más claro que la tinta */
 body.theme-light .hero-title,
 body.theme-light .hero-subtitle {
-  background-image: linear-gradient(90deg, #4a3a26, #4a3a26);
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: #6b5d47;
 }
 body.theme-light .top-bar-left,
 body.theme-light .top-bar-right,
