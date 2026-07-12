@@ -23,7 +23,7 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=42">
+  <link rel="stylesheet" href="css/style.css?v=44">
   <link rel="stylesheet" href="css/project.css?v=10">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -89,6 +89,60 @@
       .cl-cast li { transition: transform 0.4s cubic-bezier(0.22,0.61,0.36,1); }
       .cl-cast li:hover { transform: translateX(9px); }
     }
+    /* "En escena" — tres copias impresas iguales (marco blanco + cinta),
+       en abanico solapado sobre la mesa. La central manda en el eje. */
+    .cl-scenes { background: var(--ph-bg, #a8d4c8); }
+    .cs-collage {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 1240px;
+      margin: clamp(44px, 7vh, 84px) auto 0;
+      padding-bottom: clamp(10px, 2vw, 30px);
+    }
+    .cs-print {
+      position: relative;
+      margin: 0;
+      width: min(38%, 470px);
+      background: #f7f4ed;
+      padding: 11px 11px 13px;
+      border-radius: 5px;
+      box-shadow: 0 30px 60px -24px rgba(31, 74, 61, 0.55);
+      transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .cs-print img { width: 100%; height: auto; display: block; border-radius: 3px; }
+    .cs-print figcaption {
+      margin-top: 10px;
+      font-family: 'Inter', sans-serif; font-size: 0.58rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(31, 74, 61, 0.62);
+    }
+    .cs-print::before {
+      content: ''; position: absolute; top: -12px; left: 50%; z-index: 4;
+      width: 92px; height: 26px;
+      transform: translateX(-50%) rotate(-2deg);
+      background: rgba(236, 230, 218, 0.85);
+      box-shadow: 0 2px 6px rgba(31, 74, 61, 0.2);
+    }
+    .cs-print-1 { transform: rotate(-2.6deg); margin-top: 30px; z-index: 1; }
+    .cs-print-2 { transform: rotate(1.6deg); margin: 0 clamp(-56px, -4vw, -30px); z-index: 2; }
+    .cs-print-2::before { transform: translateX(-50%) rotate(1.5deg); }
+    .cs-print-3 { transform: rotate(-1.8deg); margin-top: 44px; z-index: 1; }
+    .cs-print-3::before { transform: translateX(-50%) rotate(-3deg); }
+    @media (hover: hover) and (pointer: fine) {
+      .cs-print:hover { z-index: 5; }
+      .cs-print-1:hover { transform: rotate(-0.8deg) translateY(-10px); }
+      .cs-print-2:hover { transform: rotate(0.4deg) translateY(-10px); }
+      .cs-print-3:hover { transform: rotate(-0.5deg) translateY(-10px); }
+    }
+    @media (max-width: 760px) {
+      .cs-collage { flex-direction: column; align-items: center; padding-bottom: 0; }
+      .cs-print { width: 88%; }
+      .cs-print-1 { margin: 0; }
+      .cs-print-2 { margin: 30px 0 0; transform: rotate(1.8deg); }
+      .cs-print-3 { margin: 30px 0 0; transform: rotate(-2.2deg); }
+    }
+
     /* Carrusel deslizante del hero: las 3 cajas pasan en bucle continuo */
     .can-rotator { overflow: hidden; width: 100%; border-radius: 12px; box-shadow: 0 28px 64px -30px rgba(31, 74, 61, 0.42); }
     .can-track { display: flex; width: 400%; will-change: transform; transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -186,6 +240,58 @@
 
       </div>
 
+    </div>
+  </section>
+
+  <section class="gx-section cl-scenes" aria-label="Las latas en escena">
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">En escena</span>
+        <h2 class="gx-title">Del lineal a la <em>mesa</em></h2>
+        <p class="gx-sub">La línea fuera del estudio: encimera, mesa puesta y bodegón sobre mármol. El carisma rubber hose aguanta cualquier contexto.</p>
+      </div>
+    </div>
+    <div class="cs-collage">
+      <figure class="cs-print cs-print-1 gx-reveal">
+        <img src="img/CATALALATA_MOCKUP_1_web.jpg" alt="Catalalata — las tres latas sobre la encimera de la cocina" loading="lazy" decoding="async" data-lightbox>
+        <figcaption>01 · Cocina</figcaption>
+      </figure>
+      <figure class="cs-print cs-print-2 gx-reveal">
+        <img src="img/CATALALATA_MOCKUP_2_web.jpg" alt="Catalalata — las latas en la mesa con pan y aceitunas" loading="lazy" decoding="async" data-lightbox>
+        <figcaption>02 · La mesa</figcaption>
+      </figure>
+      <figure class="cs-print cs-print-3 gx-reveal">
+        <img src="img/CATALALATA_MOCKUP_3_web.jpg" alt="Catalalata — bodegón cenital de las latas sobre mármol" loading="lazy" decoding="async" data-lightbox>
+        <figcaption>03 · Cenital</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="gx-section sys" aria-label="El sistema del proyecto">
+    <div class="gx-inner">
+      <div class="gx-head gx-reveal">
+        <span class="gx-eyebrow">El sistema</span>
+        <h2 class="gx-title">Reto, respuesta y <em>paleta</em></h2>
+      </div>
+      <div class="sys-grid">
+        <div class="sys-block gx-reveal">
+          <h3>El reto</h3>
+          <p>Romper el lineal de conservas, un territorio dominado por códigos clásicos que casi nadie se atreve a tocar.</p>
+        </div>
+        <div class="sys-block gx-reveal">
+          <h3>La solución</h3>
+          <p>Mascotas rubber hose de los años 20 que dan carisma a cada lata: la tradición se cuenta con humor, sin perder apetito ni oficio.</p>
+        </div>
+        <ul class="sys-pal gx-reveal" aria-label="Paleta del proyecto">
+        <li style="--sw:#4A95CC"><i aria-hidden="true"></i><span>Azul atún</span><b>#4A95CC</b></li>
+        <li style="--sw:#D8E6E7"><i aria-hidden="true"></i><span>Hielo</span><b>#D8E6E7</b></li>
+        <li style="--sw:#F5953F"><i aria-hidden="true"></i><span>Naranja mejillón</span><b>#F5953F</b></li>
+        <li style="--sw:#294B54"><i aria-hidden="true"></i><span>Concha</span><b>#294B54</b></li>
+        <li style="--sw:#B12B28"><i aria-hidden="true"></i><span>Rojo escabeche</span><b>#B12B28</b></li>
+        <li style="--sw:#C7C3B8"><i aria-hidden="true"></i><span>Plata sardina</span><b>#C7C3B8</b></li>
+        <li style="--sw:#DAEAE0"><i aria-hidden="true"></i><span>Menta</span><b>#DAEAE0</b></li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -406,6 +512,6 @@
   </script>
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=31"></script>
+  <script src="script.js?v=34"></script>
 </body>
 </html>

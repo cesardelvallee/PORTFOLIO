@@ -4341,6 +4341,79 @@ html { scrollbar-width: thin; scrollbar-color: rgba(140, 120, 95, 0.5) transpare
 
 
 /* ============================================================
+   EL SISTEMA — cierre de case study en las páginas de proyecto:
+   reto / solución + paleta clicable (copia el HEX). Colores por
+   proyecto vía --ph-bg / --ph-ink / --ph-accent y --sw por swatch.
+   ============================================================ */
+.sys { background: var(--ph-bg, #ece6da); position: relative; overflow: hidden; }
+.sys .gx-inner { position: relative; z-index: 1; }
+.sys-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(28px, 4.5vw, 72px);
+}
+.sys-block h3 {
+  margin: 0 0 0.9rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ph-accent, #a87d22);
+}
+.sys-block p {
+  margin: 0;
+  max-width: 46ch;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.95rem, 1.15vw, 1.08rem);
+  font-weight: 400;
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--ph-ink, #2d4a1f) 82%, transparent);
+}
+/* paleta: swatches grandes con nombre + hex (clic = copiar) */
+.sys-pal {
+  grid-column: 1 / -1;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(12px, 1.8vw, 22px);
+  margin: clamp(14px, 3vh, 28px) 0 0;
+  padding: 0;
+}
+.sys-pal i {
+  display: block;
+  aspect-ratio: 1.55;
+  border-radius: 10px;
+  background: var(--sw, #999);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+.sys-pal span {
+  display: block;
+  margin-top: 0.65rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ph-ink, #2d4a1f) 55%, transparent);
+}
+.sys-pal b {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ph-ink, #2d4a1f);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 760px) {
+  .sys-grid { grid-template-columns: 1fr; gap: 26px; }
+  .sys-pal { grid-template-columns: repeat(2, 1fr); gap: 18px 14px; }
+}
+
+
+/* ============================================================
    MENÚ GLOBAL — botón flotante + overlay de navegación
    Inyectado por script.js en todas las páginas (única fuente).
    Cortina, color y tipografía coherentes con #page-fx / footer.
