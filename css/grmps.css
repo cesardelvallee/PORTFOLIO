@@ -1,0 +1,368 @@
+/* ============================================================
+   THE GRMPS — hoja propia del TFG (img6.html)
+   Mismo sistema visual que la web de la marca
+   (cesardelvallee.github.io/THE_GRMPS):
+     fondo noche #080f1c · primario #0a3144 · crema #e8e0d0
+     dorado #c4a882 · texto #f0ece4
+     display 'Space Grotesk' · etiquetas 'Space Mono' · cuerpo 'Inter'
+   Una sola atmósfera de principio a fin, sin saltos de color.
+   ============================================================ */
+
+body.grmps-page {
+  --gr-bg: #080f1c;
+  --gr-bg2: #05080e;
+  --gr-primary: #0a3144;
+  --gr-cream: #e8e0d0;
+  --gr-gold: #c4a882;
+  --gr-text: #f0ece4;
+  --gr-line: rgba(232, 224, 208, 0.1);
+  --gr-fd: 'Space Grotesk', sans-serif;
+  --gr-fm: 'Space Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  background: var(--gr-bg);
+}
+
+/* ---------- chrome de la página en clave de marca ---------- */
+.grmps-page .proj-hero { background: var(--gr-bg); }
+.grmps-page .proj-eyebrow {
+  font-family: var(--gr-fm); color: var(--gr-gold);
+  letter-spacing: 0.24em;
+}
+.grmps-page .proj-eyebrow .n { color: rgba(240, 236, 228, 0.55); }
+.grmps-page .proj-title {
+  font-family: var(--gr-fd); font-weight: 700; color: var(--gr-cream);
+  letter-spacing: -0.03em;
+}
+.grmps-page .proj-tagline { color: rgba(240, 236, 228, 0.78); }
+.grmps-page .proj-tagline em { color: var(--gr-gold); }
+.grmps-page .proj-desc { color: rgba(240, 236, 228, 0.55); }
+.grmps-page .proj-desc strong { color: var(--gr-cream); font-weight: 600; }
+.grmps-page .proj-meta .m-label { font-family: var(--gr-fm); color: rgba(240, 236, 228, 0.42); }
+.grmps-page .proj-meta .m-value { color: var(--gr-cream); }
+.grmps-page .proj-hero-visual img {
+  border-radius: 18px;
+  border: 1px solid var(--gr-line);
+}
+
+/* logo de la marca: el SVG es azul noche; este filtro lo pasa a crema
+   (misma receta que el nav de la web de The Grmps) */
+.gr-logo { filter: brightness(0) invert(1) brightness(0.95) sepia(0.08); }
+.gr-logo-mark {
+  display: block; width: 132px; height: auto;
+  margin: 0 0 clamp(16px, 2.6vh, 26px);
+}
+
+/* ---------- base editorial (gx) en clave de marca ---------- */
+.gx-section { padding: clamp(90px, 14vh, 150px) 8vw; background: var(--gr-bg); }
+.gx-inner { max-width: 1300px; margin: 0 auto; }
+.gx-head { margin-bottom: clamp(36px, 6vh, 56px); }
+.gx-eyebrow {
+  display: block;
+  font-family: var(--gr-fm); font-size: 0.66rem; font-weight: 400;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--gr-gold);
+}
+.gx-title {
+  font-family: var(--gr-fd); font-size: clamp(2.2rem, 5vw, 3.7rem);
+  font-weight: 700; letter-spacing: -0.03em; line-height: 1;
+  color: var(--gr-cream); margin: 1rem 0 0; text-wrap: balance;
+}
+.gx-title em { font-style: normal; color: var(--gr-gold); }
+.gx-sub {
+  margin: 1.1rem 0 0; max-width: 52ch;
+  font-family: 'Inter', sans-serif; font-size: 0.96rem;
+  font-weight: 400; line-height: 1.7;
+  color: rgba(240, 236, 228, 0.5);
+}
+.gx-reveal { transition: opacity 0.75s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.gx-reveal.gx-hidden { opacity: 0; transform: translateY(26px); }
+
+/* pie de figura numerado — monoespaciada, como los datos de la web */
+.gr-cap {
+  margin-top: 0.9rem; display: flex; align-items: baseline; gap: 0.7rem;
+  font-family: var(--gr-fm); font-size: 0.6rem; font-weight: 400;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(240, 236, 228, 0.45);
+}
+.gr-num { font-weight: 700; letter-spacing: 0.04em; color: var(--gr-gold); }
+
+/* tarjeta de imagen de la marca: radio 18, hairline, hover dorado */
+.gr-card {
+  position: relative; overflow: hidden; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(232, 224, 208, 0.08);
+  transition: border-color 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gr-card:hover { border-color: rgba(196, 168, 130, 0.34); box-shadow: 0 34px 70px rgba(0, 0, 0, 0.5); }
+}
+.gr-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* índice troquelado en la esquina, como las cards del drop en la web */
+.gr-ix {
+  position: absolute; top: 14px; left: 20px; z-index: 3; pointer-events: none;
+  font-family: var(--gr-fd); font-weight: 700; font-size: 1.7rem; letter-spacing: -0.02em;
+  color: transparent; -webkit-text-stroke: 1px rgba(232, 224, 208, 0.28);
+}
+.gr-ix.on-light { -webkit-text-stroke-color: rgba(8, 15, 28, 0.3); }
+
+/* ---------- manifiesto: logo + misión · visión · valores ---------- */
+.gr-manif { padding-top: clamp(110px, 16vh, 170px); }
+.gr-manif-logo {
+  display: block; width: min(480px, 66vw); height: auto;
+  margin: 0 auto clamp(44px, 8vh, 84px);
+}
+.gr-state {
+  margin: 0 auto; max-width: 26ch; text-align: center;
+  font-family: var(--gr-fd); font-size: clamp(1.6rem, 3.6vw, 2.9rem);
+  font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; text-wrap: balance;
+  color: var(--gr-cream);
+}
+.gr-state em { font-style: normal; color: var(--gr-gold); }
+.gr-pillars {
+  list-style: none; margin: clamp(54px, 9vh, 96px) auto 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(22px, 3vw, 48px);
+}
+.gr-pillars li { border-top: 1px solid var(--gr-line); padding-top: clamp(16px, 2.2vh, 24px); }
+.gr-pillars h3 {
+  margin: 0 0 0.8rem; font-family: var(--gr-fm); font-size: 0.62rem;
+  font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--gr-gold);
+}
+.gr-pillars p {
+  margin: 0; font-family: 'Inter', sans-serif; font-size: 0.92rem;
+  font-weight: 400; line-height: 1.72;
+  color: rgba(240, 236, 228, 0.55);
+}
+
+/* ---------- el personaje: del trazo al vinilo ---------- */
+/* dos láminas idénticas (1:1), simétricas, como pliegos del estudio */
+.gr-craft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 26px); }
+.gr-craft-grid figure { margin: 0; }
+.gr-craft-grid .gr-card { aspect-ratio: 1 / 1; }
+.gr-steps {
+  list-style: none; margin: clamp(44px, 7vh, 72px) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 2.4vw, 34px);
+  counter-reset: paso;
+}
+.gr-steps li {
+  border-top: 1px solid var(--gr-line);
+  padding-top: clamp(14px, 2vh, 22px);
+  font-family: var(--gr-fd); font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 600; letter-spacing: -0.01em; line-height: 1.3;
+  color: var(--gr-cream);
+}
+.gr-steps li::before {
+  counter-increment: paso; content: '0' counter(paso);
+  display: block; margin-bottom: 0.55rem;
+  font-family: var(--gr-fm); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--gr-gold);
+}
+.gr-steps small {
+  display: block; margin-top: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem; font-weight: 400; line-height: 1.65;
+  color: rgba(240, 236, 228, 0.5);
+}
+
+/* ---------- la figura en 3D (model-viewer) ---------- */
+.gr-3d-stage {
+  position: relative; margin: clamp(10px, 3vh, 30px) auto 0;
+  max-width: 860px; border-radius: 18px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(232, 224, 208, 0.1);
+}
+.gr-3d-stage model-viewer {
+  width: 100%; height: clamp(380px, 64vh, 620px);
+  display: block; background: transparent;
+  --poster-color: transparent;
+  --progress-bar-color: #c4a882;
+  --progress-bar-height: 2px;
+}
+/* esquinas técnicas: datos de la pieza, como una ficha de museo */
+.gr-3d-meta {
+  position: absolute; z-index: 2; pointer-events: none;
+  font-family: var(--gr-fm); font-size: 0.56rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(240, 236, 228, 0.4);
+}
+.gr-3d-meta.tl { top: 18px; left: 22px; }
+.gr-3d-meta.tr { top: 18px; right: 22px; text-align: right; color: var(--gr-gold); }
+.gr-3d-hint {
+  margin-top: clamp(18px, 3vh, 28px); text-align: center;
+  font-family: var(--gr-fm); font-size: 0.6rem; letter-spacing: 0.26em;
+  text-transform: uppercase; color: rgba(240, 236, 228, 0.4);
+}
+.gr-3d-hint b { font-weight: 700; color: var(--gr-gold); }
+
+/* ---------- el drop ---------- */
+.gr-drop-grid {
+  display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(28px, 4vw, 64px); align-items: center;
+}
+.gr-drop-grid figure { margin: 0; }
+.gr-drop-copy p {
+  margin: 0 0 1.15rem; font-family: 'Inter', sans-serif;
+  font-size: 0.96rem; font-weight: 400; line-height: 1.75;
+  color: rgba(240, 236, 228, 0.55);
+}
+.gr-drop-copy strong { font-weight: 600; color: var(--gr-cream); }
+.gr-specs {
+  list-style: none; margin: clamp(30px, 4vh, 46px) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(18px, 2.2vw, 30px);
+}
+.gr-specs li {
+  border-top: 1px solid var(--gr-line);
+  padding-top: clamp(14px, 2vh, 22px);
+  font-family: var(--gr-fd); font-size: clamp(1.02rem, 1.4vw, 1.22rem);
+  font-weight: 600; letter-spacing: -0.01em; line-height: 1.3;
+  color: var(--gr-cream);
+}
+.gr-specs span {
+  display: block; margin-bottom: 0.55rem;
+  font-family: var(--gr-fm); font-size: 0.58rem; font-weight: 400;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(240, 236, 228, 0.42);
+}
+/* fila de packaging: tres tarjetas idénticas (4/5), simétricas */
+.gr-pkg-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 26px); margin-top: clamp(44px, 7vh, 76px);
+}
+.gr-pkg-row figure { margin: 0; }
+.gr-pkg-row .gr-card { aspect-ratio: 4 / 5; }
+.gr-slogan {
+  margin: clamp(60px, 10vh, 110px) auto 0; max-width: 24ch; text-align: center;
+  font-family: var(--gr-fd); font-size: clamp(1.5rem, 3.2vw, 2.6rem);
+  font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; text-wrap: balance;
+  color: var(--gr-cream);
+}
+.gr-slogan em { font-style: normal; color: var(--gr-gold); }
+
+/* ---------- el film ---------- */
+.gr-film { background: var(--gr-bg2); }
+.gr-film-frame { position: relative; margin: 0; }
+.gr-film-frame video {
+  width: 100%; height: auto; display: block; border-radius: 18px;
+  background: var(--gr-bg2);
+  border: 1px solid rgba(232, 224, 208, 0.08);
+}
+/* pastilla de sonido — misma receta que el film de la web de la marca */
+.gr-sound {
+  position: absolute; bottom: 5.5%; right: 4.5%; z-index: 6;
+  display: inline-flex; align-items: center; gap: 11px;
+  padding: 11px 18px; border-radius: 50px; cursor: pointer;
+  background: rgba(8, 15, 28, 0.5); color: var(--gr-cream);
+  border: 1px solid rgba(232, 224, 208, 0.18);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-family: var(--gr-fm); font-size: 0.56rem; font-weight: 400;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1), background 0.3s, border-color 0.3s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .gr-sound:hover { border-color: rgba(196, 168, 130, 0.55); background: rgba(8, 15, 28, 0.72); }
+}
+.gr-sound:active { transform: scale(0.96); }
+.gr-sound-ico {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(240, 236, 228, 0.3);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.gr-sound.is-on .gr-sound-ico { background: var(--gr-gold); box-shadow: 0 0 0 4px rgba(196, 168, 130, 0.16); }
+
+/* ---------- en su hábitat ---------- */
+/* retícula estricta: una lámina panorámica + cuatro iguales (16/10) */
+.gr-hab-lead { margin: 0 0 clamp(16px, 2vw, 26px); }
+.gr-hab-lead figure, .gr-hab-grid figure { margin: 0; }
+.gr-hab-lead .gr-card { aspect-ratio: 21 / 9; }
+.gr-hab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 26px); }
+.gr-hab-grid .gr-card { aspect-ratio: 16 / 10; }
+/* leyenda superpuesta abajo-izquierda, como la secuencia "lifestyle" de la web */
+.gr-hab-cap {
+  position: absolute; left: 22px; bottom: 18px; z-index: 3; pointer-events: none;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.gr-hab-cap .sub {
+  font-family: var(--gr-fm); font-size: 0.54rem; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--gr-gold);
+}
+.gr-hab-cap .tit {
+  font-family: var(--gr-fd); font-weight: 700; font-size: clamp(1rem, 1.6vw, 1.35rem);
+  letter-spacing: -0.02em; line-height: 1; color: #fff;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+}
+/* velo inferior para que la leyenda lea sobre cualquier foto */
+.gr-hab .gr-card::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(0deg, rgba(4, 8, 14, 0.72) 0%, rgba(4, 8, 14, 0.12) 34%, transparent 52%);
+}
+
+/* ---------- el sistema (paleta) — ajustes sobre la base compartida ---------- */
+.grmps-page .sys { background: var(--gr-bg); }
+.grmps-page .sys-block h3 { font-family: var(--gr-fm); color: var(--gr-gold); }
+.grmps-page .sys-block p { color: rgba(240, 236, 228, 0.55); }
+.grmps-page .sys-pal span { font-family: var(--gr-fm); color: rgba(240, 236, 228, 0.45); }
+.grmps-page .sys-pal b { font-family: var(--gr-fm); color: var(--gr-cream); }
+.grmps-page .sys-pal i { border: 1px solid rgba(232, 224, 208, 0.1); }
+
+/* ---------- la web viva ---------- */
+.gr-cta { text-align: center; padding-bottom: clamp(110px, 16vh, 180px); }
+.gr-cta-logo {
+  display: block; width: 118px; height: auto;
+  margin: 0 auto clamp(22px, 4vh, 34px); opacity: 0.85;
+}
+.gr-cta-link {
+  display: inline-flex; align-items: baseline; gap: clamp(10px, 1.6vw, 22px);
+  margin-top: 1.5rem; position: relative; text-decoration: none;
+  font-family: var(--gr-fd); font-size: clamp(2rem, 5.4vw, 4.4rem);
+  font-weight: 700; letter-spacing: -0.03em; line-height: 1.02;
+  color: var(--gr-cream);
+}
+.gr-cta-link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -0.08em; height: 2px;
+  background: var(--gr-gold);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.gr-cta-link svg {
+  width: clamp(20px, 2.6vw, 34px); height: clamp(20px, 2.6vw, 34px);
+  align-self: center; flex: 0 0 auto; color: var(--gr-gold);
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gr-cta-link:hover::after { transform: scaleX(1); }
+  .gr-cta-link:hover svg { transform: translate(4px, -4px); }
+}
+.gr-cta-note {
+  margin: 1.7rem auto 0; max-width: 46ch;
+  font-family: 'Inter', sans-serif; font-size: 0.88rem;
+  font-weight: 400; line-height: 1.7;
+  color: rgba(240, 236, 228, 0.45);
+}
+
+/* marquesina en clave de marca (tipo display) */
+.grmps-page .proj-marquee .seg { font-family: var(--gr-fd); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .gr-drop-grid { grid-template-columns: 1fr; gap: 34px; }
+  .gr-drop-grid > figure { max-width: 460px; margin: 0 auto; width: 100%; }
+}
+@media (max-width: 760px) {
+  .gx-section { padding-left: 6vw; padding-right: 6vw; }
+  .gr-pillars { grid-template-columns: 1fr; gap: 26px; }
+  .gr-craft-grid { grid-template-columns: 1fr; gap: 6vw; max-width: 440px; margin: 0 auto; }
+  .gr-steps { grid-template-columns: 1fr; gap: 20px; }
+  .gr-specs { gap: 20px 16px; }
+  .gr-pkg-row { grid-template-columns: 1fr; gap: 6vw; max-width: 400px; margin-top: 48px; margin-left: auto; margin-right: auto; }
+  .gr-hab-lead .gr-card { aspect-ratio: 16 / 10; }
+  .gr-hab-grid { grid-template-columns: 1fr; gap: 6vw; }
+  .gr-manif-logo { width: min(340px, 78vw); }
+}
+@media (max-width: 560px) {
+  .gr-3d-stage model-viewer { height: clamp(320px, 52vh, 460px); }
+  .gr-sound { bottom: 5%; right: 5%; padding: 9px 14px; }
+  .gr-logo-mark { width: 112px; }
+}
+
+/* reduced motion: sin desplazamientos; opacidad y color se conservan */
+@media (prefers-reduced-motion: reduce) {
+  .gx-reveal { transition: opacity 0.4s ease-out; }
+  .gx-reveal.gx-hidden { transform: none; }
+}

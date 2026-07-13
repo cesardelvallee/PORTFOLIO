@@ -889,6 +889,10 @@ a, button, input, textarea, .img-drag {
   transform: rotate(-4deg);
   z-index: 5;
 }
+.stacked-images .img-6 {
+  transform: rotate(5deg);
+  z-index: 6;
+}
 body {
   background: #100f0d;
   min-height: 100vh;
@@ -3356,7 +3360,7 @@ body.theme-light .hero-btn:hover {
    A la izquierda, alineado con la columna: el centro es de la cue SCROLL. */
 @media (min-width: 901px) {
   .proj-hero::after {
-    content: 'Nº ' var(--ph-num, '––') ' / 05';
+    content: 'Nº ' var(--ph-num, '––') ' / 06';
     position: absolute;
     /* al pie del hero: aparece en la zona de transición al hacer scroll
        y nunca choca con la ficha en pantallas bajas (768–800px de alto) */

@@ -18,7 +18,8 @@
     'img2.html':    { label: 'OTTOLINGER × MYKITA' },
     'img3.html':    { label: 'CATALALATA' },
     'img4.html':    { label: 'EL RASTRILLO' },
-    'img5.html':    { label: 'LOEWE 001' }
+    'img5.html':    { label: 'LOEWE 001' },
+    'img6.html':    { label: 'THE GRMPS' }
   };
   function fx() { return document.getElementById('page-fx'); }
   function pageOf(url) {
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const imgLinks = ['img1.html','img2.html','img3.html','img4.html','img5.html'];
+  const imgLinks = ['img1.html','img2.html','img3.html','img4.html','img5.html','img6.html'];
   function isMobile() { 
     return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 'ontouchstart' in window;
   }
@@ -1174,7 +1175,8 @@ document.addEventListener('DOMContentLoaded', function() {
       { href: 'img2.html', n: '02', t: 'Ottolinger × Mykita', c: '3D · Motion' },
       { href: 'img3.html', n: '03', t: 'Catalalata',          c: 'Packaging' },
       { href: 'img4.html', n: '04', t: 'El Rastrillo',        c: 'Campaña' },
-      { href: 'img5.html', n: '05', t: 'Loewe 001',           c: '3D · Spot' }
+      { href: 'img5.html', n: '05', t: 'Loewe 001',           c: '3D · Spot' },
+      { href: 'img6.html', n: '06', t: 'The Grmps',           c: 'TFG · Art Toys' }
     ];
     var here = location.pathname.split('/').pop() || 'index.html';
     function cur(href) { return href === here ? ' aria-current="page"' : ''; }
@@ -1241,7 +1243,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'img2.html': 'img/POSTER_GAFAS_1_web.jpg',
         'img3.html': 'img/MOCKUP_ATUN_02.webp',
         'img4.html': 'img/RASTRILLO_INSTASTORIE2.webp',
-        'img5.html': 'img/WhatsApp-Image-2025-09-24-at-15.47.46.webp'
+        'img5.html': 'img/WhatsApp-Image-2025-09-24-at-15.47.46.webp',
+        'img6.html': 'img/GRMP_CARD_web.jpg'
       };
       var prev = document.createElement('div');
       prev.className = 'sm-preview';
@@ -1875,6 +1878,69 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       requestAnimationFrame(loop);
     })();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   THE GRMPS (img6) — figura 3D interactiva y film del drop.
+   El visor es un <model-viewer> (mismo motor que el busto de la
+   home): arrastre nativo con inercia. Aquí solo se gobierna el
+   auto-rotate (fuera con reduced-motion, y en pausa mientras el
+   usuario lo agarra para no pelearse con su gesto).
+   ============================================================ */
+(function() {
+  function init() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* --- figura 3D --- */
+    var model = document.getElementById('gr-model');
+    if (model) {
+      if (reduce) model.removeAttribute('auto-rotate');
+      else {
+        // al soltar, model-viewer retoma el giro solo tras auto-rotate-delay
+        model.addEventListener('camera-change', function(e) {
+          if (e.detail && e.detail.source === 'user-interaction') model.dataset.touched = '1';
+        });
+      }
+    }
+
+    /* --- film del drop: reproduce a la vista, en pausa fuera --- */
+    var vid = document.getElementById('gr-film-video');
+    if (vid) {
+      if (!reduce && 'IntersectionObserver' in window) {
+        var vio = new IntersectionObserver(function(entries) {
+          entries.forEach(function(en) {
+            if (en.isIntersecting) { var p = vid.play(); if (p && p.catch) p.catch(function() {}); }
+            else vid.pause();
+          });
+        }, { threshold: 0.35 });
+        vio.observe(vid);
+      }
+      /* clic sobre el vídeo: alterna reproducción (gesto explícito, vale
+         también como único disparador cuando hay reduced-motion) */
+      vid.addEventListener('click', function() {
+        if (vid.paused) { var p = vid.play(); if (p && p.catch) p.catch(function() {}); }
+        else vid.pause();
+      });
+      var sBtn = document.getElementById('gr-film-sound');
+      if (sBtn) {
+        function syncSound() {
+          var on = !vid.muted;
+          sBtn.classList.toggle('is-on', on);
+          sBtn.setAttribute('aria-pressed', String(on));
+          sBtn.setAttribute('aria-label', on ? 'Silenciar el film' : 'Activar sonido del film');
+        }
+        vid.addEventListener('volumechange', syncSound);
+        sBtn.addEventListener('click', function() {
+          vid.muted = !vid.muted;
+          if (!vid.muted) { var p = vid.play(); if (p && p.catch) p.catch(function() {}); }
+          syncSound();
+        });
+        syncSound();
+      }
+    }
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
