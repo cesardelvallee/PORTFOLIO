@@ -94,7 +94,9 @@ body.grmps-page {
 @media (hover: hover) and (pointer: fine) {
   .gr-card:hover { border-color: rgba(196, 168, 130, 0.34); box-shadow: 0 34px 70px rgba(0, 0, 0, 0.5); }
 }
-.gr-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* max-width:none — la regla global img{max-width:800px} capaba la foto
+   dentro de las tarjetas anchas (p. ej. la vitrina) y dejaba un hueco */
+.gr-card img { width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; }
 /* índice troquelado en la esquina, como las cards del drop en la web */
 .gr-ix {
   position: absolute; top: 14px; left: 20px; z-index: 3; pointer-events: none;
@@ -116,6 +118,17 @@ body.grmps-page {
   color: var(--gr-cream);
 }
 .gr-state em { font-style: normal; color: var(--gr-gold); }
+/* la idea fundacional: el porqué del proyecto, bajo el statement */
+.gr-idea {
+  margin: clamp(26px, 4.5vh, 44px) auto 0; max-width: 62ch; text-align: center;
+}
+.gr-idea p {
+  margin: 0 0 1.05rem; font-family: 'Inter', sans-serif;
+  font-size: clamp(0.92rem, 1.05vw, 1.02rem); font-weight: 400; line-height: 1.78;
+  color: rgba(240, 236, 228, 0.58);
+}
+.gr-idea p:last-child { margin-bottom: 0; }
+.gr-idea strong { font-weight: 600; color: var(--gr-cream); }
 .gr-pillars {
   list-style: none; margin: clamp(54px, 9vh, 96px) auto 0; padding: 0;
   display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(22px, 3vw, 48px);
@@ -133,10 +146,42 @@ body.grmps-page {
 }
 
 /* ---------- el personaje: del trazo al vinilo ---------- */
-/* dos láminas idénticas (1:1), simétricas, como pliegos del estudio */
-.gr-craft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 26px); }
-.gr-craft-grid figure { margin: 0; }
-.gr-craft-grid .gr-card { aspect-ratio: 1 / 1; }
+/* comparador: un solo escenario; el divisor barre el boceto y
+   descubre el vinilo debajo (las dos figuras van alineadas por píxel) */
+.gr-mix-wrap { max-width: 640px; margin: 0 auto; }
+.gr-mix {
+  position: relative; aspect-ratio: 1 / 1;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  cursor: none; outline: none;
+}
+.gr-mix:focus-visible { border-color: var(--gr-gold); }
+.gr-mix img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: cover; display: block; pointer-events: none;
+}
+.gr-mix-top { position: absolute; inset: 0; z-index: 1; will-change: clip-path; }
+.gr-mix-tag {
+  position: absolute; top: 16px; z-index: 2; pointer-events: none;
+  font-family: var(--gr-fm); font-size: 0.56rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(8, 15, 28, 0.48);
+}
+.gr-mix-tag b { font-weight: 700; color: rgba(188, 89, 62, 0.85); }
+.gr-mix-tag.tl { left: 20px; }
+.gr-mix-tag.tr { right: 20px; }
+/* divisor dorado con tirador */
+.gr-mix-bar {
+  position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; z-index: 3;
+  background: var(--gr-gold); pointer-events: none;
+  box-shadow: 0 0 18px rgba(196, 168, 130, 0.5);
+  will-change: transform;
+}
+.gr-mix-knob {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  background: #080f1c; border: 1px solid var(--gr-gold); color: var(--gr-cream);
+}
+.gr-mix-knob svg { width: 11px; height: 11px; display: block; }
 .gr-steps {
   list-style: none; margin: clamp(44px, 7vh, 72px) 0 0; padding: 0;
   display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 2.4vw, 34px);
@@ -190,6 +235,18 @@ body.grmps-page {
   text-transform: uppercase; color: rgba(240, 236, 228, 0.4);
 }
 .gr-3d-hint b { font-weight: 700; color: var(--gr-gold); }
+/* huevo de pascua: tras tres vueltas seguidas, el GRMP protesta */
+.gr-dizzy {
+  position: absolute; left: 50%; bottom: 18px; z-index: 3; pointer-events: none;
+  transform: translate(-50%, 8px); white-space: nowrap;
+  font-family: var(--gr-fm); font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gr-gold); opacity: 0;
+  transition: opacity 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.gr-dizzy.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) {
+  .gr-dizzy { transform: translate(-50%, 0); }
+}
 
 /* ---------- el drop ---------- */
 .gr-drop-grid {
@@ -347,7 +404,6 @@ body.grmps-page {
 @media (max-width: 760px) {
   .gx-section { padding-left: 6vw; padding-right: 6vw; }
   .gr-pillars { grid-template-columns: 1fr; gap: 26px; }
-  .gr-craft-grid { grid-template-columns: 1fr; gap: 6vw; max-width: 440px; margin: 0 auto; }
   .gr-steps { grid-template-columns: 1fr; gap: 20px; }
   .gr-specs { gap: 20px 16px; }
   .gr-pkg-row { grid-template-columns: 1fr; gap: 6vw; max-width: 400px; margin-top: 48px; margin-left: auto; margin-right: auto; }

@@ -978,8 +978,10 @@ document.addEventListener('DOMContentLoaded', function() {
             + ' .genre-trigger, .genre-option, .volume-slider, .contact-link, .c-card, .cta-button, .card-link,'
             + ' .minimal-card img, .sf-mail, .sf-nav a, .back-btn, [data-lightbox]';
 
+    /* el halo mide 88px de layout; el estado de reposo es scale(0.5) (44px
+       visuales). Nunca se escala por encima de 1: rasterizado siempre nítido. */
     var mx = window.innerWidth / 2, my = window.innerHeight / 2;
-    var rx = mx, ry = my, rs = 1, targetS = 1, shown = false;
+    var rx = mx, ry = my, rs = 0.5, targetS = 0.5, shown = false;
 
     document.addEventListener('mousemove', function(e) {
       mx = e.clientX; my = e.clientY;
@@ -990,14 +992,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (lab) ring.setAttribute('data-label', lab.getAttribute('data-cursor') || '');
       ring.classList.toggle('has-label', !!lab);
       ring.classList.toggle('is-hot', !!hot && !lab);
-      if (targetS !== 0.8) targetS = lab ? 2 : (hot ? 1.4 : 1);
+      if (targetS !== 0.4) targetS = lab ? 1 : (hot ? 0.7 : 0.5);
     }, { passive: true });
 
     document.documentElement.addEventListener('mouseleave', function() { ring.classList.remove('is-visible'); });
     document.documentElement.addEventListener('mouseenter', function() { if (shown) ring.classList.add('is-visible'); });
 
     document.addEventListener('mousedown', function(e) {
-      targetS = 0.8;
+      targetS = 0.4;
       var r = document.createElement('div');
       r.className = 'click-ripple';
       r.style.left = e.clientX + 'px';
@@ -1006,8 +1008,8 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() { if (r.parentNode) r.parentNode.removeChild(r); }, 640);
     });
     document.addEventListener('mouseup', function() {
-      targetS = ring.classList.contains('has-label') ? 2
-              : ring.classList.contains('is-hot') ? 1.4 : 1;
+      targetS = ring.classList.contains('has-label') ? 1
+              : ring.classList.contains('is-hot') ? 0.7 : 0.5;
     });
 
     (function loop() {
@@ -1898,12 +1900,100 @@ document.addEventListener('DOMContentLoaded', function() {
     var model = document.getElementById('gr-model');
     if (model) {
       if (reduce) model.removeAttribute('auto-rotate');
-      else {
-        // al soltar, model-viewer retoma el giro solo tras auto-rotate-delay
-        model.addEventListener('camera-change', function(e) {
-          if (e.detail && e.detail.source === 'user-interaction') model.dataset.touched = '1';
-        });
+
+      /* huevo de pascua: tres vueltas seguidas del usuario y el GRMP se marea */
+      var dizzy = document.querySelector('.gr-dizzy');
+      var spun = 0, lastTheta = null, dizzyTimer = null;
+      model.addEventListener('camera-change', function(e) {
+        if (!e.detail || e.detail.source !== 'user-interaction') { lastTheta = null; return; }
+        if (!model.getCameraOrbit) return;
+        var th = model.getCameraOrbit().theta; // radianes
+        if (lastTheta !== null) {
+          var d = Math.abs(th - lastTheta);
+          if (d > Math.PI) d = 2 * Math.PI - d; // salto de -π a π
+          spun += d;
+          if (spun > Math.PI * 6 && dizzy && !dizzy.classList.contains('on')) {
+            dizzy.classList.add('on');
+            clearTimeout(dizzyTimer);
+            dizzyTimer = setTimeout(function() {
+              dizzy.classList.remove('on');
+              spun = 0;
+            }, 3800);
+          }
+        }
+        lastTheta = th;
+      });
+    }
+
+    /* --- comparador trazo ↔ vinilo --- */
+    var mix = document.getElementById('gr-mix');
+    if (mix) {
+      var mixTop = mix.querySelector('.gr-mix-top');
+      var mixBar = mix.querySelector('.gr-mix-bar');
+      /* arranca casi todo trazo; la presentación barre hasta la mitad.
+         Sin observer o con reduced-motion, directo al 50/50. */
+      var mp = (reduce || !('IntersectionObserver' in window)) ? 50 : 94;
+      var mixDown = false;
+
+      function mixPaint() {
+        mixTop.style.clipPath = 'inset(0 ' + (100 - mp) + '% 0 0)';
+        mixBar.style.transform = 'translateX(' + (mp / 100) * mix.clientWidth + 'px)';
+        mix.setAttribute('aria-valuenow', String(Math.round(mp)));
       }
+      function mixFrom(e) {
+        var r = mix.getBoundingClientRect();
+        mp = Math.min(94, Math.max(6, ((e.clientX - r.left) / r.width) * 100));
+        mixPaint();
+      }
+      mix.addEventListener('pointerdown', function(e) {
+        mixDown = true;
+        if (mix.setPointerCapture) { try { mix.setPointerCapture(e.pointerId); } catch (err) {} }
+        mixFrom(e);
+      });
+      mix.addEventListener('pointermove', function(e) { if (mixDown) mixFrom(e); });
+      mix.addEventListener('pointerup', function() { mixDown = false; });
+      mix.addEventListener('pointercancel', function() { mixDown = false; });
+      mix.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          mp = Math.min(94, Math.max(6, mp + (e.key === 'ArrowRight' ? 4 : -4)));
+          mixPaint();
+        }
+      });
+      window.addEventListener('resize', mixPaint, { passive: true });
+
+      /* presentación al entrar: el vinilo barre desde la derecha (una vez) */
+      if (!reduce && 'IntersectionObserver' in window) {
+        var mixSwept = false;
+        var mio = new IntersectionObserver(function(entries) {
+          entries.forEach(function(en) {
+            if (!en.isIntersecting || mixSwept) return;
+            mixSwept = true;
+            mio.disconnect();
+            var t0 = null, from = mp, dur = 950;
+            function sweep(ts) {
+              if (mixDown) return; // el usuario ya lo controla
+              if (t0 === null) t0 = ts;
+              var k = Math.min(1, (ts - t0) / dur);
+              k = 1 - Math.pow(1 - k, 3); // ease-out fuerte, como la curva de la casa
+              mp = from + (50 - from) * k;
+              mixPaint();
+              if (k < 1) requestAnimationFrame(sweep);
+            }
+            requestAnimationFrame(sweep);
+          });
+        }, { threshold: 0.5 });
+        mio.observe(mix);
+      }
+      mixPaint();
+    }
+
+    /* guiño en la pestaña: si te vas, el GRMP se queda esperando */
+    if (document.body && document.body.classList.contains('grmps-page')) {
+      var grTitle = document.title;
+      document.addEventListener('visibilitychange', function() {
+        document.title = document.visibilityState === 'hidden' ? '👴 El GRMP te espera…' : grTitle;
+      });
     }
 
     /* --- film del drop: reproduce a la vista, en pausa fuera --- */

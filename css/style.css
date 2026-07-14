@@ -3621,13 +3621,16 @@ body.theme-light .hero-btn:hover {
    ================================================ */
 
 /* --- 1. Halo del cursor (acompaña al egg-cursor con retardo suave) --- */
+/* El halo vive a su tamaño MÁXIMO (88px) y se reduce con scale ≤ 1:
+   así el texto y el borde se rasterizan a tamaño completo y nunca se
+   estiran (escalar >1 emborronaba las etiquetas "Ampliar/Girar/…"). */
 #cursor-ring {
   position: fixed;
   top: 0;
   left: 0;
-  width: 44px;
-  height: 44px;
-  border: 1.5px solid rgba(199, 178, 153, 0.5);
+  width: 88px;
+  height: 88px;
+  border: 3px solid rgba(199, 178, 153, 0.5);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
@@ -3692,7 +3695,7 @@ body.theme-light .click-ripple { border-color: rgba(60, 50, 38, 0.55); }
   align-items: center;
   justify-content: center;
   font-family: 'Inter', sans-serif;
-  font-size: 0.32rem;
+  font-size: 0.64rem; /* a escala 1 (halo 88px): nítido, sin upscale */
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;

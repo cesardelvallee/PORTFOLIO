@@ -23,9 +23,9 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=45">
+  <link rel="stylesheet" href="css/style.css?v=46">
   <link rel="stylesheet" href="css/project.css?v=10">
-  <link rel="stylesheet" href="css/grmps.css?v=2">
+  <link rel="stylesheet" href="css/grmps.css?v=4">
   <link rel="stylesheet" href="css/dragme.css">
   <!-- tipografías de la marca The Grmps: Space Grotesk (display) · Space Mono (datos) · Inter (cuerpo) -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -88,7 +88,11 @@
   <section class="gx-section gr-manif" aria-label="Manifiesto de The Grmps">
     <div class="gx-inner">
       <img class="gr-logo gr-manif-logo gx-reveal" src="img/GRMPS_LOGO.svg" alt="Logotipo de The Grmps art toys" width="480" height="384">
-      <p class="gr-state gx-reveal">El primer art toy que celebra a los que llegaron antes: porque la autenticidad y el <em>flow</em> son eternos.</p>
+      <p class="gr-state gx-reveal">Los abuelos no son para toda la vida. <em>Su flow, sí.</em></p>
+      <div class="gr-idea gx-reveal">
+        <p>The Grmps nace de una idea muy sencilla: quien ha tenido abuelos les guarda un cariño, un respeto y unos recuerdos enormes — y, por desgracia, no se quedan para siempre. Mucha gente querría conservar <strong>algo físico</strong> que se los recuerde.</p>
+        <p>Eso es exactamente esta marca: abuelos con mucho flow — ropa ancha y moderna, accesorios de moda — esculpidos como <strong>art toys de colección</strong>. Para la generación que colecciona figuras y drops, y que también quiere tener cerca un recuerdo de los suyos.</p>
+      </div>
       <ul class="gr-pillars">
         <li class="gx-reveal">
           <h3>Misión</h3>
@@ -111,23 +115,26 @@
       <div class="gx-head gx-reveal">
         <span class="gx-eyebrow">El personaje</span>
         <h2 class="gx-title">Del trazo <em>al vinilo</em></h2>
-        <p class="gx-sub">El GRMP nace como ilustración: un abuelo de barrio con gorra, puffer y bastón. De ahí pasa al esculpido digital y al acabado de vinilo pulido — sin perder ni una arruga del carácter original.</p>
+        <p class="gx-sub">El GRMP nace como ilustración: un abuelo de barrio con gorra, puffer y bastón. Mueve el divisor y mira cómo el boceto se convierte en vinilo — sin perder ni una arruga del carácter original.</p>
       </div>
-      <div class="gr-craft-grid">
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <span class="gr-ix on-light" aria-hidden="true">01</span>
-            <img src="img/GRMP_ILUSTRACION_web.jpg" alt="Ilustración original del personaje GRMP: abuelo con gorra roja, chaqueta puffer y bastón" loading="lazy" decoding="async" data-lightbox>
+      <div class="gr-mix-wrap gx-reveal">
+        <div class="gr-mix gr-card" id="gr-mix" role="slider" tabindex="0" data-cursor="Compara"
+             aria-label="Comparador entre la ilustración original y la figura de vinilo. Arrastra o usa las flechas del teclado."
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Mitad trazo, mitad vinilo">
+          <img src="img/grmp_front_web.jpg" alt="Escultura digital del GRMP, vista frontal del render 3D" loading="lazy" decoding="async" draggable="false">
+          <div class="gr-mix-top" aria-hidden="true">
+            <img src="img/GRMP_TRAZO_web.jpg" alt="" loading="lazy" decoding="async" draggable="false">
           </div>
-          <figcaption class="gr-cap"><span class="gr-num">01</span> Ilustración original</figcaption>
-        </figure>
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <span class="gr-ix on-light" aria-hidden="true">02</span>
-            <img src="img/grmp_front_web.jpg" alt="Escultura digital del GRMP, vista frontal del render 3D" loading="lazy" decoding="async" data-lightbox>
+          <span class="gr-mix-tag tl" aria-hidden="true"><b>01</b> · Trazo</span>
+          <span class="gr-mix-tag tr" aria-hidden="true"><b>02</b> · Vinilo</span>
+          <div class="gr-mix-bar" aria-hidden="true">
+            <span class="gr-mix-knob">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </span>
           </div>
-          <figcaption class="gr-cap"><span class="gr-num">02</span> Escultura digital</figcaption>
-        </figure>
+        </div>
+        <p class="gr-3d-hint gx-reveal"><b>←</b> Mueve el divisor <b>→</b></p>
       </div>
       <ul class="gr-steps gx-reveal">
         <li>Diseño<small>Ilustración y hoja de personaje: proporciones, ropa, actitud.</small></li>
@@ -151,6 +158,7 @@
           camera-controls disable-zoom disable-pan auto-rotate auto-rotate-delay="1800" rotation-per-second="24deg"
           interaction-prompt="none" loading="lazy" reveal="auto"
           alt="Modelo 3D interactivo de la figura GRMP"></model-viewer>
+        <span class="gr-dizzy" aria-hidden="true">El GRMP está mareado · dale un respiro 😵‍💫</span>
       </div>
       <p class="gr-3d-hint gx-reveal"><b>←</b> Arrastra para girar <b>→</b></p>
     </div>
@@ -349,7 +357,7 @@
 
 
   <div id="egg-cursor"></div>
-  <script src="script.js?v=36"></script>
+  <script src="script.js?v=39"></script>
   <script>
     document.getElementById('home-link').addEventListener('click', function(e) {
       e.preventDefault();
