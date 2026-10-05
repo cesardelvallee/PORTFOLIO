@@ -1424,7 +1424,10 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 /* ============================================================
-   MENÚ GLOBAL — botón flotante + overlay de navegación.
+   MENÚ GLOBAL — botón píldora + overlay en persianas.
+   Abrir: dos capas de columnas suben escalonadas (beige y luego
+   tinta) y el contenido entra con máscara. Cerrar: lo mismo en
+   orden inverso y más rápido. Solo transform/opacity.
    Se inyecta aquí para que todas las páginas compartan una única
    fuente de verdad. Los enlaces .html pasan por PageFX (cortina)
    gracias al interceptor global de clics.
@@ -1446,51 +1449,112 @@ document.addEventListener('DOMContentLoaded', function() {
       { href: 'img5.html', n: '05', t: 'Loewe 001',           c: '3D · Spot' },
       { href: 'img6.html', n: '06', t: 'The Grmps',           c: 'TFG · Art Toys' }
     ];
+    var COLS = 5;
     var here = location.pathname.split('/').pop() || 'index.html';
     function cur(href) { return href === here ? ' aria-current="page"' : ''; }
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
 
+    // cada letra en su caja: el hover las hace rodar una a una
+    function letters(text) {
+      return Array.prototype.map.call(text, function(ch, i) {
+        return '<span class="sm-ch" style="--i:' + i + '">' + (ch === ' ' ? '&nbsp;' : ch) + '</span>';
+      }).join('');
+    }
+
+    // marquesina de la banda: dos mitades idénticas para que el bucle no se note
+    function marquee(w) {
+      var unit = '<span class="mq-u"><span class="mq-t">' + w.t + '</span>'
+        + '<span class="mq-c">' + w.c + '</span><i class="mq-dot"></i></span>';
+      var half = unit + unit + unit;
+      return '<span class="sm-band" aria-hidden="true"><span class="sm-band-in">'
+        + '<span class="sm-marq">' + half + half + '</span></span></span>';
+    }
+    var ARROW = '<svg class="sm-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4.2 3H9v4.8"/></svg>';
+
+    /* ---- botón ---- */
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'menu-btn';
     btn.setAttribute('aria-label', 'Abrir menú');
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-controls', 'site-menu');
-    btn.innerHTML = '<span class="mb-ico" aria-hidden="true"></span>';
+    btn.innerHTML = '<span class="mb-ico" aria-hidden="true"></span>'
+      + '<span class="mb-label" aria-hidden="true"><span>Menú</span><span>Cerrar</span></span>';
     // en el index la esquina derecha es del reproductor: botón a la izquierda
-    if (document.querySelector('.content-drag-area')) btn.classList.add('mb-left');
+    var btnLeft = !!document.querySelector('.content-drag-area');
+    if (btnLeft) btn.classList.add('mb-left');
 
+    /* ---- overlay ---- */
     var menu = document.createElement('nav');
     menu.id = 'site-menu';
+    // el pie del menú deja hueco al botón en su mismo lado
+    if (btnLeft) menu.classList.add('sm-btn-left');
     menu.setAttribute('aria-label', 'Menú del sitio');
     menu.setAttribute('aria-hidden', 'true');
+    menu.inert = true;
 
-    var html = '<div class="sm-grid"><div class="sm-primary"><span class="sm-label sm-anim">Menú</span>';
-    PAGES.forEach(function(p) {
-      html += '<a class="sm-link sm-anim" href="' + p.href + '"' + cur(p.href) + '>' + p.label + '</a>';
+    var html = '';
+    ['a', 'b'].forEach(function(layer) {
+      html += '<div class="sm-sh sm-sh-' + layer + '" aria-hidden="true">';
+      for (var i = 0; i < COLS; i++) html += '<i style="--c:' + i + '"></i>';
+      html += '</div>';
     });
-    html += '</div><div class="sm-work"><span class="sm-label sm-anim">Selected work</span><div class="sm-work-list">';
+
+    html += '<div class="sm-inner">'
+      + '<header class="sm-top sm-in">'
+      +   '<span class="sm-brand">César del Valle</span>'
+      +   '<span class="sm-role">Graphic designer — Madrid</span>'
+      +   '<span class="sm-clock">MAD <b class="sm-time">--:--</b></span>'
+      + '</header>'
+      + '<div class="sm-body"><ul class="sm-primary">';
+    PAGES.forEach(function(p, i) {
+      html += '<li><a class="sm-link" href="' + p.href + '"' + cur(p.href) + ' aria-label="' + p.label + '">'
+        + '<span class="sm-num sm-in" aria-hidden="true">' + pad(i + 1) + '</span>'
+        + '<span class="sm-line" aria-hidden="true"><span class="sm-word">' + letters(p.label) + '</span></span>'
+        + '</a></li>';
+    });
+    html += '</ul><div class="sm-work">'
+      + '<div class="sm-work-head sm-in" aria-hidden="true"><span>Nº</span>'
+      +   '<span>Selected work <em>(' + pad(WORK.length) + ')</em></span><span>Disciplina</span></div>'
+      + '<ol class="sm-work-list">';
     WORK.forEach(function(w) {
-      html += '<a class="sm-proj sm-anim" href="' + w.href + '"' + cur(w.href) + '><span class="sm-n">' + w.n + '</span>' + w.t + '<span class="sm-cat">' + w.c + '</span></a>';
+      html += '<li class="sm-in"><a class="sm-proj" href="' + w.href + '"' + cur(w.href) + '>'
+        + '<span class="sm-n">' + w.n + '</span>'
+        + '<span class="sm-t">' + w.t + '</span>'
+        + '<span class="sm-cat">' + w.c + '</span>'
+        + ARROW + marquee(w)
+        + '</a></li>';
     });
-    html += '</div></div></div>';
-    html += '<div class="sm-foot sm-anim">'
-      + '<a class="sm-mail" href="mailto:cesardelvallefuentes@gmail.com">cesardelvallefuentes@gmail.com</a>'
-      + '<div class="sm-social">'
-      + '<a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>'
-      + '<a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>'
-      + '</div></div>';
+    html += '</ol></div>'
+      + '</div>'
+      + '<footer class="sm-foot sm-in">'
+      +   '<span class="sm-status"><i aria-hidden="true"></i>Disponible para nuevos proyectos</span>'
+      +   '<a class="sm-mail" href="mailto:cesardelvallefuentes@gmail.com">cesardelvallefuentes@gmail.com</a>'
+      +   '<div class="sm-social">'
+      +     '<a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>'
+      +     '<a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>'
+      +   '</div>'
+      + '</footer>'
+      + '</div>';
     menu.innerHTML = html;
 
     document.body.appendChild(menu);
     document.body.appendChild(btn);
 
-    // stagger de entrada (el delay solo aplica al abrir; ver .sm-anim en CSS)
-    Array.prototype.forEach.call(menu.querySelectorAll('.sm-anim'), function(el, i) {
-      el.style.setProperty('--d', (140 + i * 45) + 'ms');
+    /* ---- coreografía de entrada: cuándo aparece cada pieza (ms) ---- */
+    function delay(el, ms) { el.style.setProperty('--o', ms + 'ms'); }
+    delay(menu.querySelector('.sm-top'), 380);
+    Array.prototype.forEach.call(menu.querySelectorAll('.sm-link'), function(a, i) {
+      delay(a.querySelector('.sm-word'), 400 + i * 70);
+      delay(a.querySelector('.sm-num'), 520 + i * 70);
     });
+    delay(menu.querySelector('.sm-work-head'), 460);
+    Array.prototype.forEach.call(menu.querySelectorAll('.sm-work-list .sm-in'), function(li, i) {
+      delay(li, 480 + i * 45);
+    });
+    delay(menu.querySelector('.sm-foot'), 660);
 
     var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // botón magnético (mismo factor que .back-btn; se inyecta tarde y no
     // llega al binding del bloque de micro-interacciones)
@@ -1499,74 +1563,110 @@ document.addEventListener('DOMContentLoaded', function() {
         var r = btn.getBoundingClientRect();
         var mx = e.clientX - (r.left + r.width / 2);
         var my = e.clientY - (r.top + r.height / 2);
-        btn.style.transform = 'translate(' + (mx * 0.25).toFixed(1) + 'px,' + (my * 0.25).toFixed(1) + 'px)';
+        btn.style.transform = 'translate(' + (mx * 0.2).toFixed(1) + 'px,' + (my * 0.25).toFixed(1) + 'px)';
       });
       btn.addEventListener('mouseleave', function() { btn.style.transform = ''; });
     }
 
-    // preview flotante del proyecto al pasar por "Selected work" (solo desktop)
-    if (fine && !reduce) {
-      var PREVIEWS = {
-        'img1.html': 'img/CAFE_BOLSAS_web.jpg',
-        'img2.html': 'img/POSTER_GAFAS_1_web.jpg',
-        'img3.html': 'img/MOCKUP_ATUN_02.webp',
-        'img4.html': 'img/RASTRILLO_INSTASTORIE2.webp',
-        'img5.html': 'img/WhatsApp-Image-2025-09-24-at-15.47.46.webp',
-        'img6.html': 'img/GRMP_CARD_web.jpg'
-      };
-      var prev = document.createElement('div');
-      prev.className = 'sm-preview';
-      prev.setAttribute('aria-hidden', 'true');
-      var pimg = document.createElement('img');
-      pimg.alt = '';
-      pimg.decoding = 'async';
-      prev.appendChild(pimg);
-      menu.appendChild(prev);
-
-      var px = 0, py = 0, vx = -1e4, vy = 0;
-      menu.addEventListener('mousemove', function(e) { px = e.clientX; py = e.clientY; }, { passive: true });
-      Array.prototype.forEach.call(menu.querySelectorAll('.sm-proj'), function(a) {
-        a.addEventListener('mouseenter', function() {
-          var src = PREVIEWS[a.getAttribute('href')];
-          if (!src) return;
-          if (pimg.getAttribute('src') !== src) pimg.setAttribute('src', src);
-          prev.classList.add('is-on');
-        });
-        a.addEventListener('mouseleave', function() { prev.classList.remove('is-on'); });
+    /* ---- proyectos: la banda beige entra por el borde por el que llega el
+       cursor y sale por el que se va. Al recorrer la lista parece pasar de
+       fila en fila. Banda e interior se mueven en sentidos opuestos, así
+       el texto se descubre en vez de desplazarse. ---- */
+    var rows = menu.querySelectorAll('.sm-proj');
+    function sideOf(e, a) {
+      var r = a.getBoundingClientRect();
+      return e.clientY < r.top + r.height / 2 ? -1 : 1;
+    }
+    function hidden(band, inner, d) {
+      band.style.transform = 'translateY(' + (101 * d) + '%)';
+      inner.style.transform = 'translateY(' + (-101 * d) + '%)';
+    }
+    function setBand(a, d, on) {
+      var band = a.querySelector('.sm-band'), inner = band.firstChild;
+      if (on === a.classList.contains('is-on')) return;
+      // si aún se está yendo, se reengancha desde donde está (sin saltos)
+      if (on && performance.now() - (a._leftAt || 0) > 520) {
+        band.style.transition = inner.style.transition = 'none';
+        hidden(band, inner, d);
+        void band.offsetWidth;
+        band.style.transition = inner.style.transition = '';
+      }
+      a.classList.toggle('is-on', on);
+      if (on) band.style.transform = inner.style.transform = 'translateY(0%)';
+      else { a._leftAt = performance.now(); hidden(band, inner, d); }
+    }
+    Array.prototype.forEach.call(rows, function(a) {
+      if (fine) {
+        a.addEventListener('mouseenter', function(e) { setBand(a, sideOf(e, a), true); });
+        a.addEventListener('mouseleave', function(e) { setBand(a, sideOf(e, a), false); });
+      }
+      a.addEventListener('focus', function() { if (a.matches(':focus-visible')) setBand(a, 1, true); });
+      a.addEventListener('blur', function() { setBand(a, 1, false); });
+    });
+    function resetBands() {
+      Array.prototype.forEach.call(rows, function(a) {
+        if (!a.classList.contains('is-on')) return;
+        var band = a.querySelector('.sm-band'), inner = band.firstChild;
+        band.style.transition = inner.style.transition = 'none';
+        a.classList.remove('is-on');
+        hidden(band, inner, 1);
+        void band.offsetWidth;
+        band.style.transition = inner.style.transition = '';
       });
-      (function pvLoop() {
-        if (document.body.classList.contains('menu-open')) {
-          if (vx < -9000) { vx = px; vy = py; }  // primer frame: sin viaje desde 0,0
-          vx += (px - vx) * 0.16;
-          vy += (py - vy) * 0.16;
-          prev.style.transform = 'translate(' + (vx + 28).toFixed(1) + 'px,' + (vy - 96).toFixed(1) + 'px)';
-        } else {
-          vx = -1e4;
-        }
-        requestAnimationFrame(pvLoop);
-      })();
     }
 
+    /* ---- hora local ---- */
+    var timeEl = menu.querySelector('.sm-time');
+    var clockTimer = null;
+    var fmt = null;
+    try { fmt = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' }); } catch (e) {}
+    function tickClock() {
+      var d = new Date();
+      timeEl.textContent = fmt ? fmt.format(d) : pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    /* ---- abrir / cerrar ---- */
     function isOpen() { return document.body.classList.contains('menu-open'); }
     function setOpen(open) {
+      if (open === isOpen()) return;
       document.body.classList.toggle('menu-open', open);
       // candado de scroll en <html>, que es el contenedor que scrollea
       document.documentElement.classList.toggle('menu-open', open);
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
       menu.setAttribute('aria-hidden', String(!open));
+      menu.inert = !open;
+      clearInterval(clockTimer);
+      if (!open) setTimeout(resetBands, 300);
+      if (open) {
+        tickClock();
+        clockTimer = setInterval(tickClock, 15000);
+        var first = menu.querySelector('.sm-link');
+        if (first) first.focus({ preventScroll: true });
+      }
     }
 
     btn.addEventListener('click', function() { setOpen(!isOpen()); });
+
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); }
+      if (!isOpen()) return;
+      if (e.key === 'Escape') { setOpen(false); btn.focus(); return; }
+      if (e.key !== 'Tab') return;
+      // el foco no sale del menú mientras está abierto
+      var f = [btn].concat(Array.prototype.slice.call(menu.querySelectorAll('a')));
+      var i = f.indexOf(document.activeElement);
+      if (i === -1) { e.preventDefault(); f[0].focus(); }
+      else if (e.shiftKey && i === 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
     });
+
     // clic en la página actual: solo cierra el menú (sin recargar)
     menu.addEventListener('click', function(e) {
       var a = e.target.closest && e.target.closest('a');
       if (a && a.getAttribute('aria-current') === 'page') {
         e.preventDefault();
         setOpen(false);
+        btn.focus();
       }
     });
     // si se vuelve por bfcache, que no quede abierto
