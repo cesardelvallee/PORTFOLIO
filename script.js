@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isGrabbing) {
         eggCursor.style.backgroundImage = "url('img/GRAB.svg')";
       } else {
-        const selectable = e.target.closest && e.target.closest('.img-drag, a, button, input, textarea, .top-bar-left, .hero-btn, .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar, .genre-trigger, .genre-option, .volume-slider, .contact-link, .contact-card, .cta-button, .card-link, .minimal-card img, [data-lightbox]');
+        const selectable = e.target.closest && e.target.closest('.img-drag, a, button, input, textarea, .top-bar-left, .hero-btn, .theme-toggle, .contact-link, .contact-card, .cta-button, .card-link, .minimal-card img, [data-lightbox]');
         eggCursor.style.backgroundImage = selectable ? "url('img/HOVER.svg')" : "url('img/DEFAULT.svg')";
       }
     });
@@ -519,261 +519,528 @@ document.addEventListener('DOMContentLoaded', function() {});
   })();
 })();
 
+/* ============================================================
+   REPRODUCTOR — tocadiscos 3D + título + anterior/pausa/siguiente
+   El audio manda: los botones responden al instante y el tocadiscos
+   "actúa" detrás (el brazo se levanta, gira y baja; el plato acelera
+   y frena; el disco se cambia). Three.js se carga en diferido; sin
+   WebGL o sin red queda el vinilo CSS como respaldo.
+   ============================================================ */
 (function() {
-  const musicDatabase = {
-    'rock-ingles': { title: 'I Still Haven\'t Found What I\'m Looking For', artist: 'U2', src: 'music/U2 - I Still Haven\'t Found What I\'m Looking For (Official Music Video).mp3' },
-    'espanolada': { title: 'Llamando a la tierra', artist: 'M-Clan', src: 'music/M-Clan - Llamando a la Tierra (letra).mp3' },
-    'reggaeton': { title: 'Guaya', artist: 'Don Omar', src: 'music/Don Omar - Guaya Guaya (Audio).mp3' },
-    'techno': { title: 'Snow Crystal', artist: 'Babalos', src: 'music/Babalos - Snow Crystal [HQ] - Babalos.mp3' },
-    'folk': { title: 'Vagabond', artist: 'Caamp', src: 'music/Vagabond.mp3' },
-    'indie': { title: 'Si Algo Es Puro Vale El Doble', artist: 'West Srk', src: 'music/West Srk - Si Algo Es Puro Vale El Doble (Video Oficial) - West Srk.mp3' },
-    'trap-urbano': { title: 'Moonlights Puppet Remix', artist: 'Al Safir, Interferencias', src: 'music/Interferencias - MOONLIGHT\'S PUPPET (REMIX) feat. Al Safir (Videoclip Oficial).mp3' },
-    'pop-ingles': { title: 'Somebody That I Used to Know', artist: 'Gotye ft. Kimbra', src: 'music/Gotye - Somebody That I Used To Know (feat. Kimbra) [Official Music Video].mp3' }
-  };
+  const widget = document.getElementById('music-player');
+  const audio = document.getElementById('audio-player');
+  // El reproductor solo existe en la home
+  if (!widget || !audio) return;
 
-  // color de acento por género (desaturado, elegante) para disco + glow + visualizador
-  const genreColors = {
-    'rock-ingles': '#c0685a',
-    'espanolada': '#c79a4a',
-    'reggaeton': '#4f9e86',
-    'techno': '#6f7fc0',
-    'folk': '#8a9a55',
-    'indie': '#a06ab5',
-    'trap-urbano': '#8088a0',
-    'pop-ingles': '#c77a9a'
-  };
+  // label: color de la galleta de cada disco (tonos apagados de la paleta)
+  const tracks = [
+    { title: 'I Still Haven\'t Found What I\'m Looking For', artist: 'U2', label: '#c7b299', src: 'music/U2 - I Still Haven\'t Found What I\'m Looking For (Official Music Video).mp3' },
+    { title: 'Llamando a la tierra', artist: 'M-Clan', label: '#b48a68', src: 'music/M-Clan - Llamando a la Tierra (letra).mp3' },
+    { title: 'Guaya', artist: 'Don Omar', label: '#929b7f', src: 'music/Don Omar - Guaya Guaya (Audio).mp3' },
+    { title: 'Snow Crystal', artist: 'Babalos', label: '#9198a1', src: 'music/Babalos - Snow Crystal [HQ] - Babalos.mp3' },
+    { title: 'Vagabond', artist: 'Caamp', label: '#d6c8b0', src: 'music/Vagabond.mp3' },
+    { title: 'Si Algo Es Puro Vale El Doble', artist: 'West Srk', label: '#a3877a', src: 'music/West Srk - Si Algo Es Puro Vale El Doble (Video Oficial) - West Srk.mp3' },
+    { title: 'Moonlights Puppet Remix', artist: 'Al Safir, Interferencias', label: '#7a746c', src: 'music/Interferencias - MOONLIGHT\'S PUPPET (REMIX) feat. Al Safir (Videoclip Oficial).mp3' },
+    { title: 'Somebody That I Used to Know', artist: 'Gotye ft. Kimbra', label: '#c39c7e', src: 'music/Gotye - Somebody That I Used To Know (feat. Kimbra) [Official Music Video].mp3' }
+  ];
 
-  let currentGenre = 'rock-ingles'; let isPlaying = false; let isMinimized = false;
-  const genreList = ['rock-ingles','espanolada','reggaeton','techno','folk','indie','trap-urbano','pop-ingles']; let currentGenreIndex = 0;
+  const stage = document.getElementById('tt-stage');
+  const canvas = widget.querySelector('.tt-canvas');
+  const disc = widget.querySelector('.vinyl-disc');
+  const meta = widget.querySelector('.vinyl-meta');
+  const titleWrap = widget.querySelector('.vinyl-title-wrap');
+  const titleEl = document.getElementById('song-title');
+  const artistEl = document.getElementById('song-artist');
+  const playBtn = document.getElementById('play-pause');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
 
-  const musicWidget = document.getElementById('music-player'); const audio = document.getElementById('audio-player'); const playPauseBtn = document.getElementById('play-pause'); const playPauseIcon = document.getElementById('play-pause-icon'); const prevBtn = document.getElementById('prev-btn'); const nextBtn = document.getElementById('next-btn'); const genreSelect = document.getElementById('genre-select'); const currentGenreText = document.getElementById('current-genre-text'); const songTitle = document.getElementById('song-title'); const songArtist = document.getElementById('song-artist'); const progressFill = document.getElementById('progress-fill'); const currentTimeSpan = document.getElementById('current-time'); const totalTimeSpan = document.getElementById('total-time'); const volumeSlider = document.getElementById('volume-slider'); const minimizeBtn = document.getElementById('player-minimize'); const playerToggle = document.getElementById('player-toggle'); const progressBar = document.querySelector('.progress-bar');
-  const vizCanvas = document.getElementById('audio-viz');
-  const genreSelector = document.querySelector('.genre-selector');
-  const genreTrigger = document.getElementById('genre-trigger');
-  const genreListEl = document.getElementById('genre-list');
-  const genreTriggerLabel = document.getElementById('genre-trigger-label');
-  let isDragging = false;
-  let audioCtx = null, analyser = null, vizData = null, vizRAF = null, vizReady = false;
+  const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let index = 0;
+  let deck = null;
 
-  function initPlayer() {
-    updateCurrentSong(); 
-    audio.volume = volumeSlider.value / 100; 
-    playPauseBtn.addEventListener('click', togglePlayPause); 
-    
-    if (prevBtn) prevBtn.addEventListener('click', previousSong); 
-    if (nextBtn) nextBtn.addEventListener('click', nextSong);
-    
-    // Mejorar touch en móvil
-    const isMobileDevice = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobileDevice && playPauseBtn) {
-      playPauseBtn.style.minHeight = '44px';
-      playPauseBtn.style.minWidth = '44px';
-    }
-    
-    if (prevBtn) {
-      prevBtn.style.minHeight = '36px';
-      prevBtn.style.minWidth = '36px';
-    }
-    if (nextBtn) {
-      nextBtn.style.minHeight = '36px';
-      nextBtn.style.minWidth = '36px';
-    }
-    
-    genreSelect.addEventListener('change', changeGenre);
-
-    // Desplegable de género custom
-    if (genreTrigger && genreListEl && genreSelector) {
-      genreTrigger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const open = genreSelector.classList.toggle('open');
-        genreTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
-      genreListEl.addEventListener('click', function(e) {
-        const opt = e.target.closest('.genre-option');
-        if (!opt) return;
-        genreSelect.value = opt.dataset.value;
-        genreSelect.dispatchEvent(new Event('change'));
-        genreSelector.classList.remove('open');
-        genreTrigger.setAttribute('aria-expanded', 'false');
-      });
-      document.addEventListener('click', function(e) {
-        if (!genreSelector.contains(e.target)) { genreSelector.classList.remove('open'); genreTrigger.setAttribute('aria-expanded', 'false'); }
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { genreSelector.classList.remove('open'); genreTrigger.setAttribute('aria-expanded', 'false'); }
-      });
-    }
-    volumeSlider.addEventListener('input', changeVolume); 
-    minimizeBtn.addEventListener('click', toggleMinimize); 
-    playerToggle.addEventListener('click', togglePlayPause); 
-    progressBar.addEventListener('pointerdown', startSeek);
-    progressBar.addEventListener('pointermove', moveSeek);
-    progressBar.addEventListener('pointerup', endSeek);
-    progressBar.addEventListener('pointercancel', endSeek);
-    window.addEventListener('resize', function() { updateMarquee(); if (!vizRAF) drawIdle(); });
-    
-    document.addEventListener('keydown', (e) => { 
-      if (musicWidget && !musicWidget.style.display === 'none') { 
-        switch(e.key) { 
-          case 'ArrowLeft': e.preventDefault(); previousSong(); break; 
-          case 'ArrowRight': e.preventDefault(); nextSong(); break; 
-          case ' ': e.preventDefault(); togglePlayPause(); break; 
-        } 
-      } 
-    });
-    
-    audio.addEventListener('timeupdate', updateProgress); 
-    audio.addEventListener('loadedmetadata', updateDuration); 
-    audio.addEventListener('ended', () => { nextSong(); });
-    audio.addEventListener('play', () => { musicWidget.classList.add('is-playing'); setupViz(); startViz(); });
-    audio.addEventListener('pause', () => { musicWidget.classList.remove('is-playing'); stopViz(); });
-    
-    audio.addEventListener('error', (e) => { 
-      console.error('Error al cargar audio:', e); 
-      console.error('Archivo problemático:', audio.src); 
-      showNotification('Error al cargar la canción'); 
-      playPauseIcon.src = 'img/PLAY.svg'; 
-      playPauseIcon.alt = 'Play'; 
-      isPlaying = false; 
-    });
-    
-    audio.addEventListener('loadstart', () => { 
-      console.log('Iniciando carga de:', audio.src); 
-    }); 
-    
-    audio.addEventListener('canplay', () => { 
-      console.log('Audio listo para reproducir:', audio.src); 
-    }); 
-    
-    updateMarquee();
-    drawIdle();
-    console.log('🎵 Reproductor musical personal inicializado');
+  /* ---- Vinilo CSS de respaldo: una vuelta cada 1.8s (33⅓ rpm) ---- */
+  let spin = null, rate = 0, rateRAF = null;
+  if (!reduceMotion && disc && disc.animate) {
+    spin = disc.animate(
+      [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+      { duration: 1800, iterations: Infinity }
+    );
+    spin.pause();
   }
 
-  function updateCurrentSong() { const song = musicDatabase[currentGenre]; songTitle.textContent = song.title; songArtist.textContent = song.artist; audio.src = song.src; const genreNames = { 'rock-ingles': 'Rock Inglés', 'espanolada': 'Españolada', 'reggaeton': 'Reggaetón', 'techno': 'Techno', 'folk': 'Folk', 'indie': 'Indie', 'trap-urbano': 'Trap/Urbano', 'pop-ingles': 'Pop Inglés' }; currentGenreText.textContent = genreNames[currentGenre]; musicWidget.style.setProperty('--genre-color', genreColors[currentGenre] || '#c7b299'); syncGenreUI(); updateMarquee(); }
-
-  function syncGenreUI() {
-    if (!genreListEl) return;
-    let activeText = '';
-    genreListEl.querySelectorAll('.genre-option').forEach(function(o) {
-      const on = o.dataset.value === currentGenre;
-      o.classList.toggle('is-active', on);
-      o.setAttribute('aria-selected', on ? 'true' : 'false');
-      if (on) activeText = o.textContent;
-    });
-    if (genreTriggerLabel && activeText) genreTriggerLabel.textContent = activeText;
+  // arranque corto, frenada más larga: así se comporta un plato al soltarlo
+  function setSpin(target) {
+    if (!spin) return;
+    cancelAnimationFrame(rateRAF);
+    if (target > 0 && spin.playState !== 'running') spin.play();
+    const from = rate, t0 = performance.now(), dur = target > 0 ? 600 : 1100;
+    function step(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      rate = from + (target - from) * (1 - Math.pow(1 - p, 3));
+      spin.playbackRate = Math.max(rate, 0.001);
+      if (p < 1) rateRAF = requestAnimationFrame(step);
+      else if (target === 0) { rate = 0; spin.pause(); }
+    }
+    step(t0);
   }
 
-  function togglePlayPause() { setupViz(); if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } if (isPlaying) { audio.pause(); playPauseIcon.src = 'img/PLAY.svg'; playPauseIcon.alt = 'Play'; playerToggle.innerHTML = '<img src="img/MUSIC_LOGO.svg" alt="Music" style="width: 24px; height: 24px;">'; isPlaying = false; } else { audio.play().then(() => { playPauseIcon.src = 'img/PAUSE.svg'; playPauseIcon.alt = 'Pause'; playerToggle.innerHTML = '<img src="img/MUSIC_LOGO.svg" alt="Music" style="width: 24px; height: 24px;">'; isPlaying = true; }).catch(error => { console.log('Error al reproducir:', error); showNotification('Haz clic para reproducir música'); }); } }
+  function setPlaying(on) {
+    widget.classList.toggle('is-playing', on);
+    const label = on ? 'Pausar' : 'Reproducir';
+    playBtn.setAttribute('aria-label', label);
+    stage.setAttribute('aria-label', label);
+    if (deck) deck.setPlaying(on); else setSpin(on ? 1 : 0);
+  }
 
-  function changeGenre() { const wasPlaying = isPlaying; if (isPlaying) { audio.pause(); isPlaying = false; } currentGenre = genreSelect.value; currentGenreIndex = genreList.indexOf(currentGenre); updateCurrentSong(); if (wasPlaying) { setTimeout(() => { audio.play().then(() => { playPauseIcon.src = 'img/PAUSE.svg'; playPauseIcon.alt = 'Pause'; playerToggle.innerHTML = '<img src="img/MUSIC_LOGO.svg" alt="Music" style="width: 24px; height: 24px;">'; isPlaying = true; }).catch(error => { console.error('Error al reproducir nueva canción:', error); showNotification('Error al reproducir esta canción'); playPauseIcon.src = 'img/PLAY.svg'; playPauseIcon.alt = 'Play'; isPlaying = false; }); }, 100); } const genreNames = { 'rock-ingles': 'Rock Inglés', 'espanolada': 'Españolada', 'reggaeton': 'Reggaetón', 'techno': 'Techno', 'folk': 'Folk', 'indie': 'Indie', 'trap-urbano': 'Trap/Urbano', 'pop-ingles': 'Pop Inglés' }; showNotification(`Ahora: ${genreNames[currentGenre]}`); }
+  function play() {
+    const p = audio.play();
+    // al cambiar de pista la promesa anterior se rechaza: manda el estado real
+    if (p && p.catch) p.catch(function() { setPlaying(!audio.paused); });
+  }
 
-  function changeVolume() { audio.volume = volumeSlider.value / 100; }
-  function previousSong() { currentGenreIndex = (currentGenreIndex - 1 + genreList.length) % genreList.length; currentGenre = genreList[currentGenreIndex]; genreSelect.value = currentGenre; updateCurrentSong(); if (isPlaying) { audio.play(); } const genreNames = { 'rock-ingles': 'Rock Inglés', 'espanolada': 'Españolada', 'reggaeton': 'Reggaetón', 'techno': 'Techno', 'folk': 'Folk', 'indie': 'Indie', 'trap-urbano': 'Trap/Urbano', 'pop-ingles': 'Pop Inglés' }; showNotification(`← ${genreNames[currentGenre]}`); }
-  function nextSong() { currentGenreIndex = (currentGenreIndex + 1) % genreList.length; currentGenre = genreList[currentGenreIndex]; genreSelect.value = currentGenre; updateCurrentSong(); if (isPlaying) { audio.play(); } const genreNames = { 'rock-ingles': 'Rock Inglés', 'espanolada': 'Españolada', 'reggaeton': 'Reggaetón', 'techno': 'Techno', 'folk': 'Folk', 'indie': 'Indie', 'trap-urbano': 'Trap/Urbano', 'pop-ingles': 'Pop Inglés' }; showNotification(`${genreNames[currentGenre]} →`); }
-  function toggleMinimize() { isMinimized = !isMinimized; musicWidget.classList.toggle('minimized', isMinimized); minimizeBtn.textContent = isMinimized ? '+' : '−'; }
-  function posFromEvent(clientX) { const rect = progressBar.getBoundingClientRect(); const pos = (clientX - rect.left) / rect.width; return Math.max(0, Math.min(1, pos)); }
-  function paintSeek(pos) { progressFill.style.width = (pos * 100) + '%'; if (audio.duration) currentTimeSpan.textContent = formatTime(pos * audio.duration); }
-  function startSeek(e) { isDragging = true; try { progressBar.setPointerCapture(e.pointerId); } catch (err) {} paintSeek(posFromEvent(e.clientX)); }
-  function moveSeek(e) { if (!isDragging) return; paintSeek(posFromEvent(e.clientX)); }
-  function endSeek(e) { if (!isDragging) return; isDragging = false; const pos = posFromEvent(e.clientX); if (audio.duration) audio.currentTime = pos * audio.duration; }
+  /* ---- Título: si no cabe, se desliza al pasar el ratón ---- */
+  function measureTitle() {
+    titleWrap.classList.remove('is-long');
+    const overflow = titleEl.scrollWidth - titleWrap.clientWidth;
+    if (overflow > 2) {
+      titleEl.style.setProperty('--shift', (overflow + 10) + 'px');
+      titleEl.style.setProperty('--dur', Math.max(1.6, overflow / 28).toFixed(2) + 's');
+      titleWrap.classList.add('is-long');
+    }
+  }
 
-  function updateProgress() { if (isDragging) return; if (audio.duration) { const progress = (audio.currentTime / audio.duration) * 100; progressFill.style.width = progress + '%'; currentTimeSpan.textContent = formatTime(audio.currentTime); } }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
 
-  function updateMarquee() {
-    if (!songTitle || !songTitle.parentElement) return;
-    const wrap = songTitle.parentElement;
-    songTitle.classList.remove('marquee');
-    songTitle.style.removeProperty('--shift');
-    songTitle.style.removeProperty('--dur');
-    if (reduceMotion) return;
-    requestAnimationFrame(function() {
-      const overflow = songTitle.scrollWidth - wrap.clientWidth;
-      if (overflow > 4) {
-        songTitle.style.setProperty('--shift', overflow + 'px');
-        songTitle.style.setProperty('--dur', Math.max(5, overflow / 22).toFixed(1) + 's');
-        songTitle.classList.add('marquee');
+  function renderMeta(dir) {
+    const t = tracks[index];
+    function apply() {
+      titleEl.textContent = t.title;
+      artistEl.textContent = t.artist;
+      measureTitle();
+    }
+    if (!dir || reduceMotion || !meta.animate) { apply(); return; }
+
+    // parte del estado actual para que los clics rápidos no salten
+    const cs = getComputedStyle(meta);
+    const fromO = cs.opacity, fromT = cs.transform;
+    meta.getAnimations().forEach(function(a) { a.cancel(); });
+    const out = meta.animate(
+      [{ opacity: fromO, transform: fromT }, { opacity: 0, transform: 'translateX(' + (-6 * dir) + 'px)' }],
+      { duration: 120, easing: EASE, fill: 'forwards' }
+    );
+    out.onfinish = function() {
+      apply();
+      meta.animate(
+        [{ opacity: 0, transform: 'translateX(' + (6 * dir) + 'px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 260, easing: EASE }
+      );
+      out.cancel();
+    };
+  }
+
+  function load(i, dir) {
+    const wasPlaying = !audio.paused;
+    index = (i + tracks.length) % tracks.length;
+    audio.src = tracks[index].src;
+    renderMeta(dir);
+    if (deck) deck.setTrack(index, dir);
+    if (wasPlaying) play();
+  }
+
+  function toggle() { if (audio.paused) play(); else audio.pause(); }
+
+  playBtn.addEventListener('click', toggle);
+  stage.addEventListener('click', toggle);
+  // como en cualquier reproductor: pasados 3s, "anterior" reinicia la pista
+  prevBtn.addEventListener('click', function() {
+    if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+    load(index - 1, -1);
+  });
+  nextBtn.addEventListener('click', function() { load(index + 1, 1); });
+
+  audio.addEventListener('play', function() { setPlaying(true); });
+  audio.addEventListener('pause', function() { setPlaying(false); });
+  audio.addEventListener('ended', function() { load(index + 1, 1); play(); });
+  audio.addEventListener('error', function() {
+    console.warn('No se pudo cargar el audio:', audio.src);
+    setPlaying(false);
+  });
+
+  audio.volume = 0.7;
+  audio.src = tracks[index].src;
+  renderMeta(0);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
+  window.addEventListener('resize', measureTitle);
+
+  /* ---- Tocadiscos 3D: se carga tras el load y solo en escritorio ---- */
+  const hasWebGL = (function() {
+    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
+    catch (e) { return false; }
+  })();
+  const isDesktop = !(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+
+  if (hasWebGL && isDesktop && canvas) {
+    const start = function() {
+      import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js')
+        .then(function(THREE) {
+          deck = createDeck(THREE);
+          deck.setTrack(index, 0);
+          if (spin) { cancelAnimationFrame(rateRAF); spin.cancel(); spin = null; }
+          deck.setPlaying(!audio.paused);
+          widget.classList.add('has-3d');
+        })
+        .catch(function(err) { console.warn('Tocadiscos 3D no disponible:', err); });
+    };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+  }
+
+  function createDeck(THREE) {
+    const W = stage.clientWidth, H = stage.clientHeight;
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(W, H, false);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(24, W / H, 0.1, 60);
+    const CAM = new THREE.Vector3(0.6, 8.6, 8.4);
+    const LOOK = new THREE.Vector3(0.05, 0.15, 0.15);
+    camera.position.copy(CAM);
+    camera.lookAt(LOOK);
+
+    /* luz: un estudio cálido como entorno (da reflejo a los metales y al
+       vinilo) + una luz principal arriba a la izquierda con sombra suave */
+    const room = new THREE.Scene();
+    room.add(new THREE.Mesh(new THREE.BoxGeometry(12, 12, 12), new THREE.MeshBasicMaterial({ color: 0x3d3730, side: THREE.BackSide })));
+    function panel(w, h, x, y, z, k) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.95, 0.88).multiplyScalar(k), side: THREE.DoubleSide }));
+      m.position.set(x, y, z); m.lookAt(0, 0, 0); room.add(m);
+    }
+    panel(7, 3, -2.5, 5.8, 1.5, 4);
+    panel(3, 5, 5.8, 1.5, -1, 1.6);
+    panel(5, 2, 0, 1, 5.8, 0.8);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(room, 0.04).texture;
+    pmrem.dispose();
+
+    scene.add(new THREE.HemisphereLight(0xfff4e6, 0x2e2822, 0.5));
+    const key = new THREE.DirectionalLight(0xfff0dc, 2.2);
+    key.position.set(-3.5, 8, 2.5);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    const sc = key.shadow.camera;
+    sc.left = -4; sc.right = 4; sc.top = 4; sc.bottom = -4; sc.near = 1; sc.far = 20;
+    key.shadow.radius = 5;
+    key.shadow.bias = -0.0006;
+    key.shadow.normalBias = 0.02;
+    scene.add(key);
+
+    function mat(color, roughness, metalness) {
+      return new THREE.MeshStandardMaterial({ color: color, roughness: roughness, metalness: metalness || 0 });
+    }
+    const M = {
+      plinth: mat(0xd8cab4, 0.78),
+      dark: mat(0x26221e, 0.5, 0.25),
+      metal: mat(0xd9d3c9, 0.28, 0.9),
+      platter: mat(0x8f877c, 0.35, 0.85),
+      mat: mat(0x1b1917, 0.95),
+      accent: mat(0xc7b299, 0.55, 0.1)
+    };
+    function add(geo, material, x, y, z, parent) {
+      const m = new THREE.Mesh(geo, material);
+      m.position.set(x, y, z);
+      m.castShadow = true; m.receiveShadow = true;
+      (parent || scene).add(m);
+      return m;
+    }
+
+    /* ---- peana con cantos redondeados ---- */
+    function roundedSlab(w, d, h, r) {
+      const s = new THREE.Shape(), x = -w / 2, y = -d / 2;
+      s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+      s.lineTo(x + w, y + d - r); s.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
+      s.lineTo(x + r, y + d); s.quadraticCurveTo(x, y + d, x, y + d - r);
+      s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+      const b = 0.05;
+      const g = new THREE.ExtrudeGeometry(s, { depth: h - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 3, curveSegments: 10 });
+      g.rotateX(-Math.PI / 2);
+      g.translate(0, b, 0);
+      return g;
+    }
+    const TOP = 0.5;
+    add(roundedSlab(4.8, 3.7, TOP, 0.26), M.plinth, 0, 0, 0);
+
+    // sombra de contacto sobre el "suelo" (solo la sombra, sin plano visible)
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.ShadowMaterial({ opacity: 0.22 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    /* ---- plato ---- */
+    const C = new THREE.Vector3(-0.42, 0, 0.02);
+    const PLATTER_H = 0.13;
+    add(new THREE.CylinderGeometry(1.5, 1.5, 0.03, 64), M.dark, C.x, TOP + 0.015, C.z);
+    add(new THREE.CylinderGeometry(1.6, 1.6, PLATTER_H - 0.03, 96), M.platter, C.x, TOP + 0.03 + (PLATTER_H - 0.03) / 2, C.z);
+    add(new THREE.CylinderGeometry(1.5, 1.5, 0.006, 64), M.mat, C.x, TOP + PLATTER_H + 0.003, C.z);
+    const RECORD_Y = TOP + PLATTER_H + 0.006 + 0.0125;
+    add(new THREE.CylinderGeometry(0.028, 0.028, 0.12, 16), M.metal, C.x, RECORD_Y + 0.06, C.z);
+
+    /* ---- detalles: selector de velocidad + piloto ---- */
+    add(new THREE.CylinderGeometry(0.2, 0.21, 0.08, 40), M.dark, -1.95, TOP + 0.04, 1.47);
+    add(new THREE.CylinderGeometry(0.12, 0.12, 0.02, 32), M.metal, -1.95, TOP + 0.09, 1.47);
+    const ledMat = new THREE.MeshStandardMaterial({ color: 0x3a2f24, emissive: 0xe0a85a, emissiveIntensity: 0, roughness: 0.4 });
+    add(new THREE.CylinderGeometry(0.045, 0.045, 0.02, 20), ledMat, -1.5, TOP + 0.01, 1.55);
+
+    /* ---- textura de surcos (compartida) ---- */
+    const grooveTex = (function() {
+      const c = document.createElement('canvas'); c.width = c.height = 1024;
+      const g = c.getContext('2d'), R = 512;
+      g.fillStyle = '#131110'; g.fillRect(0, 0, 1024, 1024);
+      for (let r = R * 0.36; r < R * 0.975; r += 1.7) {
+        const gap = (r > R * 0.6 && r < R * 0.615) || (r > R * 0.78 && r < R * 0.792);
+        g.strokeStyle = gap ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,' + (0.025 + Math.random() * 0.035).toFixed(3) + ')';
+        g.lineWidth = 0.9;
+        g.beginPath(); g.arc(R, R, r, 0, Math.PI * 2); g.stroke();
       }
-    });
-  }
+      const t = new THREE.CanvasTexture(c);
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      return t;
+    })();
 
-  /* ---- Visualizador de audio en vivo (Web Audio API) ---- */
-  function setupViz() {
-    if (vizReady || !vizCanvas || reduceMotion) return;
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createMediaElementSource(audio);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      analyser.smoothingTimeConstant = 0.8;
-      source.connect(analyser);
-      analyser.connect(audioCtx.destination);
-      vizData = new Uint8Array(analyser.frequencyBinCount);
-      vizReady = true;
-    } catch (err) { console.warn('Visualizador no disponible:', err); }
-  }
-  function startViz() {
-    if (!vizReady || vizRAF || reduceMotion) return;
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    drawViz();
-  }
-  function stopViz() {
-    if (vizRAF) { cancelAnimationFrame(vizRAF); vizRAF = null; }
-    drawIdle();
-  }
-  function drawIdle() {
-    if (!vizCanvas) return;
-    const ctx2d = vizCanvas.getContext('2d');
-    if (!ctx2d) return;
-    const dpr = window.devicePixelRatio || 1;
-    const w = vizCanvas.clientWidth, h = vizCanvas.clientHeight;
-    if (!w || !h) return;
-    vizCanvas.width = Math.round(w * dpr); vizCanvas.height = Math.round(h * dpr);
-    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx2d.clearRect(0, 0, w, h);
-    const col = (getComputedStyle(musicWidget).getPropertyValue('--genre-color') || '#c7b299').trim();
-    const bars = 26, gap = 3;
-    const bw = (w - gap * (bars - 1)) / bars;
-    ctx2d.fillStyle = col;
-    ctx2d.globalAlpha = 0.2;
-    for (let i = 0; i < bars; i++) { ctx2d.fillRect(i * (bw + gap), h - 2, bw, 2); }
-    ctx2d.globalAlpha = 1;
-  }
-  function drawViz() {
-    if (!analyser || !vizCanvas) return;
-    const ctx2d = vizCanvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const w = vizCanvas.clientWidth, h = vizCanvas.clientHeight;
-    if (vizCanvas.width !== Math.round(w * dpr) || vizCanvas.height !== Math.round(h * dpr)) {
-      vizCanvas.width = Math.round(w * dpr); vizCanvas.height = Math.round(h * dpr);
+    /* ---- galleta impresa de cada disco ---- */
+    const labelCache = {};
+    function labelTexture(i) {
+      if (labelCache[i]) return labelCache[i];
+      const t = tracks[i];
+      const c = document.createElement('canvas'); c.width = c.height = 256;
+      const g = c.getContext('2d');
+      g.fillStyle = t.label;
+      g.beginPath(); g.arc(128, 128, 128, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = 'rgba(40,32,24,0.22)'; g.lineWidth = 1.5;
+      g.beginPath(); g.arc(128, 128, 114, 0, Math.PI * 2); g.stroke();
+      g.fillStyle = 'rgba(36,29,22,0.82)';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = '700 17px Inter, Arial, sans-serif';
+      g.fillText(t.artist.toUpperCase(), 128, 70);
+      g.font = '500 10px Inter, Arial, sans-serif';
+      g.fillText('CÉSAR DEL VALLE · ' + pad(i + 1), 128, 92);
+      // título en dos líneas como mucho, debajo del agujero
+      g.font = '400 13px Inter, Arial, sans-serif';
+      const words = t.title.split(' '), lines = [''];
+      words.forEach(function(w) {
+        const cand = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w;
+        if (g.measureText(cand).width > 150 && lines[lines.length - 1]) lines.push(w);
+        else lines[lines.length - 1] = cand;
+      });
+      lines.slice(0, 2).forEach(function(l, k) { g.fillText(l, 128, 168 + k * 17); });
+      g.font = '500 9px Inter, Arial, sans-serif';
+      g.fillText('33⅓ RPM', 128, 214);
+      g.fillStyle = '#131110';
+      g.beginPath(); g.arc(128, 128, 6, 0, Math.PI * 2); g.fill();
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      return (labelCache[i] = tex);
     }
-    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx2d.clearRect(0, 0, w, h);
-    analyser.getByteFrequencyData(vizData);
-    const col = (getComputedStyle(musicWidget).getPropertyValue('--genre-color') || '#c7b299').trim();
-    const bars = 26, gap = 3;
-    const bw = (w - gap * (bars - 1)) / bars;
-    const step = Math.max(1, Math.floor(vizData.length / bars));
-    ctx2d.fillStyle = col;
-    for (let i = 0; i < bars; i++) {
-      const v = vizData[i * step] / 255;
-      const bh = Math.max(2, v * h);
-      const x = i * (bw + gap), y = h - bh;
-      ctx2d.globalAlpha = 0.32 + v * 0.68;
-      if (ctx2d.roundRect) { ctx2d.beginPath(); ctx2d.roundRect(x, y, bw, bh, Math.min(bw / 2, 2)); ctx2d.fill(); }
-      else { ctx2d.fillRect(x, y, bw, bh); }
+
+    function makeRecord() {
+      const g = new THREE.Group();
+      const edge = new THREE.MeshStandardMaterial({ color: 0x131110, roughness: 0.5, transparent: true });
+      const face = new THREE.MeshStandardMaterial({ map: grooveTex, roughness: 0.32, transparent: true });
+      const vinyl = new THREE.Mesh(new THREE.CylinderGeometry(1.46, 1.46, 0.025, 96), [edge, face, face]);
+      vinyl.castShadow = true; vinyl.receiveShadow = true;
+      const labelMat = new THREE.MeshStandardMaterial({ roughness: 0.85, transparent: true });
+      const label = new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), labelMat);
+      label.rotation.x = -Math.PI / 2;
+      label.position.y = 0.0128;
+      label.receiveShadow = true;
+      g.add(vinyl, label);
+      g.userData.mats = [edge, face, labelMat];
+      g.userData.labelMat = labelMat;
+      scene.add(g);
+      return g;
     }
-    ctx2d.globalAlpha = 1;
-    vizRAF = requestAnimationFrame(drawViz);
+    function place(rec, x, y, z, opacity) {
+      rec.position.set(x, y, z);
+      rec.visible = opacity > 0.002;
+      rec.userData.mats.forEach(function(m) { m.opacity = opacity; m.depthWrite = opacity > 0.98; });
+    }
+
+    let current = makeRecord();
+    let incoming = null;
+    place(current, C.x, RECORD_Y, C.z, 1);
+
+    /* ---- brazo ---- */
+    const PIVOT = new THREE.Vector3(1.72, 0, -1.22);
+    const ARM_H = 0.34, L = 2.55, LIFT = -0.075;
+    add(new THREE.CylinderGeometry(0.26, 0.28, 0.07, 40), M.dark, PIVOT.x, TOP + 0.035, PIVOT.z);
+    add(new THREE.CylinderGeometry(0.07, 0.08, ARM_H, 24), M.metal, PIVOT.x, TOP + ARM_H / 2, PIVOT.z);
+    add(new THREE.CylinderGeometry(0.035, 0.035, ARM_H - 0.06, 12), M.dark, PIVOT.x, TOP + (ARM_H - 0.06) / 2, PIVOT.z + 2.02);
+    add(new THREE.BoxGeometry(0.12, 0.03, 0.08), M.dark, PIVOT.x, TOP + ARM_H - 0.045, PIVOT.z + 2.02);
+
+    const arm = new THREE.Group();
+    arm.rotation.order = 'YXZ';
+    arm.position.set(PIVOT.x, TOP + ARM_H, PIVOT.z);
+    scene.add(arm);
+    const tube = add(new THREE.CylinderGeometry(0.032, 0.032, L + 0.3, 16), M.metal, 0, 0, (L - 0.3) / 2, arm);
+    tube.rotation.x = Math.PI / 2;
+    add(new THREE.SphereGeometry(0.1, 24, 16), M.dark, 0, 0, 0, arm);
+    const weight = add(new THREE.CylinderGeometry(0.14, 0.14, 0.26, 32), M.dark, 0, 0, -0.44, arm);
+    weight.rotation.x = Math.PI / 2;
+    const head = new THREE.Group();
+    head.position.set(0, 0, L);
+    head.rotation.y = 0.32;
+    arm.add(head);
+    add(new THREE.BoxGeometry(0.2, 0.035, 0.38), M.dark, 0, -0.02, 0.04, head);
+    add(new THREE.BoxGeometry(0.12, 0.11, 0.2), M.accent, 0, -0.1, 0.06, head);
+    add(new THREE.BoxGeometry(0.03, 0.02, 0.16), M.metal, 0.12, -0.01, 0.0, head);
+
+    // ángulo del brazo para que la aguja caiga a radio r del centro del plato
+    function yawForRadius(r) {
+      let lo = -1.0, hi = 0;
+      for (let k = 0; k < 20; k++) {
+        const m = (lo + hi) / 2;
+        const dx = PIVOT.x + L * Math.sin(m) - C.x, dz = PIVOT.z + L * Math.cos(m) - C.z;
+        if (Math.hypot(dx, dz) > r) hi = m; else lo = m;
+      }
+      return (lo + hi) / 2;
+    }
+    const R_OUT = 1.36, R_IN = 0.8;
+
+    /* ---- estado animado (todo persigue un objetivo: siempre interrumpible) ---- */
+    const S = { playing: false, rate: 0, angle: 0, yaw: 0, lift: 0, led: 0, tx: 0, ty: 0, ttx: 0, tty: 0 };
+    let swap = null;
+    const SWAP_MS = reduceMotion ? 260 : 680;
+
+    function approach(v, target, k, dt) {
+      if (reduceMotion) return target;
+      return v + (target - v) * (1 - Math.exp(-k * dt));
+    }
+    function easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+
+    function finishSwap() {
+      if (!swap) return;
+      scene.remove(current);
+      current.traverse(function(o) { if (o.geometry) o.geometry.dispose(); });
+      current.userData.mats.forEach(function(m) { m.dispose(); });
+      current = incoming;
+      incoming = null;
+      swap = null;
+      place(current, C.x, RECORD_Y, C.z, 1);
+    }
+
+    function updateSwap(now) {
+      if (!swap) return;
+      // el disco no se mueve hasta que la aguja está levantada
+      if (!swap.t0) {
+        if (S.lift > LIFT * 0.85 && S.yaw < -0.02) return;
+        swap.t0 = now;
+      }
+      const p = Math.min(1, (now - swap.t0) / SWAP_MS), e = easeOut(p);
+      // recorridos cortos: el disco se desvanece antes de tocar el borde del lienzo
+      const fadeOut = Math.max(0, 1 - p * 1.8), fadeIn = Math.min(1, Math.max(0, p * 1.8 - 0.4));
+      if (reduceMotion) {
+        place(current, C.x, RECORD_Y, C.z, 1 - p);
+        place(incoming, C.x, RECORD_Y, C.z, p);
+      } else if (swap.dir > 0) {
+        // siguiente: el disco se levanta hacia la izquierda y el nuevo baja desde arriba
+        place(current, C.x - 1.2 * e, RECORD_Y + 0.9 * e, C.z, fadeOut);
+        place(incoming, C.x, RECORD_Y + 1.1 * (1 - e), C.z, fadeIn);
+      } else {
+        // anterior: el disco sube y el que vuelve llega desde la izquierda
+        place(current, C.x, RECORD_Y + 1.1 * e, C.z, fadeOut);
+        place(incoming, C.x - 1.2 * (1 - e), RECORD_Y + 0.9 * (1 - e), C.z, fadeIn);
+      }
+      if (p >= 1) finishSwap();
+    }
+
+    function update(dt, now) {
+      // plato: arranca rápido y frena despacio
+      const rateT = (S.playing && !reduceMotion) ? 1 : 0;
+      S.rate = approach(S.rate, rateT, rateT > S.rate ? 4.2 : 1.9, dt);
+      if (S.rate < 0.0005 && rateT === 0) S.rate = 0;
+      S.angle -= S.rate * (Math.PI * 2 / 1.8) * dt;
+      current.rotation.y = S.angle;
+      if (incoming) incoming.rotation.y = S.angle;
+
+      // brazo: levantar → girar → bajar
+      const down = S.playing && !swap;
+      const progress = audio.duration ? Math.min(1, audio.currentTime / audio.duration) : 0;
+      const yawT = down ? yawForRadius(R_OUT - (R_OUT - R_IN) * progress) : 0;
+      const far = Math.abs(S.yaw - yawT) > 0.012;
+      S.lift = approach(S.lift, far ? LIFT : 0, 13, dt);
+      if (!far || S.lift < LIFT * 0.8) S.yaw = approach(S.yaw, yawT, far ? 4.5 : 20, dt);
+      arm.rotation.y = S.yaw;
+      arm.rotation.x = S.lift;
+
+      updateSwap(now);
+
+      S.led = approach(S.led, S.playing ? 1 : 0, 6, dt);
+      ledMat.emissiveIntensity = S.led * 2.2;
+
+      // leve paralaje de cámara con el cursor sobre el tocadiscos
+      S.tx = approach(S.tx, S.ttx, 5, dt);
+      S.ty = approach(S.ty, S.tty, 5, dt);
+      camera.position.set(CAM.x + S.tx * 0.9, CAM.y - S.ty * 0.6, CAM.z + S.ty * 0.3);
+      camera.lookAt(LOOK);
+
+      return S.playing || !!swap || S.rate > 0 ||
+        Math.abs(S.yaw - yawT) > 0.0005 || Math.abs(S.lift - (far ? LIFT : 0)) > 0.0005 ||
+        Math.abs(S.led - (S.playing ? 1 : 0)) > 0.002 ||
+        Math.abs(S.tx - S.ttx) > 0.001 || Math.abs(S.ty - S.tty) > 0.001;
+    }
+
+    let raf = 0, last = 0;
+    function frame(now) {
+      raf = 0;
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const busy = update(dt, now);
+      renderer.render(scene, camera);
+      if (busy) raf = requestAnimationFrame(frame);
+    }
+    function kick() {
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+
+    if (!reduceMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      stage.addEventListener('pointermove', function(e) {
+        const r = stage.getBoundingClientRect();
+        S.ttx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        S.tty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+        kick();
+      });
+      stage.addEventListener('pointerleave', function() { S.ttx = 0; S.tty = 0; kick(); });
+    }
+
+    kick();
+
+    return {
+      setPlaying: function(on) { S.playing = on; kick(); },
+      setTrack: function(i, dir) {
+        if (!dir) {
+          finishSwap();
+          current.userData.labelMat.map = labelTexture(i);
+          current.userData.labelMat.needsUpdate = true;
+          kick();
+          return;
+        }
+        finishSwap();
+        incoming = makeRecord();
+        incoming.userData.labelMat.map = labelTexture(i);
+        place(incoming, C.x, RECORD_Y, C.z, 0);
+        swap = { dir: dir, t0: 0 };
+        kick();
+      }
+    };
   }
-  function updateDuration() { totalTimeSpan.textContent = formatTime(audio.duration); }
-  function formatTime(seconds) { const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${mins}:${secs.toString().padStart(2, '0')}`; }
-
-  function showNotification(message) { const notification = document.createElement('div'); notification.style.cssText = `position: fixed; bottom: 90px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.75rem; z-index: 4000; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);`; notification.textContent = message; document.body.appendChild(notification); setTimeout(() => notification.style.opacity = '1', 10); setTimeout(() => { notification.style.opacity = '0'; setTimeout(() => notification.remove(), 300); }, 3000); }
-
-  // El reproductor solo existe en la home: en el resto de páginas no se inicializa
-  document.addEventListener('DOMContentLoaded', () => { if (musicWidget && audio) setTimeout(initPlayer, 500); });
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -974,8 +1241,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(ring);
 
     var HOT = '.img-drag, a, button, input, textarea, select, .top-bar-left, .hero-btn,'
-            + ' .theme-toggle, .control-btn, .player-toggle, .player-minimize, .progress-bar,'
-            + ' .genre-trigger, .genre-option, .volume-slider, .contact-link, .c-card, .cta-button, .card-link,'
+            + ' .theme-toggle, .contact-link, .c-card, .cta-button, .card-link,'
             + ' .minimal-card img, .sf-mail, .sf-nav a, .back-btn, [data-lightbox]';
 
     /* el halo mide 88px de layout; el estado de reposo es scale(0.5) (44px

@@ -59,7 +59,7 @@
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net/" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=46">
+  <link rel="stylesheet" href="css/style.css?v=50">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,81 +88,31 @@
 <div id="vanta-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;"></div>
 
 <!-- REPRODUCTOR MUSICAL WIDGET -->
-<div id="music-player" class="music-widget">
-  <div class="music-header">
-    <button id="player-toggle" class="player-toggle">
-      <img src="img/MUSIC_LOGO.svg" alt="Music" style="width: 24px; height: 24px;">
-    </button>
-    <span class="player-title">MY SOUND PALETTE</span>
-    <button id="player-minimize" class="player-minimize">−</button>
-  </div>
+<div id="music-player" class="vinyl-player" role="region" aria-label="Reproductor de música">
+  <button type="button" id="tt-stage" class="tt-stage" aria-label="Reproducir">
+    <canvas class="tt-canvas" aria-hidden="true"></canvas>
+    <span class="vinyl" aria-hidden="true">
+      <span class="vinyl-disc"><span class="vinyl-label"></span></span>
+      <span class="vinyl-sheen"></span>
+    </span>
+  </button>
 
-  <div id="player-content" class="player-content">
-    <div class="now-playing">
-      <div class="np-disc" aria-hidden="true"></div>
-      <div class="np-text">
-        <span id="current-genre-text" class="np-genre">Rock Inglés</span>
-        <div class="song-title-wrap"><div class="song-title" id="song-title">Cargando...</div></div>
-        <div class="song-artist" id="song-artist">-</div>
-      </div>
+  <div class="tt-side">
+    <div class="vinyl-meta" aria-live="polite">
+      <div class="vinyl-title-wrap"><span class="vinyl-title" id="song-title">—</span></div>
+      <span class="vinyl-artist" id="song-artist">—</span>
     </div>
-
-    <div class="visualizer-wrap">
-      <canvas id="audio-viz" class="audio-viz" aria-hidden="true"></canvas>
-    </div>
-
-    <div class="player-controls">
-      <button id="prev-btn" class="control-btn">
-        <img src="img/BACK.svg" alt="Previous" class="control-icon">
+    <div class="vinyl-controls">
+      <button type="button" id="prev-btn" class="vinyl-btn" aria-label="Canción anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.6" y="6" width="2.2" height="12" rx="1.1"/><path d="M18 6.5v11a.5.5 0 0 1-.78.42L9.5 12.4a.5.5 0 0 1 0-.8l7.72-5.52a.5.5 0 0 1 .78.42z"/></svg>
       </button>
-      <button id="play-pause" class="control-btn main-control">
-        <img id="play-pause-icon" src="img/PLAY.svg" alt="Play" class="control-icon">
+      <button type="button" id="play-pause" class="vinyl-btn vinyl-btn--main" aria-label="Reproducir">
+        <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a.6.6 0 0 0 .92.5l10.1-6.4a.6.6 0 0 0 0-1L8.92 5.1A.6.6 0 0 0 8 5.6z"/></svg>
+        <svg class="ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="1"/><rect x="13.9" y="5" width="3.6" height="14" rx="1"/></svg>
       </button>
-      <button id="next-btn" class="control-btn">
-        <img src="img/NEXT.svg" alt="Next" class="control-icon">
+      <button type="button" id="next-btn" class="vinyl-btn" aria-label="Siguiente canción">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="16.2" y="6" width="2.2" height="12" rx="1.1"/><path d="M6 6.5v11a.5.5 0 0 0 .78.42l7.72-5.52a.5.5 0 0 0 0-.8L6.78 6.08A.5.5 0 0 0 6 6.5z"/></svg>
       </button>
-    </div>
-
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div id="progress-fill" class="progress-fill"></div>
-      </div>
-      <div class="time-display">
-        <span id="current-time">0:00</span>
-        <span id="total-time">0:00</span>
-      </div>
-    </div>
-
-    <div class="genre-selector">
-      <select id="genre-select" class="genre-native" tabindex="-1" aria-hidden="true">
-        <option value="rock-ingles">Rock Inglés</option>
-        <option value="espanolada">Españolada</option>
-        <option value="reggaeton">Reggaetón</option>
-        <option value="techno">Techno</option>
-        <option value="folk">Folk</option>
-        <option value="indie">Indie / Alternativo</option>
-        <option value="trap-urbano">Trap / Urbano Español</option>
-        <option value="pop-ingles">Pop Inglés</option>
-      </select>
-      <button type="button" id="genre-trigger" class="genre-trigger" aria-haspopup="listbox" aria-expanded="false">
-        <span id="genre-trigger-label">Rock Inglés</span>
-        <svg class="genre-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <ul id="genre-list" class="genre-list" role="listbox" aria-label="Género musical">
-        <li class="genre-option" role="option" data-value="rock-ingles">Rock Inglés</li>
-        <li class="genre-option" role="option" data-value="espanolada">Españolada</li>
-        <li class="genre-option" role="option" data-value="reggaeton">Reggaetón</li>
-        <li class="genre-option" role="option" data-value="techno">Techno</li>
-        <li class="genre-option" role="option" data-value="folk">Folk</li>
-        <li class="genre-option" role="option" data-value="indie">Indie / Alternativo</li>
-        <li class="genre-option" role="option" data-value="trap-urbano">Trap / Urbano Español</li>
-        <li class="genre-option" role="option" data-value="pop-ingles">Pop Inglés</li>
-      </ul>
-    </div>
-
-    <div class="volume-control">
-      <span class="volume-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 4a9 9 0 0 1 0 16"/></svg></span>
-      <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="70">
     </div>
   </div>
 
@@ -249,7 +199,7 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
-<script src="script.js?v=39"></script>
+<script src="script.js?v=42"></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script>
 
