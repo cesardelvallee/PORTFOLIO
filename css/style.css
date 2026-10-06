@@ -577,6 +577,13 @@ html, body {
    ampliar se conserva. Los carruseles horizontales y lo arrastrable
    llevan su propio touch-action y siguen funcionando. */
 html { touch-action: pan-y pinch-zoom; }
+/* móvil: la home y el contacto caben en una pantalla y no se desplazan */
+@media (max-width: 768px) {
+  html:has(> body.home-page),
+  html:has(> body.contact-page) { height: 100%; overflow: hidden; }
+  body.home-page,
+  body.contact-page { position: fixed; inset: 0; overflow: hidden; }
+}
 
 img {
   width: 100%;
@@ -4416,6 +4423,38 @@ body.menu-open .sm-word {
     align-items: flex-start;
     padding: 18px 0 84px;
   }
+}
+
+/* ---- móvil: botón solo con el icono y el menú cabe entero en la
+   pantalla, sin scroll. Las medidas van en svh para que quepa también
+   con las barras del navegador visibles. ---- */
+@media (max-width: 768px) {
+  .menu-btn { width: 46px; height: 46px; padding: 0; gap: 0; justify-content: center; }
+  .menu-btn .mb-label { display: none; }
+  .sm-inner {
+    overflow: hidden;
+    padding: calc(env(safe-area-inset-top, 0px) + 2.4svh) 22px 0;
+  }
+  .sm-top { padding-bottom: 1.4svh; }
+  .sm-body {
+    min-height: 0;
+    gap: 2.4svh;
+    padding-block: 2.4svh 1.6svh;
+  }
+  .sm-link { font-size: min(13vw, 6.2svh); }
+  .sm-num { padding-top: 0.6svh; }
+  .sm-work-head { padding-bottom: 1svh; }
+  .sm-proj { height: min(3.4rem, 5.2svh); }
+  .sm-t { font-size: min(1.15rem, 2.6svh); }
+  /* la última línea del pie (redes) queda a la altura del botón de cerrar */
+  .sm-foot,
+  #site-menu.sm-btn-left .sm-foot {
+    gap: 1svh;
+    min-height: 0;
+    padding: 1.6svh 0 calc(env(safe-area-inset-bottom, 0px) + 36px);
+  }
+  /* con el botón a la izquierda (home) el pie se alinea a la derecha */
+  #site-menu.sm-btn-left .sm-foot { align-items: flex-end; text-align: right; }
 }
 
 /* ---- accesibilidad: sin desplazamientos, solo fundido ---- */

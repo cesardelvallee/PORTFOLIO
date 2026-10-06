@@ -262,6 +262,34 @@
   .cx-star { width: 9vw; height: 9vw; }
 }
 
+/* ---- móvil: todo en una pantalla, sin scroll. Medidas en svh para que
+   quepa también con las barras del navegador visibles. ---- */
+@media (max-width: 768px) {
+  .cx {
+    gap: 0;
+    justify-content: space-between;
+    height: 100svh;
+    min-height: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + 74px) 22px calc(env(safe-area-inset-bottom, 0px) + 84px);
+    overflow: hidden;
+  }
+  .cx-lead { margin-top: 1.2svh; font-size: min(4.2vw, 2.3svh); }
+  .cx-stage { height: min(34vw, 17svh); }
+  .cx-word { font-size: min(30vw, 15svh); }
+  .cx-star { width: min(9vw, 4.5svh); height: min(9vw, 4.5svh); }
+  .cx-lab { margin-bottom: 0.8svh; }
+  .cx-mail { font-size: min(6vw, 3.2svh); }
+  .cx-copy { margin-top: 1.4svh; }
+  /* redes en dos columnas */
+  .cx-br { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+  .cx-br .cx-lab { grid-column: 1 / -1; }
+  .cx-social + .cx-social { margin-top: 0; }
+  .cx-roll { font-size: min(8vw, 4.2svh); }
+  .cx-handle { font-size: 0.78rem; }
+  .cx-clock { font-size: min(9vw, 4.6svh); }
+  .cx-hours { margin-top: 0.6svh; font-size: 0.8rem; }
+}
+
 /* ---- reduced motion: sin desplazamientos, solo fundidos ---- */
 @media (prefers-reduced-motion: reduce) {
   .cx-track { animation: none; transform: translateX(-8%); }
