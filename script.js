@@ -520,6 +520,22 @@ document.addEventListener('DOMContentLoaded', function() {});
 })();
 
 /* ============================================================
+   DISCOS — la "sound palette" de César. Única fuente para el
+   tocadiscos de la home y la caja de discos del about.
+   label: color de la galleta de cada disco (tonos apagados de la paleta)
+   ============================================================ */
+var SITE_TRACKS = [
+  { title: 'I Still Haven\'t Found What I\'m Looking For', artist: 'U2', label: '#c7b299', src: 'music/U2 - I Still Haven\'t Found What I\'m Looking For (Official Music Video).mp3' },
+  { title: 'Llamando a la tierra', artist: 'M-Clan', label: '#b48a68', src: 'music/M-Clan - Llamando a la Tierra (letra).mp3' },
+  { title: 'Guaya', artist: 'Don Omar', label: '#929b7f', src: 'music/Don Omar - Guaya Guaya (Audio).mp3' },
+  { title: 'Snow Crystal', artist: 'Babalos', label: '#9198a1', src: 'music/Babalos - Snow Crystal [HQ] - Babalos.mp3' },
+  { title: 'Vagabond', artist: 'Caamp', label: '#d6c8b0', src: 'music/Vagabond.mp3' },
+  { title: 'Si Algo Es Puro Vale El Doble', artist: 'West Srk', label: '#a3877a', src: 'music/West Srk - Si Algo Es Puro Vale El Doble (Video Oficial) - West Srk.mp3' },
+  { title: 'Moonlights Puppet Remix', artist: 'Al Safir, Interferencias', label: '#7a746c', src: 'music/Interferencias - MOONLIGHT\'S PUPPET (REMIX) feat. Al Safir (Videoclip Oficial).mp3' },
+  { title: 'Somebody That I Used to Know', artist: 'Gotye ft. Kimbra', label: '#c39c7e', src: 'music/Gotye - Somebody That I Used To Know (feat. Kimbra) [Official Music Video].mp3' }
+];
+
+/* ============================================================
    REPRODUCTOR — tocadiscos 3D + título + anterior/pausa/siguiente
    El audio manda: los botones responden al instante y el tocadiscos
    "actúa" detrás (el brazo se levanta, gira y baja; el plato acelera
@@ -532,17 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {});
   // El reproductor solo existe en la home
   if (!widget || !audio) return;
 
-  // label: color de la galleta de cada disco (tonos apagados de la paleta)
-  const tracks = [
-    { title: 'I Still Haven\'t Found What I\'m Looking For', artist: 'U2', label: '#c7b299', src: 'music/U2 - I Still Haven\'t Found What I\'m Looking For (Official Music Video).mp3' },
-    { title: 'Llamando a la tierra', artist: 'M-Clan', label: '#b48a68', src: 'music/M-Clan - Llamando a la Tierra (letra).mp3' },
-    { title: 'Guaya', artist: 'Don Omar', label: '#929b7f', src: 'music/Don Omar - Guaya Guaya (Audio).mp3' },
-    { title: 'Snow Crystal', artist: 'Babalos', label: '#9198a1', src: 'music/Babalos - Snow Crystal [HQ] - Babalos.mp3' },
-    { title: 'Vagabond', artist: 'Caamp', label: '#d6c8b0', src: 'music/Vagabond.mp3' },
-    { title: 'Si Algo Es Puro Vale El Doble', artist: 'West Srk', label: '#a3877a', src: 'music/West Srk - Si Algo Es Puro Vale El Doble (Video Oficial) - West Srk.mp3' },
-    { title: 'Moonlights Puppet Remix', artist: 'Al Safir, Interferencias', label: '#7a746c', src: 'music/Interferencias - MOONLIGHT\'S PUPPET (REMIX) feat. Al Safir (Videoclip Oficial).mp3' },
-    { title: 'Somebody That I Used to Know', artist: 'Gotye ft. Kimbra', label: '#c39c7e', src: 'music/Gotye - Somebody That I Used To Know (feat. Kimbra) [Official Music Video].mp3' }
-  ];
+  const tracks = SITE_TRACKS;
 
   const stage = document.getElementById('tt-stage');
   const canvas = widget.querySelector('.tt-canvas');
@@ -1043,13 +1049,6 @@ document.addEventListener('DOMContentLoaded', function() {});
   }
 })();
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (!document.body.classList.contains('about-page')) return;
-  function elegantAnimations() { const elements = [ { selector: '.elegant-title', delay: 0 }, { selector: '.title-accent', delay: 200 }, { selector: '.name-elegant', delay: 400 }, { selector: '.role-elegant', delay: 500 }, { selector: '.description-elegant', delay: 600 }, { selector: '.visual-element', delay: 300 }, { selector: '.section-title-elegant', delay: 800 }, { selector: '.section-line', delay: 900 }, { selector: '.skill-block', delay: 1000 }, { selector: '.info-grid-elegant', delay: 1200 } ]; elements.forEach(({ selector, delay }) => { const els = document.querySelectorAll(selector); els.forEach((el, index) => { el.style.opacity = '0'; el.style.transform = 'translateY(40px)'; el.style.transition = 'opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, delay + (index * 100)); }); }); }
-  function addHoverEffects() { const skillBlocks = document.querySelectorAll('.skill-block'); skillBlocks.forEach(block => { block.addEventListener('mouseenter', () => { block.style.transform = 'translateY(-4px)'; block.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; }); block.addEventListener('mouseleave', () => { block.style.transform = 'translateY(0)'; }); }); }
-  setTimeout(() => { elegantAnimations(); addHoverEffects(); }, 100);
-});
-
   /* Loewe spot — activa el audio cuando el vídeo entra en pantalla y lo silencia al salir.
      Usa IntersectionObserver (no la dirección del scroll). Refuerzo en el 1er gesto
      porque el navegador exige interacción del usuario para reproducir sonido. */
@@ -1292,12 +1291,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var sel = [];
     if (document.body.classList.contains('about-page')) {
       sel = [
-        '.abx-sec-head',
-        '.abx-path-block',
-        '.abx-bar',
-        '.abx-exp',
-        '.abx-fact',
-        '.abx-cta-inner'
+        '.ab-lead',
+        '.ab-body',
+        '.ab-ledger > .ab-line',
+        '.ab-tools',
+        '.ab-cta-link',
+        '.ab-cta-meta'
       ];
     }
     // páginas de proyecto: créditos + bloque "siguiente proyecto"
@@ -1693,62 +1692,188 @@ document.addEventListener('DOMContentLoaded', function() {
     var inner = hero.querySelector('.proj-hero-inner') || hero.querySelector('.abx-hero-inner');
     if (!inner) return;
 
-    var h = 1, cur = 0;
+    // en el about el héroe desaparece del todo antes de llegar a la barra
+    // superior (si no, el blíster se ve a medias detrás de ATRÁS/CONTACT ME)
+    var fade = hero.classList.contains('abx-hero') ? 1.06 : 0.55;
+    var h = 1, cur = 0, raf = 0;
     function measure() { h = Math.max(1, hero.offsetHeight); }
-    measure();
-    window.addEventListener('resize', measure);
-
-    (function loop() {
+    // el bucle solo corre mientras el héroe se está moviendo
+    function frame() {
+      raf = 0;
       var sc = Math.min(Math.max(window.scrollY, 0), h);
-      cur += ((sc * 0.24) - cur) * 0.12;
+      var target = sc * 0.24;
+      cur += (target - cur) * 0.12;
+      if (Math.abs(target - cur) < 0.1) cur = target;
       var p = Math.min(1, sc / h);
       inner.style.transform = 'translateY(' + cur.toFixed(2) + 'px)';
-      inner.style.opacity = (1 - p * 0.55).toFixed(3);
-      requestAnimationFrame(loop);
-    })();
+      inner.style.opacity = Math.max(0, 1 - p * fade).toFixed(3);
+      if (cur !== target) raf = requestAnimationFrame(frame);
+    }
+    function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+    measure();
+    window.addEventListener('resize', function() { measure(); kick(); });
+    window.addEventListener('scroll', kick, { passive: true });
+    kick();
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
 })();
 
 /* ============================================================
-   ABOUT — count-up de los números del toolbox al revelarse.
-   Acompaña al llenado de la barra (misma duración y curva).
+   ABOUT — el muñeco en su blíster + el documento (perfil,
+   trayectoria, herramientas, especialidades, contacto) con un
+   índice fijo que sigue la lectura. Solo transform/opacity; en
+   táctil y con reduced-motion todo sigue funcionando.
    ============================================================ */
 (function() {
   function init() {
-    if (!document.body.classList.contains('about-page')) return;
+    var page = document.querySelector('.ab3');
+    if (!page) return;
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || !('IntersectionObserver' in window)) return;
+    var hasIO = 'IntersectionObserver' in window;
+    var each = function(list, fn) { Array.prototype.forEach.call(list, fn); };
 
-    var bars = document.querySelectorAll('.abx-bar');
-    if (!bars.length) return;
-
-    function countUp(num) {
-      var target = parseInt(num.textContent, 10);
-      if (!target) return;
-      var t0 = null;
-      var DUR = 1150;
-      function step(ts) {
-        if (!t0) t0 = ts;
-        var t = Math.min(1, (ts - t0) / DUR);
-        var eased = 1 - Math.pow(1 - t, 3); // ease-out cúbico, como la barra
-        num.textContent = Math.round(target * eased);
-        if (t < 1) requestAnimationFrame(step);
-      }
-      num.textContent = '0';
-      requestAnimationFrame(step);
+    // añade una clase la primera vez que el elemento entra en vista
+    function once(el, cls, threshold) {
+      if (!el) return;
+      if (!hasIO) { el.classList.add(cls); return; }
+      var io = new IntersectionObserver(function(es) {
+        es.forEach(function(en) { if (en.isIntersecting) { el.classList.add(cls); io.disconnect(); } });
+      }, { threshold: threshold || 0.2 });
+      io.observe(el);
     }
 
-    var io = new IntersectionObserver(function(entries) {
-      entries.forEach(function(en) {
-        if (!en.isIntersecting) return;
-        var num = en.target.querySelector('.abx-bar-num');
-        if (num && !en.target.__counted) { en.target.__counted = true; countUp(num); }
-        io.unobserve(en.target);
+    /* ---- el muñeco: se gira arrastrando; tres vueltas tienen premio ---- */
+    (function toy() {
+      var mv = page.querySelector('.ab-bubble model-viewer');
+      if (!mv) return;
+      var bubble = mv.closest('.ab-bubble');
+      var hint = page.querySelector('.ab-hint');
+      mv.addEventListener('load', function() {
+        bubble.classList.remove('is-failed');
+        bubble.classList.add('is-loaded');
       });
-    }, { threshold: 0.4 });
-    bars.forEach(function(b) { io.observe(b); });
+      // sin red, sin el componente o sin el .glb: se dice, no se queda cargando
+      function fail() { if (!bubble.classList.contains('is-loaded')) bubble.classList.add('is-failed'); }
+      mv.addEventListener('error', fail);
+      setTimeout(fail, 12000);
+      // el sitio dibuja su propio cursor: model-viewer pone "grab" dentro de su
+      // shadow DOM y se colaba por encima
+      if (window.customElements && customElements.whenDefined) {
+        customElements.whenDefined('model-viewer').then(function() {
+          if (!mv.shadowRoot || mv.shadowRoot.querySelector('style[data-nocursor]')) return;
+          var st = document.createElement('style');
+          st.setAttribute('data-nocursor', '');
+          st.textContent = '.userInput{cursor:none!important}';
+          mv.shadowRoot.appendChild(st);
+        });
+      }
+      var last = null, acc = 0, eggT = 0;
+      mv.addEventListener('camera-change', function(e) {
+        if (!e.detail || e.detail.source !== 'user-interaction' || !mv.getCameraOrbit) { last = null; return; }
+        var th = mv.getCameraOrbit().theta;
+        if (last !== null) {
+          var d = th - last;
+          if (d > Math.PI) d -= Math.PI * 2;
+          if (d < -Math.PI) d += Math.PI * 2;
+          acc += Math.abs(d);
+        }
+        last = th;
+        if (hint && acc >= Math.PI * 6) {
+          acc = 0;
+          hint.classList.add('is-egg');
+          clearTimeout(eggT);
+          eggT = setTimeout(function() { hint.classList.remove('is-egg'); }, 3200);
+        }
+      });
+    })();
+
+    /* ---- índice + barra superior: marca la sección que se está leyendo y,
+       pasado el muñeco, da fondo a la barra fija. Una sola comprobación
+       por frame, en scroll y al cambiar el tamaño. ---- */
+    (function index() {
+      var nav = page.querySelector('.ab-index');
+      var links = nav ? nav.querySelectorAll('a') : [];
+      var bar = nav ? nav.querySelector('.ab-index-bar') : null;
+      var parts = page.querySelectorAll('.ab-part[id]');
+      var hero = page.querySelector('.ab-hero');
+      var current = '', raf = 0;
+      function activate(id) {
+        if (id === current) return;
+        current = id;
+        each(links, function(a) {
+          if (a.getAttribute('href') === '#' + id) {
+            a.setAttribute('aria-current', 'location');
+            if (bar) bar.style.transform = 'translateY(' + (a.offsetTop + a.offsetHeight / 2 - 8) + 'px)';
+          } else {
+            a.removeAttribute('aria-current');
+          }
+        });
+      }
+      function spy() {
+        raf = 0;
+        if (hero) document.body.classList.toggle('ab-past-hero', hero.getBoundingClientRect().bottom < 80);
+        if (!parts.length) return;
+        var id = parts[0].id;
+        var doc = document.documentElement;
+        if (window.innerHeight + window.scrollY >= doc.scrollHeight - 4) {
+          id = parts[parts.length - 1].id;
+        } else {
+          each(parts, function(s) { if (s.getBoundingClientRect().top <= window.innerHeight * 0.42) id = s.id; });
+        }
+        activate(id);
+      }
+      function kick() { if (!raf) raf = requestAnimationFrame(spy); }
+      each(links, function(a) {
+        a.addEventListener('click', function(e) {
+          var t = document.getElementById(a.getAttribute('href').slice(1));
+          if (!t) return;
+          e.preventDefault();
+          t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+          history.replaceState(null, '', a.getAttribute('href'));
+        });
+      });
+      window.addEventListener('scroll', kick, { passive: true });
+      window.addEventListener('resize', function() { current = ''; kick(); });
+      spy();
+    })();
+
+    /* ---- herramientas: los medidores se llenan al entrar en vista ---- */
+    each(page.querySelectorAll('.ab-tool-group'), function(g) { once(g, 'is-in', 0.35); });
+
+    /* ---- copiar el correo (y decirlo también a los lectores de pantalla) ---- */
+    (function copy() {
+      var btn = page.querySelector('.ab-copy');
+      var mail = page.querySelector('.ab-mail');
+      var sr = page.querySelector('.ab-cta .ab-sr');
+      if (!btn || !mail) return;
+      btn.addEventListener('click', function() {
+        var text = mail.textContent.trim();
+        function done(cls, msg) {
+          btn.classList.remove('is-copied', 'is-select');
+          btn.classList.add(cls);
+          if (sr) sr.textContent = msg;
+          clearTimeout(btn._t);
+          btn._t = setTimeout(function() {
+            btn.classList.remove('is-copied', 'is-select');
+            if (sr) sr.textContent = '';
+          }, 1600);
+        }
+        function select() {
+          var r = document.createRange();
+          r.selectNodeContents(mail);
+          var s = window.getSelection();
+          s.removeAllRanges();
+          s.addRange(r);
+          done('is-select', 'Correo seleccionado, pulsa Ctrl+C para copiarlo');
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(function() { done('is-copied', 'Correo copiado'); }, select);
+        } else {
+          select();
+        }
+      });
+    })();
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
@@ -1933,7 +2058,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // nombre del loader del index: letra a letra sobre el telón
     split(document.querySelector('.loader-name'), 'letter', 300, 45, 800);
     // títulos de sección de las páginas de proyecto, al entrar en vista
-    Array.prototype.forEach.call(document.querySelectorAll('.gx-title'), function(t) {
+    Array.prototype.forEach.call(document.querySelectorAll('.gx-title, .ab-h'), function(t) {
       splitOnView(t, 'word', 150, 60, 750);
     });
   }
