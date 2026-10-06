@@ -133,26 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // botón "About me": mismo comportamiento que el del menú (el press lo
+  // hace el :active del CSS; la cortina de PageFX es la respuesta)
   const btn = document.querySelector('.hero-btn');
-  const btnText = document.querySelector('.hero-btn-text');
-  const subtitle = document.querySelector('.hero-subtitle');
-  if (btn && btnText) {
-    if (!isMobile()) {
-      btn.addEventListener('mouseenter', () => { btnText.classList.remove('animate'); void btnText.offsetWidth; btnText.classList.add('animate'); });
-      btn.addEventListener('mouseleave', () => { btnText.classList.remove('animate'); });
-    }
-    btn.style.cursor = 'pointer';
-    btn.addEventListener('click', () => {
-      btn.classList.add('clicked');
-      setTimeout(() => btn.classList.remove('clicked'), 400);
-      setTimeout(() => { window.PageFX.leave('about.html'); }, 140);
-    });
-    btn.addEventListener('touchstart', () => {
-      btn.style.transform = 'scale(0.95)';
-    }, { passive: true });
-    btn.addEventListener('touchend', () => {
-      btn.style.transform = '';
-    }, { passive: true });
+  if (btn) {
+    btn.addEventListener('touchstart', () => {}, { passive: true }); // :active en iOS
+    btn.addEventListener('click', () => { window.PageFX.leave('about.html'); });
   }
 
   /* (sin hover en el subtítulo: la animación de rebote solo en la entrada) */
@@ -193,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, '-=0.12')
       .to(btn, {opacity: 1, y: 0, scale: 1.08, filter: 'blur(0px)', duration: 0.14, ease: 'back.out(2)',
         onStart: () => { btn.style.pointerEvents = 'none'; },
-        onComplete:()=>{ btn.style.pointerEvents = 'auto'; gsap.to(btn, {scale:1, duration:0.12, ease:'power1.out'}); }
+        onComplete:()=>{ btn.style.pointerEvents = 'auto'; gsap.to(btn, {scale:1, duration:0.12, ease:'power1.out', clearProps:'transform,filter'}); }
       }, '-=0.18')
       .add(() => animateStackedImages(), '-=0.25')
       .add(() => { if (window.initWhatsitIn) window.initWhatsitIn(); }, '+=0.7');
@@ -343,11 +329,6 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 (function() {
-  const btn = document.querySelector('.hero-btn'); const btnText = document.querySelector('.hero-btn-text');
-  if (btn && btnText) { btn.addEventListener('mouseenter', function() { btnText.classList.remove('hover-animate'); void btnText.offsetWidth; btnText.classList.add('hover-animate'); }); btn.addEventListener('mouseleave', function() { btnText.classList.remove('hover-animate'); }); }
-})();
-
-(function() {
   // Single source of truth for the intro / loading screen.
   // Replays the intro only on the first visit of the session or a manual reload;
   // skips it (instant reveal) on internal navigation / back-forward so returning
@@ -390,57 +371,113 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function runLoader() {
-    const loadingScreen = document.getElementById('loading-screen');
-    const loadingProgress = document.getElementById('loading-progress');
-    const loadingText = document.getElementById('loading-text');
-    const loadingPercent = document.getElementById('loading-percent');
-    if (!(loadingScreen && loadingProgress && loadingText)) { showInstant(); return; }
+    const ld = document.getElementById('loading-screen');
+    const h1 = ld && ld.querySelector('.ld-h1');
+    const h2 = ld && ld.querySelector('.ld-h2');
+    const view = h1 && h1.querySelector('.ld-view');
+    if (!(ld && h1 && h2 && view)) { showInstant(); return; }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Timed, smoothly eased intro so it can be appreciated.
-    const fillDuration = 3300;   // ms for 0 -> 100
-    const startDelay = 650;      // let the wordmark reveal first
-    const holdAtFull = 480;      // small beat at 100%
-    const loadingMessages = ['Cargando experiencia', 'Preparando el portfolio', 'Afinando detalles', 'Listo'];
-    loadingText.style.opacity = '1';
+    // la mitad de abajo enseña la misma vista, desplazada (ver CSS)
+    h2.insertBefore(view.cloneNode(true), h2.firstChild);
+    const yy = String(new Date().getFullYear()).slice(-2);
+    ld.querySelectorAll('.ld-year').forEach((y) => { y.textContent = 'Portfolio — ’' + yy; });
 
-    const setProgress = (value) => {
-      const v = Math.max(0, Math.min(100, value));
-      loadingProgress.style.width = v + '%';
-      // número desnudo: el contador gigante no lleva símbolo
-      if (loadingPercent) loadingPercent.textContent = Math.round(v);
+    // dónde cae la línea central del monograma: ahí se parte la pantalla
+    const measure = () => {
+      const lr = ld.getBoundingClientRect();
+      ld.style.setProperty('--lh', lr.height + 'px');
+      const cross = view.querySelector('.ld-cross').getBoundingClientRect();
+      const mark = view.querySelector('.ld-mark').getBoundingClientRect();
+      // en píxeles de pantalla exactos: si el corte cae entre dos, se ve una costura
+      const dpr = window.devicePixelRatio || 1;
+      const split = Math.round((cross.top - lr.top + cross.height / 2) * dpr) / dpr;
+      ld.style.setProperty('--split', split + 'px');
+      ld.style.setProperty('--t', Math.max(2, cross.height).toFixed(2) + 'px');
+      ld.style.setProperty('--cx', (mark.left + mark.width / 2).toFixed(1) + 'px');
     };
-    // easeInOutCubic — slow start, fluid middle, gentle settle
-    const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    measure();
+    window.addEventListener('resize', measure);
 
-    let lastMsg = -1;
-    const updateMessage = (pct) => {
-      let idx = pct < 28 ? 0 : pct < 62 ? 1 : pct < 96 ? 2 : 3;
-      if (idx !== lastMsg) { loadingText.textContent = loadingMessages[idx]; lastMsg = idx; }
+    // contador de rodillos en las dos copias
+    const counters = Array.prototype.map.call(ld.querySelectorAll('.ld-count'), (el) => [0, 1, 2].map(() => {
+      const d = document.createElement('span');
+      d.className = 'ld-digit';
+      const strip = document.createElement('span');
+      strip.className = 'ld-strip';
+      for (let n = 0; n <= 9; n++) { const s = document.createElement('span'); s.textContent = n; strip.appendChild(s); }
+      d.appendChild(strip);
+      el.appendChild(d);
+      return { d, strip };
+    }));
+    const msgs = ld.querySelectorAll('.ld-msg');
+    const STEPS = ['Trazando la retícula', 'Componiendo el monograma', 'Ajustando el kerning', 'Listo'];
+    let msgIdx = 0;
+    const setCount = (v) => {
+      const str = String(Math.round(v)).padStart(3, '0');
+      counters.forEach((cols) => {
+        let lead = true;
+        cols.forEach((col, i) => {
+          const n = +str[i];
+          if (n !== 0 || i === 2) lead = false;
+          col.d.classList.toggle('is-lead', lead);
+          col.strip.style.transform = 'translateY(' + (-n) + 'em)';
+        });
+      });
+      const idx = v >= 100 ? 3 : v >= 66 ? 2 : v >= 30 ? 1 : 0;
+      if (idx !== msgIdx) { msgIdx = idx; msgs.forEach((m) => { m.textContent = STEPS[idx]; }); }
     };
+    setCount(0);
 
-    const finish = () => {
-      setProgress(100); updateMessage(100);
-      setTimeout(() => {
-        revealMain();                                   // hero sits behind the curtain
-        loadingScreen.classList.add('fade-out');        // curtain wipes up
-        triggerStartAnimations();                       // hero reveals as it rises
-        try { sessionStorage.setItem(visitedKey, '1'); } catch (e) {}
-        setTimeout(() => {
-          try { loadingScreen.remove(); } catch (e) { loadingScreen.style.display = 'none'; }
-        }, 1000);
-      }, holdAtFull);
-    };
+    // las dos copias empiezan a la vez
+    ld.classList.add('is-run');
 
-    let startTs = null;
+    // contador: entra lento, corre en medio y se asienta
+    const START = reduce ? 150 : 350;
+    const FILL = reduce ? 900 : 3200;
+    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    let t0 = null;
     const step = (ts) => {
-      if (startTs === null) startTs = ts;
-      const t = Math.min(1, (ts - startTs) / fillDuration);
-      const pct = ease(t) * 100;
-      setProgress(pct); updateMessage(pct);
-      if (t < 1) { requestAnimationFrame(step); } else { finish(); }
+      if (t0 === null) t0 = ts;
+      const x = Math.min(1, (ts - t0) / FILL);
+      setCount(ease(x) * 100);
+      if (x < 1) requestAnimationFrame(step); else finish();
     };
+    setTimeout(() => requestAnimationFrame(step), START);
 
-    setTimeout(() => { requestAnimationFrame(step); }, startDelay);
+    function done() {
+      try { sessionStorage.setItem(visitedKey, '1'); } catch (e) {}
+      window.removeEventListener('resize', measure);
+      setTimeout(() => { try { ld.remove(); } catch (e) { ld.style.display = 'none'; } }, 1100);
+    }
+
+    function finish() {
+      setCount(100);
+      if (reduce) {
+        setTimeout(() => {
+          revealMain();
+          ld.classList.add('fade-out');
+          triggerStartAnimations();
+          done();
+        }, 250);
+        return;
+      }
+      // 1) el monograma pasa a beige  2) su línea central cruza la pantalla
+      // 3) la pantalla se parte en dos por esa línea y aparece la home
+      setTimeout(() => {
+        ld.classList.add('is-beige');
+        setTimeout(() => {
+          measure();
+          ld.classList.add('is-cut');
+          setTimeout(() => {
+            revealMain();
+            ld.classList.add('is-split');
+            triggerStartAnimations();
+            done();
+          }, 650);
+        }, 300);
+      }, 350);
+    }
   }
 
   function initializeLoading() {
@@ -1084,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Botones magnéticos (solo con puntero fino / no táctil)
   var finePointer = !window.matchMedia || !window.matchMedia('(hover: none)').matches;
   if (finePointer) {
-    document.querySelectorAll('.hero-btn, .back-btn').forEach(function(el) {
+    document.querySelectorAll('.back-btn').forEach(function(el) {
       el.addEventListener('mousemove', function(e) {
         var r = el.getBoundingClientRect();
         var mx = e.clientX - (r.left + r.width / 2);
@@ -2075,8 +2112,6 @@ document.addEventListener('DOMContentLoaded', function() {
     split(document.querySelector('.proj-title'), 'word', 160, 70, 850);
     split(document.querySelector('.abx-name'), 'word', 140, 95, 900);
     split(document.querySelector('.contact-title'), 'letter', 110, 30, 750);
-    // nombre del loader del index: letra a letra sobre el telón
-    split(document.querySelector('.loader-name'), 'letter', 300, 45, 800);
     // títulos de sección de las páginas de proyecto, al entrar en vista
     Array.prototype.forEach.call(document.querySelectorAll('.gx-title, .ab-h'), function(t) {
       splitOnView(t, 'word', 150, 60, 750);
@@ -2580,6 +2615,7 @@ try {
     var btn = ws.querySelector('.ws-btn');
     var spin = ws.querySelector('.ws-spin');
     var dot = ws.querySelector('.ws-dot');
+    var egg = ws.querySelector('.ws-egg');
     var sr = ws.querySelector('.ws-sr');
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -2603,23 +2639,16 @@ try {
       return svg;
     });
 
-    // junto a la P del título, a media altura; --fs escala nota y flecha.
-    // Si las fotos arrastrables lo taparían, se aparta a su izquierda.
-    // En móvil no se muestra (CSS).
-    var cards = document.querySelector('.stacked-images');
+    // abajo a la izquierda, bajo el subtítulo: la nota arranca en el margen
+    // y su flecha baja hasta el punto. --fs escala nota y flecha (el tamaño
+    // del título antiguo, con el que se ajustaron). En móvil no se muestra (CSS).
+    var sub = document.querySelector('.hero-subtitle');
     function place() {
-      var fs = parseFloat(getComputedStyle(title).fontSize);
+      var fs = Math.min(window.innerWidth * 0.063, 110);
       ws.style.setProperty('--fs', fs + 'px');
-      // un poco por debajo de la mitad del título y algo más separado de la P
-      var dx = fs * 0.75, dy = fs * 1.6;
-      var shift = dx;
-      if (cards) {
-        var dotX = title.getBoundingClientRect().left - fs * 0.5 - dx;
-        var limit = cards.getBoundingClientRect().left - 34;
-        if (dotX > limit) shift += dotX - limit;
-      }
-      ws.style.top = (title.offsetTop + title.offsetHeight / 2 + dy) + 'px';
-      ws.style.left = (title.offsetLeft - shift) + 'px';
+      var below = sub ? sub.offsetTop + sub.offsetHeight : title.offsetTop + title.offsetHeight;
+      ws.style.left = ((sub ? sub.offsetLeft : title.offsetLeft) + fs * 1.7) + 'px';
+      ws.style.top = (below + fs * 0.5 + fs * 1.19) + 'px';
     }
     place();
     window.addEventListener('resize', place);
@@ -2628,9 +2657,10 @@ try {
     var step = 0;
     btn.addEventListener('click', function() {
       if (step >= PHRASES.length) {
-        // ya está todo dicho: el punto niega con la cabeza
-        if (!reduce && dot.animate) {
-          dot.animate([
+        // ya está todo dicho: el punto (o lo que queda de él) niega con la cabeza
+        var target = ws.classList.contains('is-broken') ? egg : dot;
+        if (!reduce && target.animate) {
+          target.animate([
             { translate: '0 0' }, { translate: '-5px 0' }, { translate: '4px 0' },
             { translate: '-3px 0' }, { translate: '0 0' }
           ], { duration: 360, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' });
@@ -2642,6 +2672,14 @@ try {
       ws.classList.add('is-open');
       sr.textContent = PHRASES[step];
       step++;
+      // la última frase ("Happy now?"): el punto se tensa, se agrieta y se rompe como un huevo
+      if (step === PHRASES.length) {
+        if (!reduce && dot.animate) {
+          dot.animate([{ scale: '1' }, { scale: '1.14' }, { scale: '0.92' }, { scale: '1' }], { duration: 260, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' });
+        }
+        setTimeout(function() { ws.classList.add('is-cracked'); }, reduce ? 0 : 230);
+        setTimeout(function() { ws.classList.add('is-broken'); }, reduce ? 0 : 560);
+      }
       btn.setAttribute('aria-label', step < PHRASES.length ? PHRASES[step - 1] + ' Pulsa otra vez' : PHRASES[step - 1]);
     });
 

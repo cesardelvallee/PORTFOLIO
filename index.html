@@ -59,9 +59,10 @@
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net/" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=74">
+  <link rel="stylesheet" href="css/style.css?v=96">
   <link rel="stylesheet" href="css/dragme.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@500&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
@@ -69,17 +70,38 @@
 <body class="home-page">
 <div id="page-fx" aria-hidden="true"></div>
 <script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
-<!-- PANTALLA DE CARGA — telón editorial mínimo -->
+<!-- PANTALLA DE CARGA: el monograma CE se traza como un plano técnico;
+     al terminar, su línea central cruza la pantalla y la parte en dos
+     (la mitad de arriba sube, la de abajo baja). script.js clona la
+     vista en la mitad inferior y lo anima todo a la vez. -->
 <div id="loading-screen">
-  <span class="loader-corner lc-tl" aria-hidden="true">César Del Valle</span>
-  <span class="loader-corner lc-tr" aria-hidden="true">Portfolio — ’25</span>
-  <div class="loader-center">
-    <span class="loader-name">CÉSAR DEL VALLE</span>
-    <span class="loader-role">Graphic Designer</span>
+  <span class="ld-sr" role="status">Cargando el portfolio</span>
+  <div class="ld-half ld-h1">
+    <div class="ld-view" aria-hidden="true">
+      <span class="ld-corner ld-tl">César del Valle</span>
+      <span class="ld-corner ld-tr ld-year">Portfolio</span>
+      <span class="ld-corner ld-bl"><i></i><span class="ld-msg">Trazando la retícula</span></span>
+      <span class="ld-corner ld-br"><span class="ld-count"></span><span class="ld-pc">%</span></span>
+      <figure class="ld-mark">
+        <svg class="ld-logo" viewBox="0 0 429 319">
+          <rect class="ld-s ld-x0" style="--d:0" x="74.38" y="9" width="275.36" height="7.48"/>
+          <rect class="ld-s ld-y0" style="--d:1" x="342.25" y="9" width="7.5" height="301"/>
+          <rect class="ld-s ld-x1" style="--d:2" x="74.38" y="302.52" width="275.36" height="7.48"/>
+          <rect class="ld-s ld-y1" style="--d:3" x="74.38" y="9" width="7.5" height="301"/>
+          <rect class="ld-s ld-y0" style="--d:4" x="115.66" y="56.09" width="7.5" height="208.95"/>
+          <rect class="ld-s ld-x0" style="--d:5" x="115.66" y="56.09" width="186.85" height="7.48"/>
+          <rect class="ld-s ld-x0" style="--d:6" x="115.66" y="257.56" width="304.34" height="7.48"/>
+          <rect class="ld-s ld-x0 ld-cross" style="--d:7" x="9" y="156.83" width="291.97" height="7.48"/>
+          <rect class="ld-s ld-y0" style="--d:8" x="298.76" y="56.09" width="7.5" height="108.21"/>
+          <path class="ld-l" style="--d:9" d="M202.859 199.243H192.887C171.331 199.243 153.785 181.737 153.785 160.229C153.785 138.721 171.331 121.216 192.887 121.216H202.859V128.697H192.887C175.454 128.697 161.283 142.836 161.283 160.229C161.283 177.623 175.454 191.762 192.887 191.762H202.859V199.243Z"/>
+          <path class="ld-l" style="--d:9.6" d="M264.718 199.243H215.681V121.216H264.718V128.697H223.179V191.762H264.718V199.243Z"/>
+        </svg>
+        <figcaption>Fig. 01 — Monograma</figcaption>
+      </figure>
+    </div>
+    <span class="ld-cut"></span>
   </div>
-  <div class="loader-count" aria-hidden="true"><span id="loading-percent">0</span></div>
-  <span id="loading-text" class="loader-status">Cargando experiencia</span>
-  <div class="loader-line" aria-hidden="true"><div id="loading-progress" class="loader-line-fill"></div></div>
+  <div class="ld-half ld-h2"><span class="ld-cut"></span></div>
 </div>
 
 <!-- CONTENIDO PRINCIPAL -->
@@ -136,17 +158,27 @@
 <div class="content-drag-area">
   <div class="center-hero-text">
     <div class="model-3d-bg">
-  <model-viewer src="assets/CESAR_3D.glb" auto-rotate auto-rotate-speed="6" disable-zoom disable-pan style="width:140%;height:140%;background:transparent;" alt="3D Model"></model-viewer>
+  <model-viewer src="assets/CESAR_3D.glb" auto-rotate auto-rotate-speed="6" disable-zoom disable-pan style="background:transparent;" alt="3D Model"></model-viewer>
     </div>
     <div class="hero-title">PORTFOLIO</div>
-    <div class="hero-subtitle">GRAPHIC DESIGNER</div>
+    <div class="hero-subtitle">GRAPHIC DESIGNER — MADRID</div>
     <!-- "¿Qué es esto?": puntito con nota a mano; cada clic, otra frase -->
     <div class="whatsit" aria-hidden="false">
-      <span class="ws-note" aria-hidden="true">Branding &amp; Packaging</span>
+      <span class="ws-note" aria-hidden="true">Don’t click!</span>
       <svg class="ws-arrow" viewBox="0 0 120 150" aria-hidden="true"><path class="ws-arrow-line" d="M14 6c3 18 9 36 19 55 12 23 32 46 62 70"/><path class="ws-arrow-head" d="M78 136c7-1 13-2 19-4-1-7-3-13-6-19"/></svg>
       <button type="button" class="ws-btn" aria-label="¿Qué es esto?">
         <span class="ws-spin" aria-hidden="true"></span>
         <span class="ws-dot" aria-hidden="true"></span>
+        <svg class="ws-egg" viewBox="0 0 40 40" aria-hidden="true">
+          <circle class="ws-yolk" cx="20" cy="18" r="9"/>
+          <path class="ws-shell ws-shell-b" d="M0 20 L5 16 L10 23 L15 17 L20 24 L25 17 L30 23 L35 16 L40 20 A20 20 0 0 1 0 20 Z"/>
+          <path class="ws-shell ws-shell-t" d="M0 20 A20 20 0 0 1 40 20 L35 16 L30 23 L25 17 L20 24 L15 17 L10 23 L5 16 Z"/>
+          <polyline class="ws-crack" points="0,20 5,16 10,23 15,17 20,24 25,17 30,23 35,16 40,20"/>
+          <polygon class="ws-shard" style="--dx:-16px;--dy:-12px;--r:-110deg" points="6,17 10,16 8,20"/>
+          <polygon class="ws-shard" style="--dx:-6px;--dy:-20px;--r:70deg" points="16,18 19,17 18,21"/>
+          <polygon class="ws-shard" style="--dx:9px;--dy:-18px;--r:-60deg" points="24,18 27,18 25,21"/>
+          <polygon class="ws-shard" style="--dx:17px;--dy:-8px;--r:120deg" points="32,17 36,17 34,20"/>
+        </svg>
       </button>
       <span class="ws-sr" role="status"></span>
     </div>
@@ -179,7 +211,10 @@
   </div>
   
   <div class="hero-btn-bottom-wrapper">
-    <button class="hero-btn"><span class="hero-btn-text">ABOUT ME</span></button>
+    <button type="button" class="hero-btn">
+      <span class="hb-ico" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1.6 8.4L8.4 1.6M3 1.6h5.4V7"/></svg><svg viewBox="0 0 10 10"><path d="M1.6 8.4L8.4 1.6M3 1.6h5.4V7"/></svg></span>
+      <span class="hero-btn-text">About me</span>
+    </button>
   </div>
 </div>
 
@@ -209,21 +244,15 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
-<script src="script.js?v=61"></script>
+<script src="script.js?v=73"></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script>
 
 window.addEventListener('DOMContentLoaded', function() {
   var subtitle = document.querySelector('.hero-subtitle');
-  var btnText = document.querySelector('.hero-btn-text');
   if(subtitle) {
     subtitle.classList.add('animate');
   }
-  setTimeout(function() {
-    if(btnText) {
-      btnText.classList.add('animate');
-    }
-  }, 1400); 
 });
 </script>
 
