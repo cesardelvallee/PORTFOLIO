@@ -569,7 +569,14 @@ html, body {
   overflow-x: hidden;
   overflow-x: clip;
   height: auto;
+  /* en táctil la página no rebota ni arrastra el scroll a lo que hay
+     detrás (menú abierto, carruseles) */
+  overscroll-behavior: none;
 }
+/* la página solo se desplaza en vertical con el dedo; el pellizco para
+   ampliar se conserva. Los carruseles horizontales y lo arrastrable
+   llevan su propio touch-action y siguen funcionando. */
+html { touch-action: pan-y pinch-zoom; }
 
 img {
   width: 100%;
@@ -3689,6 +3696,148 @@ body.about-page.ab-past-hero .top-bar::before { opacity: 1; }
 
 
 
+/* ================================================
+   WHATSIT — el puntito de la home. Una nota a mano con flecha
+   señala un punto junto a PORTFOLIO; cada clic lo agranda y le da
+   otra frase en círculo, que gira despacio. La última se queda.
+   script.js lo coloca junto a la P (top/left/--fs desde el título).
+   ================================================ */
+.whatsit {
+  --ws-accent: #c7b299;
+  --ws-ink: #ece6da;
+  --fs: 90px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+body.theme-light .whatsit { --ws-accent: #8a6f4a; --ws-ink: #2a2620; }
+
+/* botón: caja táctil de 44px aunque el punto en reposo mida 8px */
+.ws-btn {
+  position: absolute;
+  left: calc(var(--fs) * -0.5);
+  top: 0;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ws-btn:focus-visible { outline: none; }
+.ws-btn:focus-visible .ws-dot { box-shadow: 0 0 0 3px rgba(16, 15, 13, 0.9), 0 0 0 5px var(--ws-accent); }
+.ws-dot {
+  --s: 0.1;
+  --p: 1;
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--ws-accent);
+  opacity: 0;
+  transform: scale(calc(var(--s) * var(--p)));
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.whatsit.is-in .ws-dot { --s: 0.2; opacity: 1; }
+.whatsit.is-open .ws-dot { --s: 0.72; }
+.ws-btn:active .ws-dot { --p: 0.88; transition-duration: 0.16s; }
+
+/* el anillo de texto gira solo cuando hay frase */
+.ws-spin {
+  position: absolute;
+  inset: -22px;
+  animation: ws-spin 12s linear infinite;
+  animation-play-state: paused;
+}
+.whatsit.is-open .ws-spin { animation-play-state: running; }
+@keyframes ws-spin { to { transform: rotate(360deg); } }
+.ws-phrase {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--ws-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: scale(0.6) rotate(-40deg);
+  transition: opacity 0.22s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.ws-phrase.is-on {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* la nota y la flecha: dibujadas a mano, en el beige de la casa */
+.ws-note,
+.ws-arrow {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.ws-note {
+  left: calc(var(--fs) * -1.99);
+  top: calc(var(--fs) * -1.19);
+  white-space: nowrap;
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: calc(var(--fs) * 0.22);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ws-accent);
+  transform: rotate(-14deg) translateY(8px);
+}
+.ws-arrow {
+  left: calc(var(--fs) * -1.27);
+  top: calc(var(--fs) * -0.955);
+  width: calc(var(--fs) * 0.65);
+  height: auto;
+  fill: none;
+  stroke: var(--ws-accent);
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: translate(-8px, -8px);
+}
+.whatsit.is-in .ws-note { opacity: 0.95; transform: rotate(-14deg); transition-delay: 0.15s; }
+.whatsit.is-in .ws-arrow { opacity: 0.9; transform: none; transition-delay: 0.3s; }
+
+/* lector de pantalla: la frase se anuncia */
+.ws-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* móvil: no se muestra (las fotos tapan el título y no tiene sitio) */
+@media (max-width: 768px) {
+  .whatsit { display: none; }
+}
+
+/* reduced motion: sin giro ni escalas, solo fundidos */
+@media (prefers-reduced-motion: reduce) {
+  .ws-spin { animation: none; }
+  .ws-phrase, .ws-phrase.is-on, .ws-arrow,
+  .whatsit.is-in .ws-arrow { transform: none !important; }
+  .whatsit .ws-note, .whatsit.is-in .ws-note { transform: rotate(-14deg) !important; }
+  .whatsit .ws-phrase { transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+  .whatsit .ws-dot, .whatsit .ws-note, .whatsit .ws-arrow { transition-duration: 0.3s !important; }
+}
+
 /* ============================================================
    PULIDO FINAL — detalles premium globales
    selección · scrollbar · tap móvil · underline footer · marquee
@@ -3968,8 +4117,10 @@ body.menu-open .sm-sh-b i { transition-delay: calc(110ms + var(--c) * 40ms); }
   display: flex;
   flex-direction: column;
   padding: calc(env(safe-area-inset-top, 0px) + clamp(22px, 3.4vh, 34px)) clamp(24px, 4vw, 56px) 28px;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y pinch-zoom;
 }
 
 /* entrada genérica: al cerrar sale rápido y sin escalonado */
@@ -4260,6 +4411,8 @@ body.menu-open .sm-word {
   .sm-foot,
   #site-menu.sm-btn-left .sm-foot {
     flex-direction: column;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
     align-items: flex-start;
     padding: 18px 0 84px;
   }

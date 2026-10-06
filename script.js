@@ -195,7 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         onStart: () => { btn.style.pointerEvents = 'none'; },
         onComplete:()=>{ btn.style.pointerEvents = 'auto'; gsap.to(btn, {scale:1, duration:0.12, ease:'power1.out'}); }
       }, '-=0.18')
-      .add(() => animateStackedImages(), '-=0.25');
+      .add(() => animateStackedImages(), '-=0.25')
+      .add(() => { if (window.initWhatsitIn) window.initWhatsitIn(); }, '+=0.7');
   }
 
   function startInitialAnimations() { playHeroTitleAnimation(); }
@@ -1625,12 +1626,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /* ---- abrir / cerrar ---- */
+    // overflow:hidden en <html> no basta en iOS: con el dedo la página de
+    // detrás se sigue moviendo. Se fija el body donde estaba y, al cerrar,
+    // se devuelve el scroll a su sitio sin animación.
+    var lockedY = 0;
+    function lockPage(lock) {
+      var bs = document.body.style;
+      if (lock) {
+        lockedY = window.scrollY;
+        bs.position = 'fixed';
+        bs.top = -lockedY + 'px';
+        bs.left = '0';
+        bs.right = '0';
+        bs.width = '100%';
+      } else {
+        bs.position = bs.top = bs.left = bs.right = bs.width = '';
+        window.scrollTo({ top: lockedY, left: 0, behavior: 'instant' });
+      }
+    }
     function isOpen() { return document.body.classList.contains('menu-open'); }
     function setOpen(open) {
       if (open === isOpen()) return;
       document.body.classList.toggle('menu-open', open);
       // candado de scroll en <html>, que es el contenedor que scrollea
       document.documentElement.classList.toggle('menu-open', open);
+      lockPage(open);
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
       menu.setAttribute('aria-hidden', String(!open));
@@ -2536,3 +2556,99 @@ try {
     'font:400 11px Inter,sans-serif;color:#8d857a;'
   );
 } catch (e) {}
+/* ============================================================
+   WHATSIT — el puntito de la home. Cada clic lo agranda y le pone
+   otra frase en círculo (SVG textPath, gira con CSS). La última se
+   queda; a partir de ahí el punto solo dice que no con la cabeza.
+   Aparece cuando termina la entrada del título (initWhatsitIn).
+   ============================================================ */
+(function() {
+  var PHRASES = [
+    'What is that?',
+    'Stop clicking it!',
+    'Stop! Really, please stop!',
+    'I warned you!',
+    'Last chance!',
+    'Happy now?'
+  ];
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function init() {
+    var ws = document.querySelector('.whatsit');
+    var title = document.querySelector('.hero-title');
+    if (!ws || !title) return;
+    var btn = ws.querySelector('.ws-btn');
+    var spin = ws.querySelector('.ws-spin');
+    var dot = ws.querySelector('.ws-dot');
+    var sr = ws.querySelector('.ws-sr');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // un anillo SVG por frase: texto sobre un círculo alrededor del punto
+    var rings = PHRASES.map(function(text, i) {
+      var svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'ws-phrase');
+      svg.setAttribute('viewBox', '0 0 88 88');
+      var path = document.createElementNS(NS, 'path');
+      path.setAttribute('id', 'ws-c' + i);
+      path.setAttribute('d', 'M44,44 m-28,0 a28,28 0 1,1 56,0 a28,28 0 1,1 -56,0');
+      path.setAttribute('fill', 'none');
+      var t = document.createElementNS(NS, 'text');
+      var tp = document.createElementNS(NS, 'textPath');
+      tp.setAttribute('href', '#ws-c' + i);
+      tp.textContent = text;
+      t.appendChild(tp);
+      svg.appendChild(path);
+      svg.appendChild(t);
+      spin.appendChild(svg);
+      return svg;
+    });
+
+    // junto a la P del título, a media altura; --fs escala nota y flecha.
+    // Si las fotos arrastrables lo taparían, se aparta a su izquierda.
+    // En móvil no se muestra (CSS).
+    var cards = document.querySelector('.stacked-images');
+    function place() {
+      var fs = parseFloat(getComputedStyle(title).fontSize);
+      ws.style.setProperty('--fs', fs + 'px');
+      // un poco por debajo de la mitad del título y algo más separado de la P
+      var dx = fs * 0.75, dy = fs * 1.6;
+      var shift = dx;
+      if (cards) {
+        var dotX = title.getBoundingClientRect().left - fs * 0.5 - dx;
+        var limit = cards.getBoundingClientRect().left - 34;
+        if (dotX > limit) shift += dotX - limit;
+      }
+      ws.style.top = (title.offsetTop + title.offsetHeight / 2 + dy) + 'px';
+      ws.style.left = (title.offsetLeft - shift) + 'px';
+    }
+    place();
+    window.addEventListener('resize', place);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+
+    var step = 0;
+    btn.addEventListener('click', function() {
+      if (step >= PHRASES.length) {
+        // ya está todo dicho: el punto niega con la cabeza
+        if (!reduce && dot.animate) {
+          dot.animate([
+            { translate: '0 0' }, { translate: '-5px 0' }, { translate: '4px 0' },
+            { translate: '-3px 0' }, { translate: '0 0' }
+          ], { duration: 360, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' });
+        }
+        return;
+      }
+      if (step > 0) rings[step - 1].classList.remove('is-on');
+      rings[step].classList.add('is-on');
+      ws.classList.add('is-open');
+      sr.textContent = PHRASES[step];
+      step++;
+      btn.setAttribute('aria-label', step < PHRASES.length ? PHRASES[step - 1] + ' Pulsa otra vez' : PHRASES[step - 1]);
+    });
+
+    window.initWhatsitIn = function() { place(); ws.classList.add('is-in'); };
+    // sin GSAP o sin entrada del título (otras rutas): aparece igualmente
+    setTimeout(window.initWhatsitIn, 6000);
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
