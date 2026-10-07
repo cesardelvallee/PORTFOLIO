@@ -2930,3 +2930,59 @@ try {
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
 })();
+
+/* ============================================================
+   404 — la cara busca la página perdida. Los ojos siguen al cursor;
+   si no se mueve (o en táctil), miran a un lado y a otro, como
+   buscando. Parpadea cada pocos segundos y, al tocarla, saluda.
+   Solo mueve el grupo de los ojos (unidades del logo).
+   ============================================================ */
+(function() {
+  function init() {
+    var face = document.querySelector('.nf-face');
+    var look = face && face.querySelector('.nf-look');
+    if (!look) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function blink() { face.classList.remove('is-blink'); void face.offsetWidth; face.classList.add('is-blink'); }
+    (function nextBlink() {
+      setTimeout(function() { if (!document.hidden) blink(); nextBlink(); }, 2600 + Math.random() * 3200);
+    })();
+    face.addEventListener('click', function() {
+      face.classList.remove('is-hi'); void face.offsetWidth; face.classList.add('is-hi'); blink();
+    });
+    face.addEventListener('animationend', function(e) { if (e.target === face.firstElementChild) face.classList.remove('is-hi'); });
+    if (reduce) return;
+
+    // hasta dónde se mueven los ojos: a la derecha y hacia arriba menos, que
+    // ahí la cara se acaba antes y está el flequillo
+    var MX_L = 22, MX_R = 13, MY_UP = 10, MY_DN = 16;
+    var tx = 0, ty = 0, x = 0, y = 0, lastMove = -1e9, hop = 0, spot = 0;
+    var SPOTS = [[-1, 0.2], [0.9, -0.1], [-0.4, -0.9], [1, 0.7], [-0.9, 0.8], [0.1, -0.6]];
+    document.addEventListener('pointermove', function(e) {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+      var r = face.getBoundingClientRect();
+      var dx = e.clientX - (r.left + r.width * 0.66), dy = e.clientY - (r.top + r.height * 0.58);
+      var d = Math.sqrt(dx * dx + dy * dy) || 1, k = Math.min(1, d / 280);
+      tx = dx / d * k * (dx < 0 ? MX_L : MX_R);
+      ty = dy / d * k * (dy < 0 ? MY_UP : MY_DN);
+      lastMove = performance.now();
+    }, { passive: true });
+
+    (function loop(now) {
+      // quieto un rato: busca (salta de un sitio a otro y se queda mirando)
+      if (now - lastMove > 2400 && now - hop > 950) {
+        hop = now;
+        spot = (spot + 1) % SPOTS.length;
+        tx = SPOTS[spot][0] * (SPOTS[spot][0] < 0 ? MX_L : MX_R);
+        ty = SPOTS[spot][1] * (SPOTS[spot][1] < 0 ? MY_UP : MY_DN);
+      }
+      x += (tx - x) * 0.16;
+      y += (ty - y) * 0.16;
+      look.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ')');
+      requestAnimationFrame(loop);
+    })(performance.now());
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
