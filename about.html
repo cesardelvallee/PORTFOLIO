@@ -29,11 +29,11 @@
 
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=96">
+  <link rel="stylesheet" href="css/style.css?v=105">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body class="about-page">
 <div id="page-fx" aria-hidden="true"></div>
@@ -55,7 +55,7 @@
 
   <main class="abx ab3">
 
-    <!-- El muñeco: César en su propio blíster, como un Grmp -->
+    <!-- El muñeco: César en la caja de su figura coleccionable, como un Grmp -->
     <section class="abx-hero ab-hero">
       <div class="abx-hero-inner ab-hero-inner">
         <div class="ab-hero-text">
@@ -63,25 +63,17 @@
           <p class="ab-role">Diseñador gráfico en Madrid. Branding, packaging y dirección de arte.</p>
         </div>
 
-        <figure class="ab-blister">
-          <div class="ab-blister-tab" aria-hidden="true"><span class="ab-hole"></span></div>
-          <div class="ab-blister-head" aria-hidden="true"><span>Serie 01</span><span>Ed. 1/1</span></div>
-          <div class="ab-bubble" data-cursor="Gira">
-            <span class="ab-bubble-ph" aria-hidden="true"><span class="ab-ph-a">sacando la figura…</span><span class="ab-ph-b">la figura no ha podido cargar</span></span>
-            <model-viewer src="assets/CESAR_3D.glb" alt="César del Valle en 3D, dentro de su blíster. Se puede girar arrastrando."
-              camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
-              camera-orbit="0deg 84deg auto" min-camera-orbit="auto 72deg auto" max-camera-orbit="auto 96deg auto"
-              shadow-intensity="0.5" exposure="1.05" loading="eager"></model-viewer>
-            <span class="ab-glare" aria-hidden="true"></span>
+        <figure class="ab-box">
+          <!-- la caja en 3D (about-box.js): se gira entera arrastrando -->
+          <div class="ab-stage" data-cursor="Gira">
+            <canvas class="ab-canvas" role="img" aria-label="César del Valle en 3D, dentro de la caja de su figura coleccionable. Se puede girar la caja arrastrando."></canvas>
+            <span class="ab-ph" aria-hidden="true"><span class="ab-ph-a">sacando la caja…</span><span class="ab-ph-b">la caja no ha podido cargar</span></span>
           </div>
-          <figcaption class="ab-blister-foot">
-            <span class="ab-blister-name">César</span>
-            <span class="ab-spec"><span>Origen</span><span>Madrid</span></span>
-            <span class="ab-spec"><span>Contiene</span><span>1 diseñador gráfico</span></span>
-            <span class="ab-spec"><span>Formato</span><span>.glb · 1,2 MB</span></span>
-            <span class="ab-hint">
-              <span class="ab-hint-a">← arrástralo →</span>
-              <span class="ab-hint-b" aria-hidden="true">Vale, ya me has visto por todos lados.</span>
+          <figcaption class="ab-box-cap">
+            <span class="ab-sr">César. Serie 01, edición 1/1. Origen: Madrid. Contiene: 1 diseñador gráfico. Formato: .glb, 1,2 MB.</span>
+            <span class="ab-hint" aria-hidden="true">
+              <span class="ab-hint-a">← arrástrala →</span>
+              <span class="ab-hint-b">Vale, ya me has visto por todos lados.</span>
             </span>
           </figcaption>
         </figure>
@@ -227,6 +219,7 @@
 
   <div id="egg-cursor"></div>
 
-  <script src="script.js?v=73"></script>
+  <script src="script.js?v=84"></script>
+  <script type="module" src="about-box.js?v=5"></script>
 </body>
 </html>

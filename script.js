@@ -143,46 +143,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* (sin hover en el subtítulo: la animación de rebote solo en la entrada) */
 
+  /* Entrada del hero. PORTFOLIO sube letra a letra desde detrás de su
+     línea base, del centro hacia fuera (nace del muñeco), estirada; al
+     llegar se asienta con un pequeño aplastamiento. Después el subtítulo
+     sube igual, más rápido, y entran el botón, las cards y el punto.
+     Con movimiento reducido: solo fundidos. */
   function playHeroTitleAnimation() {
     const title = document.querySelector('.hero-title');
     const btn = document.querySelector('.hero-btn');
     const subtitle = document.querySelector('.hero-subtitle');
     if (!title || typeof gsap === 'undefined') return; // páginas sin hero de la home / sin GSAP
-    gsap.set(btn, {opacity: 0, y: 60, scale: 0.92, filter: 'blur(10px)'});
-    gsap.set(subtitle, {opacity: 0, y: 40, scale: 0.98, filter: 'blur(10px)', visibility: 'hidden'});
-    const tl = gsap.timeline();
+    if (window.heroSplit) window.heroSplit();
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const letters = title.querySelectorAll('.ht-l');
-    if (letters.length) {
-      // desktop: cascada letra a letra (la onda cinética espera con la
-      // bandera "entering" para no pisar los transforms de la entrada)
-      title.dataset.entering = '1';
-      gsap.set(title, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', pointerEvents: 'none'});
-      gsap.set(letters, {yPercent: 115, opacity: 0});
-      tl.to(letters, {yPercent: 0, opacity: 1, duration: 0.6, stagger: 0.045, ease: 'expo.out',
-        onComplete: () => {
-          delete title.dataset.entering;
-          gsap.set(letters, {clearProps: 'transform,opacity'});
-          title.style.pointerEvents = 'auto';
-        }
-      });
+    const subLetters = subtitle ? subtitle.querySelectorAll('.ht-l') : [];
+    const EASE_IN = 'power4.out';
+    gsap.set(btn, {opacity: 0, y: 60, scale: 0.92, filter: 'blur(10px)'});
+    const tl = gsap.timeline();
+
+    if (reduce || !letters.length) {
+      // (el CSS antiguo deja el subtítulo desplazado y borroso: se fija a mano)
+      gsap.set([title, subtitle], {opacity: 0, visibility: 'visible', y: 0, scale: 1, filter: 'blur(0px)'});
+      tl.to(title, {opacity: 1, duration: 0.6, ease: 'power2.out', onComplete: () => { title.style.pointerEvents = 'auto'; }}, 0)
+        .to(subtitle, {opacity: 1, duration: 0.6, ease: 'power2.out', onComplete: () => { subtitle.style.pointerEvents = 'auto'; }}, 0.2);
     } else {
-      // móvil / sin letras: entrada en bloque de siempre
-      gsap.set(title, {opacity: 0, y: 80, scale: 0.98, filter: 'blur(16px)', pointerEvents: 'none'});
-      tl.to(title, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.32, ease: 'expo.out',
-        onStart: () => { title.style.pointerEvents = 'none'; },
-        onComplete: () => { title.style.pointerEvents = 'auto'; }
-      });
+      // mientras dura la entrada, GSAP es dueño de los transforms (los
+      // muelles del cursor esperan a que se borre la bandera)
+      title.dataset.entering = '1';
+      gsap.killTweensOf([...letters, ...subLetters]);
+      title.classList.add('is-masking');
+      if (subtitle) subtitle.classList.add('is-masking');
+      gsap.set([title, subtitle], {opacity: 1, visibility: 'visible', y: 0, scale: 1, filter: 'blur(0px)', pointerEvents: 'none'});
+      gsap.set(letters, {yPercent: 112, scaleY: 1.45, opacity: 1});
+      gsap.set(subLetters, {yPercent: 120, opacity: 1});
+      const from = {each: 0.07, from: 'center'};
+      tl.to(letters, {yPercent: 0, duration: 1.3, ease: EASE_IN, stagger: from}, 0)
+        .to(letters, {scaleY: 1, duration: 0.95, ease: 'back.out(2.4)', stagger: from}, 0.16)
+        .to(subLetters, {yPercent: 0, duration: 0.85, ease: EASE_IN, stagger: 0.016}, 0.62)
+        .add(() => {
+          delete title.dataset.entering;
+          gsap.set([...letters, ...subLetters], {clearProps: 'transform'});
+          title.classList.remove('is-masking');
+          if (subtitle) subtitle.classList.remove('is-masking');
+          title.style.pointerEvents = 'auto';
+          if (subtitle) subtitle.style.pointerEvents = 'auto';
+          if (window.heroRemeasure) window.heroRemeasure();
+        });
     }
-    tl.to(subtitle, {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', visibility: 'visible', duration: 0.18, ease: 'power3.out',
-        onStart: () => { subtitle.style.pointerEvents = 'none'; subtitle.style.visibility = 'visible'; },
-        onComplete: () => { subtitle.style.pointerEvents = 'auto'; }
-      }, '-=0.12')
-      .to(btn, {opacity: 1, y: 0, scale: 1.08, filter: 'blur(0px)', duration: 0.14, ease: 'back.out(2)',
+
+    tl.to(btn, {opacity: 1, y: 0, scale: 1.08, filter: 'blur(0px)', duration: 0.14, ease: 'back.out(2)',
         onStart: () => { btn.style.pointerEvents = 'none'; },
         onComplete:()=>{ btn.style.pointerEvents = 'auto'; gsap.to(btn, {scale:1, duration:0.12, ease:'power1.out', clearProps:'transform,filter'}); }
-      }, '-=0.18')
-      .add(() => animateStackedImages(), '-=0.25')
-      .add(() => { if (window.initWhatsitIn) window.initWhatsitIn(); }, '+=0.7');
+      }, 0.75)
+      .add(() => animateStackedImages(), 0.85)
+      .add(() => { if (window.initWhatsitIn) window.initWhatsitIn(); }, 2.1);
   }
 
   function startInitialAnimations() { playHeroTitleAnimation(); }
@@ -249,19 +263,118 @@ if (typeof gsap !== 'undefined' && typeof Draggable !== 'undefined' && typeof In
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
 
-let clampSkew = gsap.utils.clamp(-20, 20);
+/* Física de las cards. Cada card lleva muelles para su giro, su escala y
+   su inclinación 3D, y GSAP lo compone con la x/y del arrastre:
+   · cursor encima → se levanta un poco y se inclina hacia él; las que
+     siguen en el montón se abren en abanico para que se vea que hay más;
+   · al cogerla → se levanta del todo, como una foto que coges de la mesa;
+   · al arrastrarla o lanzarla → se balancea según la velocidad, como si
+     la llevaras cogida por una esquina;
+   · al soltarla → se asienta con un giro nuevo, como caída sobre la mesa.
+   Solo transform, y el muelle reapunta desde donde esté (interrumpible).
+   Con reduced-motion no hay física: se arrastran como siempre. */
+const CARD_K = 0.12, CARD_D = 0.76;            // rigidez y amortiguación del muelle
+const cardFine = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+const cardReduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const clampSwing = gsap.utils.clamp(-12, 12);
+const clampDrop = gsap.utils.clamp(-4, 4);
+const clampRest = gsap.utils.clamp(-9, 9);
+const cards = [];
+let cardsRunning = false, stackHover = false;
+
+function inStack(c) {
+  return Math.abs(gsap.getProperty(c.img, 'x')) < 40 && Math.abs(gsap.getProperty(c.img, 'y')) < 40;
+}
+// un paso del muelle; al llegar (dentro de eps) se clava en el destino
+function cardSpring(c, key, vkey, target, eps) {
+  c[vkey] = (c[vkey] + (target - c[key]) * CARD_K) * CARD_D;
+  c[key] += c[vkey];
+  if (Math.abs(target - c[key]) < eps && Math.abs(c[vkey]) < eps) { c[key] = target; c[vkey] = 0; return 1; }
+  return 0;
+}
+function cardsStep() {
+  let active = false;
+  cards.forEach(c => {
+    if (gsap.isTweening(c.img)) { active = true; return; }   // la entrada de las cards manda
+    const moving = c.dragging || c.throwing;
+    const v = moving ? c.tracker.get('x') : 0;              // px/s en horizontal
+    const fan = stackHover && !moving && inStack(c) ? Math.sign(c.base || 1) * 3.2 : 0;
+    const tilt = c.hover && !moving;
+    const done =
+      cardSpring(c, 'r', 'vr', c.base + clampSwing(v * 0.01) + fan, 0.02) &
+      cardSpring(c, 's', 'vs', c.dragging ? 1.06 : (c.hover ? 1.03 : 1), 0.0005) &
+      cardSpring(c, 'rx', 'vrx', tilt ? (0.5 - c.hy) * 14 : 0, 0.02) &
+      cardSpring(c, 'ry', 'vry', tilt ? (c.hx - 0.5) * 14 : 0, 0.02);
+    gsap.set(c.img, { rotation: c.r, scale: c.s, rotationX: c.rx, rotationY: c.ry });
+    if (!done || moving) active = true;
+  });
+  cardsRunning = active;
+  if (active) requestAnimationFrame(cardsStep);
+}
+// un destello suave cruza la card una sola vez (al entrar el cursor); si
+// ya está pasando, no se reinicia
+function playSweep(c) {
+  if (cardReduce || !c.sweep || !c.sweep.animate) return;
+  if (c.sweepAnim && c.sweepAnim.playState === 'running') return;
+  c.sweepAnim = c.sweep.animate([
+    { transform: 'translateX(-30%)', opacity: 0 },        // ±30% de una capa 4 veces la card = ±1.2 cards
+    { opacity: 1, offset: 0.2 },
+    { opacity: 1, offset: 0.75 },
+    { transform: 'translateX(30%)', opacity: 0 }
+  ], { duration: 1100, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' });   // ease-out suave: cruza a ritmo casi constante
+}
+function kickCards() {
+  if (cardReduce || cardsRunning) return;
+  cardsRunning = true;
+  requestAnimationFrame(cardsStep);
+}
 
 class DraggableImg {
   constructor(Image) {
     const proxy = document.createElement("div"),
       tracker = InertiaPlugin.track(proxy, "x")[0],
-      updateSkew = () => {},
     align = () => gsap.set(proxy, {attr:{class:'proxy'}, x: gsap.getProperty(Image, "x"), y: gsap.getProperty(Image, "y"), width: Image.offsetWidth, height: Image.offsetHeight, position: "absolute", pointerEvents: "none", top: Image.offsetTop, left: Image.offsetLeft});
 
     align();
     Image.parentNode.append(proxy);
     Image.style.borderRadius = "12px";
     window.addEventListener('resize', align);
+
+    // estado físico de la card (el giro de partida es el de su CSS)
+    const base = gsap.getProperty(Image, 'rotation') || 0;
+    const c = { img: Image, tracker, base, r: base, vr: 0, s: 1, vs: 0, rx: 0, vrx: 0, ry: 0, vry: 0,
+                hx: 0.5, hy: 0.5, hover: false, dragging: false, throwing: false };
+    cards.push(c);
+    gsap.set(Image, { transformPerspective: 1000 });
+
+    // destello: capa hermana de la imagen (un <img> no admite capas dentro)
+    // que copia su transform en cada fotograma (ver glossLoop)
+    const gloss = document.createElement('span');
+    gloss.className = 'card-gloss';
+    gloss.setAttribute('aria-hidden', 'true');
+    gloss.innerHTML = '<i class="cg-sweep"></i>';
+    Image.after(gloss);
+    Object.assign(c, { gloss, sweep: gloss.firstChild, sweepAnim: null, gT: null, gO: null, gZ: null });
+    const placeGloss = () => {
+      c.w = Image.offsetWidth; c.h = Image.offsetHeight;
+      Object.assign(gloss.style, { left: Image.offsetLeft + 'px', top: Image.offsetTop + 'px', width: c.w + 'px', height: c.h + 'px' });
+    };
+    placeGloss();
+    window.addEventListener('resize', placeGloss);
+
+    if (cardFine) {
+      Image.addEventListener('mouseenter', () => playSweep(c));
+      Image.addEventListener('mousemove', (e) => {
+        if (c.dragging) return;
+        const r = Image.getBoundingClientRect();
+        c.hx = (e.clientX - r.left) / r.width;
+        c.hy = (e.clientY - r.top) / r.height;
+        c.hover = true;
+        stackHover = inStack(c);
+        kickCards();
+      });
+      Image.addEventListener('mouseleave', () => { c.hover = false; stackHover = false; kickCards(); });
+    }
 
     this.drag = Draggable.create(proxy, {
       type: "x,y",
@@ -276,7 +389,11 @@ class DraggableImg {
         var m = Image.className.match(/img-(\d)/);
         if (m && window.PageFX) window.PageFX.leave('img' + m[1] + '.html');
       },
-      onPress() { Image.style.zIndex = proxy.style.zIndex; window._setGrabbingCursor(true); },
+      onPress() {
+        Image.style.zIndex = proxy.style.zIndex; window._setGrabbingCursor(true);
+        c.dragging = true; c.throwing = false; stackHover = false; kickCards();
+        if (!cardFine) playSweep(c);                // en táctil no hay hover: el destello sale al tocarla
+      },
       onDrag(e) {
         gsap.set(Image, {x: this.x, y: this.y});
         const evt = (e && e.type && e.clientX !== undefined) ? e : (window.event || {});
@@ -285,14 +402,35 @@ class DraggableImg {
           const dragmeBubble = document.getElementById('dragme-bubble'); dragmeBubble.style.left = (evt.clientX + 8) + 'px'; dragmeBubble.style.top = (evt.clientY + 8) + 'px'; dragmeBubble.style.opacity = '1'; dragmeBubble.style.visibility = 'visible';
         }
       },
-      onRelease() { window._setGrabbingCursor(false); const dragmeBubble = document.getElementById('dragme-bubble'); dragmeBubble.style.opacity = '0'; dragmeBubble.style.visibility = 'hidden'; },
-      onThrowUpdate() { gsap.set(Image, {x: this.x, y: this.y}); },
+      onDragEnd() {
+        // cae sobre la mesa con un giro nuevo, algo empujado por la velocidad
+        c.base = clampRest(c.base + clampDrop(tracker.get('x') * 0.003) + (Math.random() * 6 - 3));
+      },
+      onRelease() {
+        window._setGrabbingCursor(false); const dragmeBubble = document.getElementById('dragme-bubble'); dragmeBubble.style.opacity = '0'; dragmeBubble.style.visibility = 'hidden';
+        c.dragging = false; kickCards();
+      },
+      onThrowUpdate() { gsap.set(Image, {x: this.x, y: this.y}); c.throwing = true; kickCards(); },
+      onThrowComplete() { c.throwing = false; kickCards(); },
       inertia: true
     })[0];
   }
 }
 
 let draggables = gsap.utils.toArray(".img-drag").map(el => new DraggableImg(el));
+
+/* Destello de las cards: cada capa copia transform, opacidad y z-index de
+   su imagen, así el destello viaja con la card (giro, inclinación, entrada). */
+(function glossLoop() {
+  for (let i = 0; i < cards.length; i++) {
+    const c = cards[i], st = c.img.style;
+    if (st.transform !== c.gT) { c.gT = st.transform; c.gloss.style.transform = st.transform; }
+    if (st.opacity !== c.gO) { c.gO = st.opacity; c.gloss.style.opacity = st.opacity; }
+    const z = st.zIndex || getComputedStyle(c.img).zIndex;
+    if (z !== c.gZ) { c.gZ = z; c.gloss.style.zIndex = z; }
+  }
+  requestAnimationFrame(glossLoop);
+})();
 
 }
 
@@ -1800,49 +1938,12 @@ document.addEventListener('DOMContentLoaded', function() {
       io.observe(el);
     }
 
-    /* ---- el muñeco: se gira arrastrando; tres vueltas tienen premio ---- */
-    (function toy() {
-      var mv = page.querySelector('.ab-bubble model-viewer');
-      if (!mv) return;
-      var bubble = mv.closest('.ab-bubble');
-      var hint = page.querySelector('.ab-hint');
-      mv.addEventListener('load', function() {
-        bubble.classList.remove('is-failed');
-        bubble.classList.add('is-loaded');
-      });
-      // sin red, sin el componente o sin el .glb: se dice, no se queda cargando
-      function fail() { if (!bubble.classList.contains('is-loaded')) bubble.classList.add('is-failed'); }
-      mv.addEventListener('error', fail);
-      setTimeout(fail, 12000);
-      // el sitio dibuja su propio cursor: model-viewer pone "grab" dentro de su
-      // shadow DOM y se colaba por encima
-      if (window.customElements && customElements.whenDefined) {
-        customElements.whenDefined('model-viewer').then(function() {
-          if (!mv.shadowRoot || mv.shadowRoot.querySelector('style[data-nocursor]')) return;
-          var st = document.createElement('style');
-          st.setAttribute('data-nocursor', '');
-          st.textContent = '.userInput{cursor:none!important}';
-          mv.shadowRoot.appendChild(st);
-        });
-      }
-      var last = null, acc = 0, eggT = 0;
-      mv.addEventListener('camera-change', function(e) {
-        if (!e.detail || e.detail.source !== 'user-interaction' || !mv.getCameraOrbit) { last = null; return; }
-        var th = mv.getCameraOrbit().theta;
-        if (last !== null) {
-          var d = th - last;
-          if (d > Math.PI) d -= Math.PI * 2;
-          if (d < -Math.PI) d += Math.PI * 2;
-          acc += Math.abs(d);
-        }
-        last = th;
-        if (hint && acc >= Math.PI * 6) {
-          acc = 0;
-          hint.classList.add('is-egg');
-          clearTimeout(eggT);
-          eggT = setTimeout(function() { hint.classList.remove('is-egg'); }, 3200);
-        }
-      });
+    /* ---- la caja 3D vive en about-box.js (módulo). Si no llega a cargar
+       (sin red, sin WebGL), se dice en vez de quedarse "cargando". ---- */
+    (function boxFallback() {
+      var stage = page.querySelector('.ab-stage');
+      if (!stage) return;
+      setTimeout(function() { if (!stage.classList.contains('is-loaded')) stage.classList.add('is-failed'); }, 15000);
     })();
 
     /* ---- índice + barra superior: marca la sección que se está leyendo y,
@@ -2356,21 +2457,23 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 /* ============================================================
-   HERO KINÉTICO (home) — las letras de PORTFOLIO responden a la
-   proximidad del cursor con una onda suave que se asienta sola.
-   Solo desktop con puntero fino y sin reduced-motion; transform
-   puro sobre cada letra, interrumpible por diseño.
+   HERO KINÉTICO (home) — PORTFOLIO y su subtítulo, letra a letra.
+   1) Trocea los dos textos en letras en todos los dispositivos (la
+      entrada de playHeroTitleAnimation las necesita).
+   2) Escritorio con puntero fino y sin reduced-motion: cada letra es un
+      muelle. Cerca del cursor se estira desde su base, sube y se inclina
+      hacia él; si el ratón pasa deprisa se deja arrastrar un poco y
+      vuelve con un rebote corto. Transform puro, interrumpible: el muelle
+      siempre reapunta desde donde está.
    ============================================================ */
 (function() {
   function mq(q) { return window.matchMedia && window.matchMedia(q).matches; }
-  function init() {
-    if (mq('(prefers-reduced-motion: reduce)') || mq('(hover: none)') || mq('(pointer: coarse)') || window.innerWidth <= 900) return;
+  var title, groups = [];
 
-    var letters = [];
-
-    /* trocea el texto en letras (los espacios quedan como texto normal) */
-    function arm(el, lift, radius) {
-      if (!el || el.dataset.kinetic) return;
+  // trocea el texto en letras (los espacios quedan como texto normal)
+  function split(el) {
+    if (!el) return [];
+    if (!el.dataset.kinetic) {
       el.dataset.kinetic = '1';
       var text = el.textContent;
       el.textContent = '';
@@ -2380,48 +2483,88 @@ document.addEventListener('DOMContentLoaded', function() {
         s.className = 'ht-l';
         s.textContent = text[i];
         el.appendChild(s);
-        letters.push({ el: s, y: 0, cx: 0, cy: 0, lift: lift, r: radius });
       }
     }
-    var titleRef = document.querySelector('.hero-title');
-    arm(titleRef, 16, 190);
-    arm(document.querySelector('.hero-subtitle'), 7, 130);
-    if (!letters.length) return;
+    return Array.prototype.slice.call(el.querySelectorAll('.ht-l'));
+  }
+  window.heroSplit = function() {
+    split(document.querySelector('.hero-title'));
+    split(document.querySelector('.hero-subtitle'));
+  };
 
-    var measured = false;
-    function measure() {
-      var ok = false;
-      letters.forEach(function(l) {
-        var r = l.el.getBoundingClientRect();
-        l.cx = r.left + r.width / 2;
-        l.cy = r.top + r.height / 2;
-        if (r.width > 0) ok = true;
+  function init() {
+    title = document.querySelector('.hero-title');
+    if (!title) return;
+    var sub = document.querySelector('.hero-subtitle');
+    // cada grupo: cuánto sube, se estira y se inclina, y su radio (en em
+    // del propio texto, para que escale con el tamaño del título)
+    groups = [
+      { el: title, letters: split(title), lift: 0.06, stretch: 0.13, lean: 7, drag: 9, r: 0.62, reach: 0.95 },
+      { el: sub, letters: split(sub), lift: 0.35, stretch: 0.3, lean: 12, drag: 14, r: 6, reach: 3.2 }
+    ].filter(function(g) { return g.el && g.letters.length; });
+
+    if (mq('(prefers-reduced-motion: reduce)') || mq('(hover: none)') || mq('(pointer: coarse)') || window.innerWidth <= 900) return;
+
+    groups.forEach(function(g) {
+      g.letters = g.letters.map(function(el) { return { el: el, y: 0, s: 0, k: 0, vy: 0, vs: 0, vk: 0, on: false }; });
+    });
+
+    // centros de cada letra respecto a su texto (offsetLeft no ve los
+    // transforms de la letra, así que no hace falta medir en reposo)
+    function remeasure() {
+      groups.forEach(function(g) {
+        var fs = parseFloat(getComputedStyle(g.el).fontSize) || 16;
+        g.px = { lift: g.lift * fs, r: g.r * fs, reach: g.reach * fs };
+        g.letters.forEach(function(l) {
+          l.ox = l.el.offsetLeft + l.el.offsetWidth / 2;
+          l.oy = l.el.offsetTop + l.el.offsetHeight / 2;
+        });
       });
-      measured = ok;
     }
-    window.addEventListener('resize', function() { measured = false; }, { passive: true });
-    window.addEventListener('scroll', function() { measured = false; }, { passive: true });
+    window.heroRemeasure = remeasure;
+    remeasure();
+    window.addEventListener('resize', remeasure, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
 
-    var mx = -1e4, my = -1e4;
-    document.addEventListener('mousemove', function(e) {
-      mx = e.clientX;
-      my = e.clientY;
-      if (!measured) measure();
-    }, { passive: true });
+    var mx = -1e4, my = -1e4, pmx = null, vx = 0;
+    document.addEventListener('mousemove', function(e) { mx = e.clientX; my = e.clientY; }, { passive: true });
+    document.documentElement.addEventListener('mouseleave', function() { mx = -1e4; my = -1e4; });
+
+    var K = 0.1, D = 0.76;                      // rigidez y amortiguación: rebote corto, sin temblar
+    function spring(l, key, vkey, target) {
+      l[vkey] = (l[vkey] + (target - l[key]) * K) * D;
+      l[key] += l[vkey];
+    }
+    var clamp1 = function(v) { return v < -1 ? -1 : v > 1 ? 1 : v; };
 
     (function loop() {
-      // durante la cascada de entrada, GSAP es dueño de los transforms
-      var hold = titleRef && titleRef.dataset.entering;
-      if (measured && !hold) {
-        for (var i = 0; i < letters.length; i++) {
-          var l = letters[i];
-          var dx = mx - l.cx;
-          var dy = my - l.cy;
-          var d = Math.sqrt(dx * dx + dy * dy);
-          var t = Math.max(0, 1 - d / l.r);
-          var target = -t * t * l.lift;
-          l.y += (target - l.y) * 0.14;         // se asienta con suavidad
-          l.el.style.transform = (l.y > -0.01) ? '' : 'translateY(' + l.y.toFixed(2) + 'px)';
+      // velocidad horizontal del cursor, suavizada
+      var live = mx > -1e3;
+      vx += ((live && pmx !== null ? mx - pmx : 0) - vx) * 0.22;
+      pmx = live ? mx : null;
+
+      if (!title.dataset.entering) {
+        for (var gi = 0; gi < groups.length; gi++) {
+          var g = groups[gi], box = g.el.getBoundingClientRect();
+          for (var i = 0; i < g.letters.length; i++) {
+            var l = g.letters[i];
+            var dx = mx - (box.left + l.ox), dy = my - (box.top + l.oy);
+            var f = Math.exp(-(dx * dx) / (2 * g.px.r * g.px.r)) * Math.max(0, 1 - Math.abs(dy) / g.px.reach);
+            // la cabeza de la letra se va hacia el cursor; si pasa deprisa, con él
+            var lean = -(clamp1(dx / g.px.r) * g.lean + clamp1(vx / 30) * g.drag) * f;
+            spring(l, 'y', 'vy', -g.px.lift * f);
+            spring(l, 's', 'vs', g.stretch * f);
+            spring(l, 'k', 'vk', lean);
+            var still = f < 0.001 && Math.abs(l.y) < 0.05 && Math.abs(l.s) < 0.0008 && Math.abs(l.k) < 0.04 &&
+                        Math.abs(l.vy) < 0.05 && Math.abs(l.vs) < 0.0008 && Math.abs(l.vk) < 0.04;
+            if (still) {
+              if (l.on) { l.el.style.transform = ''; l.on = false; }
+              l.y = l.s = l.k = l.vy = l.vs = l.vk = 0;
+            } else {
+              l.on = true;
+              l.el.style.transform = 'translateY(' + l.y.toFixed(2) + 'px) scaleY(' + (1 + l.s).toFixed(4) + ') skewX(' + l.k.toFixed(2) + 'deg)';
+            }
+          }
         }
       }
       requestAnimationFrame(loop);
