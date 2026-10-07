@@ -470,6 +470,13 @@ html, body {
    ampliar se conserva. Los carruseles horizontales y lo arrastrable
    llevan su propio touch-action y siguen funcionando. */
 html { touch-action: pan-y pinch-zoom; }
+/* la home es una sola pantalla: nunca se desplaza ni enseña barra de
+   scroll, tampoco durante la pantalla de carga. Lo poco que sobresale
+   (la flotación del título, los manchones del fondo, una card arrastrada
+   hasta el borde) queda recortado en vez de alargar la página.
+   is-home va puesto en el <html> de index.html (no depende de :has). */
+html.is-home { height: 100%; overflow: hidden; }
+html.is-home > body { height: 100%; overflow: hidden; }
 /* móvil: la home y el contacto caben en una pantalla y no se desplazan */
 @media (max-width: 768px) {
   html:has(> body.home-page),
@@ -1745,39 +1752,35 @@ a.back-top-link svg {
 
 
 /* ================================================
-   LOADING SCREEN — el monograma se traza como un plano técnico
-   Sobre tinta el monograma CE se
-   dibuja trazo a trazo (el marco, la retícula interior, las líneas de
-   construcción que se salen de la caja y, al final, la C y la E).
-   Al llegar a 100 todo pasa a beige, la línea central (que es también
-   el brazo de la E) cruza la pantalla y la parte en dos: la mitad de
-   arriba sube y la de abajo baja. script.js clona la vista en la mitad
-   inferior, mide dónde cae la línea (--split) y dispara las clases.
+   LOADING SCREEN — el autorretrato
+   La cara se monta por capas, y cada capa es su propio <svg>: así todo
+   se anima solo con transform/opacity en el compositor y va fluido
+   aunque la home esté cargando el 3D por detrás.
+   1) el pelo y el contorno se rellenan desde abajo (los descubre una
+   tapa que sube); 2) salen los ojos; 3) la sonrisa; 4) la oreja. Al llegar a 100 parpadea y la
+   cámara entra por el brillo del ojo izquierdo: el escenario (fondo
+   oscuro con ese brillo recortado + la cara) crece hasta que el agujero
+   cubre la pantalla, y por él aparece la home. script.js coloca el
+   recorte, calcula cuánto crecer y dispara las clases.
    ================================================ */
 html { scroll-behavior: smooth; }
 
 #loading-screen {
   --ld-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --ld-curtain: cubic-bezier(0.76, 0, 0.24, 1);
+  --ld-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --ld-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ld-ink: #ece6da;
   --ld-mute: rgba(236, 230, 218, 0.5);
   --ld-beige: #c7b299;
-  --split: 50vh;
-  --lh: 100vh;
-  --t: 4px;
-  --cx: 50%;
-  --step: 270ms;
   position: fixed;
   inset: 0;
   z-index: 9999;
   font-family: 'Inter', sans-serif;
   color: var(--ld-ink);
-  /* fondo por detrás de las mitades: tapa la costura mientras están juntas */
-  background: #100f0d;
-  transition: opacity 0.5s var(--ld-ease);
+  transition: opacity 0.32s var(--ld-ease);
 }
-#loading-screen.is-split { background: transparent; }
 #loading-screen *, #loading-screen *::before, #loading-screen *::after { box-sizing: border-box; }
+#loading-screen.is-gone { opacity: 0; pointer-events: none; }
 .ld-sr {
   position: absolute;
   width: 1px;
@@ -1788,43 +1791,12 @@ html { scroll-behavior: smooth; }
   white-space: nowrap;
 }
 
-/* ---- las dos mitades: cada una enseña su parte de la misma vista ---- */
-.ld-half {
-  position: absolute;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  background: #100f0d;
-  transition: transform 1s var(--ld-curtain);
-  will-change: transform;
-}
-.ld-h1 { top: 0; height: var(--split); }
-.ld-h2 { top: var(--split); bottom: 0; }
-.ld-view {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: var(--lh);
-}
-.ld-h2 .ld-view { top: calc(-1 * var(--split)); }
-#loading-screen.is-split .ld-h1 { transform: translateY(-101%); }
-#loading-screen.is-split .ld-h2 { transform: translateY(101%); }
-
-/* el corte: media línea beige en el borde de cada mitad, crece desde
-   el centro del monograma hacia los lados */
-.ld-cut {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: calc(var(--t) / 2);
-  background: var(--ld-beige);
-  transform: scaleX(0);
-  transform-origin: var(--cx) 50%;
-}
-.ld-h1 .ld-cut { bottom: 0; }
-.ld-h2 .ld-cut { top: 0; }
-#loading-screen.is-cut .ld-cut { transform: none; transition: transform 0.7s var(--ld-curtain); }
+/* ---- escenario ---- */
+.ld-zoom { position: absolute; inset: 0; }
+.ld-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/* el agujero del brillo solo existe al entrar (antes no hay nada detrás) */
+.ld-hole { opacity: 0; }
+#loading-screen.is-exit .ld-hole { opacity: 1; }
 
 /* ---- esquinas ---- */
 .ld-corner {
@@ -1871,79 +1843,70 @@ html { scroll-behavior: smooth; }
 .ld-strip span { display: block; height: 1em; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
 .ld-digit.is-lead .ld-strip { opacity: 0.22; }
 
-/* ---- el monograma ---- */
+/* ---- la cara, por capas ---- */
 .ld-mark {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: clamp(260px, 42vmin, 480px);
+  width: clamp(220px, 34vmin, 400px);
+  aspect-ratio: 3000 / 3435;
   margin: 0;
   transform: translate(-50%, -50%);
 }
-.ld-logo { display: block; width: 100%; height: auto; overflow: visible; }
-/* cada trazo es un rectángulo que crece desde un extremo, como un tiralíneas */
-.ld-s { fill: var(--ld-ink); transform-box: fill-box; transition: fill 0.35s var(--ld-ease); }
-.ld-x0, .ld-x1 { transform: scaleX(0); }
-.ld-y0, .ld-y1 { transform: scaleY(0); }
-.ld-x0 { transform-origin: 0 50%; }
-.ld-x1 { transform-origin: 100% 50%; }
-.ld-y0 { transform-origin: 50% 0; }
-.ld-y1 { transform-origin: 50% 100%; }
-#loading-screen.is-run .ld-s {
-  animation: ld-draw 0.46s var(--ld-ease) forwards;
-  animation-delay: calc(400ms + var(--d) * var(--step));
-}
-@keyframes ld-draw { to { transform: none; } }
-/* la C y la E: aparecen y se asientan */
-.ld-l {
-  fill: var(--ld-beige);
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-  transform: scale(0.82);
-}
-#loading-screen.is-run .ld-l {
-  animation: ld-pop 0.6s var(--ld-ease) forwards;
-  animation-delay: calc(400ms + var(--d) * var(--step));
-}
-@keyframes ld-pop { to { opacity: 1; transform: none; } }
-#loading-screen.is-beige .ld-s { fill: var(--ld-beige); }
-
-.ld-mark figcaption {
+.ld-part { position: absolute; inset: 0; }
+.ld-part > svg { display: block; width: 100%; height: 100%; }
+.ld-part path { fill: var(--ld-beige); }
+/* el relleno: una tapa del color del fondo, encima del pelo y el
+   contorno, sube y los descubre de abajo arriba. Es una sola capa que se
+   mueve (nada de máscaras con dos capas a contrapelo, que tiemblan) */
+.ld-cover {
   position: absolute;
-  left: -40px;
-  right: -40px;
-  top: 100%;
-  margin-top: 26px;
-  font-size: max(11px, 0.6875rem);
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-align: center;
-  text-transform: uppercase;
-  color: var(--ld-mute);
-  opacity: 0;
+  inset: -3px;
+  background: #100f0d;
 }
-#loading-screen.is-run .ld-mark figcaption { animation: ld-fade 0.6s var(--ld-ease) forwards; animation-delay: calc(400ms + 9.6 * var(--step)); }
-/* al cortar, lo que no es el monograma se apaga */
-#loading-screen.is-beige :is(.ld-corner, .ld-mark figcaption) { opacity: 0 !important; transition: opacity 0.3s var(--ld-ease); animation: none; }
+/* ojos, sonrisa y oreja: aparecen desde su centro con un pequeño rebote */
+.ld-eye, .ld-ear, .ld-mouth { opacity: 0; transform: scale(0.35); }
+.ld-mouth { transform: scale(0.6); }
+.ld-eye-l, .ld-eye-l .ld-lid { transform-origin: 55.6% 63.7%; }
+.ld-eye-r, .ld-eye-r .ld-lid { transform-origin: 78.3% 60.9%; }
+.ld-mouth { transform-origin: 62.3% 84.7%; }
+.ld-ear { transform-origin: 29.1% 74.3%; }
+
+/* 1) el pelo y el contorno se rellenan de abajo arriba  2) los ojos
+   3) la sonrisa  4) la oreja */
+#loading-screen.is-run .ld-cover { animation: ld-lift 1.3s var(--ld-inout) 0.35s both; }
+#loading-screen.is-run .ld-eye { animation: ld-pop 0.7s var(--ld-pop) both; }
+#loading-screen.is-run .ld-eye-l { animation-delay: 1.2s; }
+#loading-screen.is-run .ld-eye-r { animation-delay: 1.33s; }
+#loading-screen.is-run .ld-mouth { animation: ld-pop 0.65s var(--ld-pop) 1.46s both; }
+#loading-screen.is-run .ld-ear { animation: ld-pop 0.6s var(--ld-pop) 1.65s both; }
+@keyframes ld-lift { from { transform: none; } to { transform: translateY(-101%); } }
+@keyframes ld-pop { to { opacity: 1; transform: none; } }
+@keyframes ld-hide { from { opacity: 1; } to { opacity: 0; } }
+
+/* parpadeo antes de entrar */
+#loading-screen.is-blink .ld-lid { animation: ld-blink 0.34s var(--ld-ease); }
+@keyframes ld-blink { 0%, 100% { transform: none; } 42% { transform: scaleY(0.06); } }
+
+/* al entrar, los textos se van antes de que la cara crezca */
+#loading-screen.is-exit .ld-corner { animation: ld-hide 0.25s var(--ld-ease) forwards; }
 
 @keyframes ld-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes ld-fade { to { opacity: 1; } }
 
 /* ---- móvil ---- */
 @media (max-width: 768px) {
-  .ld-mark { width: min(76vw, 40svh); }
+  .ld-mark { width: min(62vw, 36svh); }
   .ld-count { font-size: min(13vw, 7svh); }
 }
 
-/* ---- reduced motion: sin trazado ni corte, solo fundidos ---- */
+/* ---- reduced motion: la cara aparece ya montada y la pantalla se funde ---- */
 @media (prefers-reduced-motion: reduce) {
-  .ld-s, .ld-l { transform: none !important; }
-  #loading-screen.is-run .ld-s { animation: none; }
-  .ld-l { opacity: 1; }
-  #loading-screen.is-run .ld-l { animation: none; }
+  .ld-part, .ld-part > svg { transform: none !important; animation: none !important; opacity: 1; }
+  .ld-cover { display: none; }
+  .ld-mark { opacity: 0; }
+  #loading-screen.is-run .ld-mark { animation: ld-fade 0.6s var(--ld-ease) 0.2s forwards; }
   .ld-strip { transition: none; }
-  #loading-screen.fade-out { opacity: 0; pointer-events: none; }
 }
 
 /* ================================================
@@ -4536,6 +4499,51 @@ body.home-page .model-3d-bg model-viewer {
   min-height: 0;
   max-width: none;
   max-height: none;
+}
+
+/* título del proyecto encima de la card al pasar el cursor (script.js la
+   coloca en cada fotograma). Mismo estilo que el botón del menú; entra
+   creciendo desde la card y se va rápido. */
+.card-title {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2500;
+  pointer-events: none;
+  will-change: transform;
+}
+.card-title .ct-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transform-origin: 50% 100%;
+  transition: opacity 0.14s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.card-title.is-below .ct-in { transform: translateY(-6px) scale(0.96); transform-origin: 50% 0; }
+.card-title.is-on .ct-in {
+  opacity: 1;
+  transform: none;
+  transition-duration: 0.22s, 0.32s;
+}
+.card-title .ct-n { color: #c7b299; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .card-title .ct-in, .card-title.is-below .ct-in { transform: none; }
 }
 
 /* destello de las cards: al entrar el cursor, una franja de luz suave

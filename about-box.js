@@ -18,8 +18,9 @@ const WT = 0.62;                           // arriba del arco
 const AC = WT - WX;                        // centro del arco
 const PX = 1200;                           // píxeles de textura por unidad
 const C = {
-  board: '#ece6da', paper: '#f4efe6', ink: '#151311', beige: '#c7b299',
-  inner: '#e3dacb', shelf: '#dcd2c1', edge: '#cfc2ad',
+  // cartón amarillo impreso en negro; por dentro, un amarillo pálido
+  board: '#f2c230', paper: '#f4c73a', ink: '#151311', beige: '#f2c230',
+  inner: '#f1e0a6', shelf: '#e8d08a', edge: '#d39f1b', insert: '#f6e6b0',
   mute: 'rgba(21, 19, 17, 0.55)', line: 'rgba(21, 19, 17, 0.16)', fold: 'rgba(60, 50, 38, 0.22)'
 };
 const SANS = 'Inter, "Helvetica Neue", Arial, sans-serif';
@@ -427,15 +428,15 @@ function drawBottom(c, w, h) {
 }
 // el fondo de dentro: el número de la serie, enorme y suave, y los arcos de la ventana
 function drawInsert(c, w, h) {
-  c.fillStyle = '#e7dfd1'; c.fillRect(0, 0, w, h);
-  c.strokeStyle = 'rgba(60, 50, 38, 0.09)'; c.lineWidth = 3;
+  c.fillStyle = C.insert; c.fillRect(0, 0, w, h);
+  c.strokeStyle = 'rgba(120, 82, 0, 0.12)'; c.lineWidth = 3;
   for (let i = 1; i <= 5; i++) {
     const r = (WX + i * 0.07) * PX;
     c.beginPath();
     c.arc(w / 2, (H / 2 - AC) * PX, r, Math.PI, 0);
     c.stroke();
   }
-  txt(c, '01', w / 2, h - 30, { size: 760, weight: 800, track: -0.07, color: 'rgba(60, 50, 38, 0.08)', align: 'center' });
+  txt(c, '01', w / 2, h - 30, { size: 760, weight: 800, track: -0.07, color: 'rgba(120, 82, 0, 0.1)', align: 'center' });
 }
 
 // el reflejo: textura con una franja ancha y otra fina, inclinadas, en blanco

@@ -323,6 +323,53 @@ function playSweep(c) {
     { transform: 'translateX(30%)', opacity: 0 }
   ], { duration: 1100, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' });   // ease-out suave: cruza a ritmo casi constante
 }
+/* Título del proyecto encima de la card al pasar el cursor (solo con ratón).
+   Una sola etiqueta para todas, con el estilo del botón del menú: cada
+   fotograma se coloca sobre el borde de arriba de su card (que se mueve,
+   gira y se inclina); si la card está pegada arriba, va debajo. */
+const cardTitle = (() => {
+  if (!cardFine) return null;
+  const el = document.createElement('div');
+  el.className = 'card-title';
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = '<span class="ct-in"><span class="ct-n"></span><span class="ct-t"></span></span>';
+  document.body.appendChild(el);
+  return { el, inner: el.firstChild, n: el.querySelector('.ct-n'), t: el.querySelector('.ct-t'), card: null, raf: 0, off: 0 };
+})();
+function titleFollow() {
+  const T = cardTitle;
+  T.raf = 0;
+  if (!T.card) return;
+  const r = T.card.img.getBoundingClientRect();
+  const below = r.top < 64;
+  const x = r.left + r.width / 2, y = below ? r.bottom + 14 : r.top - 14;
+  T.el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translate(-50%,' + (below ? '0' : '-100%') + ')';
+  T.el.classList.toggle('is-below', below);
+  T.raf = requestAnimationFrame(titleFollow);
+}
+function showTitle(c) {
+  const T = cardTitle;
+  if (!T) return;
+  clearTimeout(T.off);
+  const swap = T.card && T.card !== c && T.el.classList.contains('is-on');
+  T.card = c;
+  T.n.textContent = c.num;
+  T.t.textContent = c.title;
+  if (!T.raf) titleFollow();
+  T.el.classList.add('is-on');
+  // de una card a otra: el texto cambia con un pequeño relevo, sin apagarse
+  if (swap && !cardReduce && T.inner.animate) {
+    T.inner.animate([{ transform: 'translateY(4px)', opacity: 0.35 }, { transform: 'none', opacity: 1 }],
+      { duration: 180, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' });
+  }
+}
+function hideTitle(c) {
+  const T = cardTitle;
+  if (!T || (c && T.card !== c)) return;
+  T.el.classList.remove('is-on');
+  clearTimeout(T.off);
+  T.off = setTimeout(() => { cancelAnimationFrame(T.raf); T.raf = 0; T.card = null; }, 220);
+}
 function kickCards() {
   if (cardReduce || cardsRunning) return;
   cardsRunning = true;
@@ -343,7 +390,9 @@ class DraggableImg {
     // estado físico de la card (el giro de partida es el de su CSS)
     const base = gsap.getProperty(Image, 'rotation') || 0;
     const c = { img: Image, tracker, base, r: base, vr: 0, s: 1, vs: 0, rx: 0, vrx: 0, ry: 0, vry: 0,
-                hx: 0.5, hy: 0.5, hover: false, dragging: false, throwing: false };
+                hx: 0.5, hy: 0.5, hover: false, dragging: false, throwing: false,
+                num: ((Image.className.match(/img-(\d)/) || [0, 0])[1] + '').padStart(2, '0'),
+                title: (Image.alt || '').split(' — ')[0] };
     cards.push(c);
     gsap.set(Image, { transformPerspective: 1000 });
 
@@ -363,7 +412,7 @@ class DraggableImg {
     window.addEventListener('resize', placeGloss);
 
     if (cardFine) {
-      Image.addEventListener('mouseenter', () => playSweep(c));
+      Image.addEventListener('mouseenter', () => { playSweep(c); if (!c.dragging) showTitle(c); });
       Image.addEventListener('mousemove', (e) => {
         if (c.dragging) return;
         const r = Image.getBoundingClientRect();
@@ -372,8 +421,10 @@ class DraggableImg {
         c.hover = true;
         stackHover = inStack(c);
         kickCards();
+        // tras soltarla (o si entró arrastrando otra) la etiqueta vuelve al moverse
+        if (cardTitle && (cardTitle.card !== c || !cardTitle.el.classList.contains('is-on'))) showTitle(c);
       });
-      Image.addEventListener('mouseleave', () => { c.hover = false; stackHover = false; kickCards(); });
+      Image.addEventListener('mouseleave', () => { c.hover = false; stackHover = false; kickCards(); hideTitle(c); });
     }
 
     this.drag = Draggable.create(proxy, {
@@ -393,6 +444,7 @@ class DraggableImg {
         Image.style.zIndex = proxy.style.zIndex; window._setGrabbingCursor(true);
         c.dragging = true; c.throwing = false; stackHover = false; kickCards();
         if (!cardFine) playSweep(c);                // en táctil no hay hover: el destello sale al tocarla
+        hideTitle();                                // arrastrando, la etiqueta estorba
       },
       onDrag(e) {
         gsap.set(Image, {x: this.x, y: this.y});
@@ -409,6 +461,7 @@ class DraggableImg {
       onRelease() {
         window._setGrabbingCursor(false); const dragmeBubble = document.getElementById('dragme-bubble'); dragmeBubble.style.opacity = '0'; dragmeBubble.style.visibility = 'hidden';
         c.dragging = false; kickCards();
+        if (cardFine && Image.matches(':hover')) showTitle(c);
       },
       onThrowUpdate() { gsap.set(Image, {x: this.x, y: this.y}); c.throwing = true; kickCards(); },
       onThrowComplete() { c.throwing = false; kickCards(); },
@@ -510,34 +563,53 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function runLoader() {
     const ld = document.getElementById('loading-screen');
-    const h1 = ld && ld.querySelector('.ld-h1');
-    const h2 = ld && ld.querySelector('.ld-h2');
-    const view = h1 && h1.querySelector('.ld-view');
-    if (!(ld && h1 && h2 && view)) { showInstant(); return; }
+    const zoom = ld && ld.querySelector('.ld-zoom');
+    const mark = ld && ld.querySelector('.ld-mark');
+    const hole = ld && ld.querySelector('.ld-hole');
+    const glint = ld && ld.querySelector('.ld-glint');
+    if (!(ld && zoom && mark && hole && glint)) { showInstant(); return; }
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // la mitad de abajo enseña la misma vista, desplazada (ver CSS)
-    h2.insertBefore(view.cloneNode(true), h2.firstChild);
     const yy = String(new Date().getFullYear()).slice(-2);
     ld.querySelectorAll('.ld-year').forEach((y) => { y.textContent = 'Portfolio — ’' + yy; });
 
-    // dónde cae la línea central del monograma: ahí se parte la pantalla
-    const measure = () => {
-      const lr = ld.getBoundingClientRect();
-      ld.style.setProperty('--lh', lr.height + 'px');
-      const cross = view.querySelector('.ld-cross').getBoundingClientRect();
-      const mark = view.querySelector('.ld-mark').getBoundingClientRect();
-      // en píxeles de pantalla exactos: si el corte cae entre dos, se ve una costura
-      const dpr = window.devicePixelRatio || 1;
-      const split = Math.round((cross.top - lr.top + cross.height / 2) * dpr) / dpr;
-      ld.style.setProperty('--split', split + 'px');
-      ld.style.setProperty('--t', Math.max(2, cross.height).toFixed(2) + 'px');
-      ld.style.setProperty('--cx', (mark.left + mark.width / 2).toFixed(1) + 'px');
+    // el brillo grande del ojo izquierdo, recortado en el fondo justo
+    // debajo de la cara (algo agrandado, para que su borde quede bajo el
+    // beige del ojo). Solo se recorta al entrar: por ahí se ve la home.
+    // VB es el viewBox del logo.
+    const VB = { x: 500, y: 285, w: 3000 };
+    const GLINT = { x: 2270, y: 2297 };              // centro del brillo
+    let geo = null;
+    const placeHole = () => {
+      const m = mark.getBoundingClientRect(), z = zoom.getBoundingClientRect();
+      const s = m.width / VB.w, ox = m.left - z.left, oy = m.top - z.top;
+      const t = 'translate(' + ox.toFixed(2) + ' ' + oy.toFixed(2) + ') scale(' + s.toFixed(6) + ') translate(' + (-VB.x) + ' ' + (-VB.y) + ')';
+      hole.setAttribute('transform', t);
+      glint.setAttribute('transform', t);
+      geo = { s, ox, oy, w: z.width, h: z.height };
     };
-    measure();
-    window.addEventListener('resize', measure);
+    placeHole();
+    window.addEventListener('resize', placeHole);
 
-    // contador de rodillos en las dos copias
+    // cuánto tiene que crecer el escenario, desde el centro del brillo, para
+    // que el agujero cubra toda la pantalla (se comprueba con su forma real)
+    const zoomTarget = () => {
+      const { s, ox, oy, w, h } = geo;
+      const Ox = ox + (GLINT.x - VB.x) * s, Oy = oy + (GLINT.y - VB.y) * s;
+      const pt = glint.ownerSVGElement.createSVGPoint();
+      const probe = [[0, 0], [w, 0], [0, h], [w, h], [w / 2, 0], [w / 2, h], [0, h / 2], [w, h / 2]];
+      const covers = (S) => probe.every(([px, py]) => {
+        pt.x = VB.x + (Ox + (px - Ox) / S - ox) / s;
+        pt.y = VB.y + (Oy + (py - Oy) / S - oy) / s;
+        return glint.isPointInFill(pt);
+      });
+      let lo = 1, hi = 3000;
+      if (!covers(hi)) return { S: 400, Ox, Oy };
+      for (let i = 0; i < 28; i++) { const mid = Math.sqrt(lo * hi); if (covers(mid)) hi = mid; else lo = mid; }
+      return { S: hi * 1.1, Ox, Oy };
+    };
+
+    // contador de rodillos
     const counters = Array.prototype.map.call(ld.querySelectorAll('.ld-count'), (el) => [0, 1, 2].map(() => {
       const d = document.createElement('span');
       d.className = 'ld-digit';
@@ -549,7 +621,7 @@ window.addEventListener('DOMContentLoaded', function() {
       return { d, strip };
     }));
     const msgs = ld.querySelectorAll('.ld-msg');
-    const STEPS = ['Trazando la retícula', 'Componiendo el monograma', 'Ajustando el kerning', 'Listo'];
+    const STEPS = ['Trazando el contorno', 'Dibujando los ojos', 'Afinando la sonrisa', 'Listo'];
     let msgIdx = 0;
     const setCount = (v) => {
       const str = String(Math.round(v)).padStart(3, '0');
@@ -567,12 +639,12 @@ window.addEventListener('DOMContentLoaded', function() {
     };
     setCount(0);
 
-    // las dos copias empiezan a la vez
     ld.classList.add('is-run');
 
-    // contador: entra lento, corre en medio y se asienta
+    // contador: entra lento, corre en medio y se asienta (acaba cuando la
+    // cara ya está montada)
     const START = reduce ? 150 : 350;
-    const FILL = reduce ? 900 : 3200;
+    const FILL = reduce ? 900 : 2600;
     const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     let t0 = null;
     const step = (ts) => {
@@ -585,8 +657,32 @@ window.addEventListener('DOMContentLoaded', function() {
 
     function done() {
       try { sessionStorage.setItem(visitedKey, '1'); } catch (e) {}
-      window.removeEventListener('resize', measure);
-      setTimeout(() => { try { ld.remove(); } catch (e) { ld.style.display = 'none'; } }, 1100);
+      window.removeEventListener('resize', placeHole);
+      setTimeout(() => { try { ld.remove(); } catch (e) { ld.style.display = 'none'; } }, 700);
+    }
+
+    // la entrada: se destapa el brillo, la home ya está detrás y el
+    // escenario crece desde ese punto. Un leve retroceso al principio y
+    // luego cada vez más deprisa (la escala sube de forma exponencial y su
+    // logaritmo acelera, así el viaje se siente continuo). Hasta 120
+    // aumentos como mucho: a esas alturas el brillo ya llena casi toda la
+    // pantalla y la pantalla de carga se funde. Solo transform y opacidad.
+    function enter() {
+      const target = zoomTarget();
+      const S = Math.min(target.S, 120);
+      zoom.style.transformOrigin = target.Ox.toFixed(2) + 'px ' + target.Oy.toFixed(2) + 'px';
+      ld.classList.add('is-exit');
+      revealMain();
+      const T = 1400, A = 0.94, t1 = 0.16, n = 12, p = 1.5;
+      const frames = [{ offset: 0, transform: 'scale(1)', easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+                      { offset: t1, transform: 'scale(' + A + ')' }];
+      for (let i = 1; i <= n; i++) {
+        frames.push({ offset: t1 + (1 - t1) * Math.pow(i / n, 1 / p), transform: 'scale(' + (A * Math.pow(S / A, i / n)).toFixed(4) + ')' });
+      }
+      if (zoom.animate) zoom.animate(frames, { duration: T, fill: 'forwards' });
+      setTimeout(triggerStartAnimations, T * 0.45);     // la home entra mientras se llega
+      setTimeout(() => ld.classList.add('is-gone'), T * 0.76);
+      setTimeout(done, T);
     }
 
     function finish() {
@@ -594,27 +690,15 @@ window.addEventListener('DOMContentLoaded', function() {
       if (reduce) {
         setTimeout(() => {
           revealMain();
-          ld.classList.add('fade-out');
+          ld.classList.add('is-gone');
           triggerStartAnimations();
           done();
-        }, 250);
+        }, 300);
         return;
       }
-      // 1) el monograma pasa a beige  2) su línea central cruza la pantalla
-      // 3) la pantalla se parte en dos por esa línea y aparece la home
-      setTimeout(() => {
-        ld.classList.add('is-beige');
-        setTimeout(() => {
-          measure();
-          ld.classList.add('is-cut');
-          setTimeout(() => {
-            revealMain();
-            ld.classList.add('is-split');
-            triggerStartAnimations();
-            done();
-          }, 650);
-        }, 300);
-      }, 350);
+      // 1) parpadea  2) entra por el brillo del ojo
+      setTimeout(() => ld.classList.add('is-blink'), 160);
+      setTimeout(enter, 700);
     }
   }
 
