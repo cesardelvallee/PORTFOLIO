@@ -68,6 +68,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   const isMobileDevice = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 'ontouchstart' in window;
 
+  // el logo de la cabecera de la home: ya estás en la home, así que en
+  // vez de recargar, la cara saluda (se ladea y parpadea)
+  const topLogo = document.querySelector('.top-logo');
+  if (topLogo) {
+    topLogo.addEventListener('click', (e) => {
+      e.preventDefault();
+      topLogo.classList.remove('is-hi');
+      void topLogo.offsetWidth;
+      topLogo.classList.add('is-hi');
+    });
+    topLogo.addEventListener('animationend', (e) => { if (e.target === topLogo.firstElementChild) topLogo.classList.remove('is-hi'); });
+  }
+
   const topBarLeft = document.querySelector('.top-bar-left');
   if (topBarLeft) {
     topBarLeft.addEventListener('click', () => { window.PageFX.leave('index.html'); });
@@ -577,8 +590,8 @@ window.addEventListener('DOMContentLoaded', function() {
     // debajo de la cara (algo agrandado, para que su borde quede bajo el
     // beige del ojo). Solo se recorta al entrar: por ahí se ve la home.
     // VB es el viewBox del logo.
-    const VB = { x: 500, y: 285, w: 3000 };
-    const GLINT = { x: 2270, y: 2297 };              // centro del brillo
+    const VB = { x: 122.89, y: 71.46, w: 714.21 };
+    const GLINT = { x: 544.87, y: 551.08 };              // centro del brillo
     let geo = null;
     const placeHole = () => {
       const m = mark.getBoundingClientRect(), z = zoom.getBoundingClientRect();

@@ -1849,7 +1849,7 @@ html { scroll-behavior: smooth; }
   left: 50%;
   top: 50%;
   width: clamp(220px, 34vmin, 400px);
-  aspect-ratio: 3000 / 3435;
+  aspect-ratio: 714.21 / 817.09;
   margin: 0;
   transform: translate(-50%, -50%);
 }
@@ -1867,10 +1867,10 @@ html { scroll-behavior: smooth; }
 /* ojos, sonrisa y oreja: aparecen desde su centro con un pequeño rebote */
 .ld-eye, .ld-ear, .ld-mouth { opacity: 0; transform: scale(0.35); }
 .ld-mouth { transform: scale(0.6); }
-.ld-eye-l, .ld-eye-l .ld-lid { transform-origin: 55.6% 63.7%; }
-.ld-eye-r, .ld-eye-r .ld-lid { transform-origin: 78.3% 60.9%; }
-.ld-mouth { transform-origin: 62.3% 84.7%; }
-.ld-ear { transform-origin: 29.1% 74.3%; }
+.ld-eye-l, .ld-eye-l .ld-lid { transform-origin: 55.63% 63.75%; }
+.ld-eye-r, .ld-eye-r .ld-lid { transform-origin: 78.54% 61.08%; }
+.ld-mouth { transform-origin: 62.53% 85.05%; }
+.ld-ear { transform-origin: 28.91% 74.56%; }
 
 /* 1) el pelo y el contorno se rellenan de abajo arriba  2) los ojos
    3) la sonrisa  4) la oreja */
@@ -2152,6 +2152,68 @@ body.theme-light {
 #scroll-progress.visible { opacity: 1; }
 body.theme-light #scroll-progress { background: linear-gradient(90deg, #8a7f6b, #6f665a); }
 
+
+/* ================================================
+   CABECERA DE LA HOME — contacto a la izquierda, el logo en el centro y
+   el interruptor día / noche a la derecha
+   ================================================ */
+.top-bar-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.tb-l { justify-content: flex-start; }
+/* sin el relleno inferior del enlace, queda centrado con el logo y el interruptor */
+.top-bar-side .contact-link { padding-bottom: 0; }
+.tb-r { justify-content: flex-end; }
+/* mismo color que PORTFOLIO en cada tema */
+.top-logo {
+  display: block;
+  color: #e6d6ad;
+  line-height: 0;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.45s ease;
+}
+body.theme-light .top-logo { color: #6b5d47; }
+.top-logo svg {
+  display: block;
+  height: 62px;
+  width: auto;
+  overflow: visible;
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.top-logo path { fill: currentColor; }
+.tl-eyes { transform-box: fill-box; transform-origin: 50% 55%; }
+/* cursor encima: la cara se ladea un poco y parpadea */
+@media (hover: hover) and (pointer: fine) {
+  .top-logo:hover svg { transform: rotate(-8deg) scale(1.06); }
+  .top-logo:hover .tl-eyes { animation: tl-blink 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s; }
+}
+.top-logo:active svg { transform: scale(0.94); transition-duration: 0.16s; }
+.top-logo:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; border-radius: 6px; }
+/* clic en la home (ya estás en ella): saluda en vez de recargar */
+.top-logo.is-hi svg { animation: tl-hi 0.62s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.top-logo.is-hi .tl-eyes { animation: tl-blink 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) 0.14s; }
+@keyframes tl-blink { 0%, 100% { transform: none; } 42% { transform: scaleY(0.08); } }
+@keyframes tl-hi {
+  0%, 100% { transform: none; }
+  25% { transform: rotate(-12deg) scale(1.08); }
+  55% { transform: rotate(8deg) scale(1.04); }
+  80% { transform: rotate(-3deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .top-logo svg { transition: none; }
+  .top-logo:hover svg, .top-logo.is-hi svg { transform: none; animation: none; }
+}
+@media (max-width: 768px) {
+  .top-bar-side .contact-link { font-size: 0.65rem; }
+  .top-logo svg { height: 50px; }
+}
+@media (max-width: 480px) {
+  .top-logo svg { height: 44px; margin-top: 8px; }
+}
 
 /* ================================================
    INTERRUPTOR DÍA / NOCHE
@@ -4589,19 +4651,21 @@ body.home-page .model-3d-bg model-viewer {
   /* mismos márgenes que la barra superior: 50px hasta 480, 12px debajo */
   body.home-page { --hx-gut: 50px; }
   body.home-page .center-hero-text { padding: 0 var(--hx-gut) 6svh; }
-  /* el muñeco ocupa todo el centro: el subtítulo sube bajo el nombre de
-     la barra superior, como una firma de dos líneas */
+  /* el muñeco ocupa todo el centro: el subtítulo sube a la cabecera,
+     centrado bajo el logo */
   body.home-page .hero-subtitle {
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 54px);
-    left: var(--hx-gut);
+    top: calc(env(safe-area-inset-top, 0px) + 76px);
+    left: 0;
+    right: 0;
     margin: 0;
     font-size: 0.6rem;
     letter-spacing: 0.2em;
+    text-align: center;
   }
   body.home-page .model-3d-bg { width: 100vw; height: 58svh; }
 }
 @media (max-width: 480px) {
   body.home-page { --hx-gut: 12px; }
-  body.home-page .hero-subtitle { top: calc(env(safe-area-inset-top, 0px) + 34px); }
+  body.home-page .hero-subtitle { top: calc(env(safe-area-inset-top, 0px) + 60px); }
 }
