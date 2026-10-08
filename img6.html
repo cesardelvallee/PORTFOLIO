@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <style>html, body { margin:0!important; padding:0!important; box-sizing:border-box!important; }</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#080f1c">
+  <meta name="theme-color" content="#0e0d0b">
   <meta name="description" content="The Grmps — art toys brand created as final degree project. Naming, character design, 3D sculpting, packaging, film and web by César Del Valle.">
   <meta name="author" content="César Del Valle">
   <title>The Grmps — Art Toys · TFG · César Del Valle</title>
@@ -24,361 +23,131 @@
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.jpg?v=2">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=4">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=4">
-  <link rel="stylesheet" href="css/style.css?v=121">
-  <link rel="stylesheet" href="css/project.css?v=10">
-  <link rel="stylesheet" href="css/grmps.css?v=4">
-  <link rel="stylesheet" href="css/dragme.css">
-  <!-- tipografías de la marca The Grmps: Space Grotesk (display) · Space Mono (datos) · Inter (cuerpo) -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="img/GRMP_ENTORNO_2.jpg">
+  <link rel="stylesheet" href="css/style.css?v=123">
+  <link rel="stylesheet" href="css/case.css?v=12">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/FILM_POSTER_GRMP_web.jpg">
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-
-  <style>
-    .top-bar-left, .top-bar-right { color: #e8e0d0 !important; }
-
-    @media (max-width: 560px) {
-      /* img6: hero a pantalla — imagen arriba, texto repartido, sin hueco arriba */
-      .proj-hero { min-height: 100dvh; align-items: stretch; padding: 54px 18px 20px; }
-      .proj-hero-inner { display: flex; flex-direction: column; gap: 0; }
-      .proj-hero-visual { order: -1; flex: 0 0 auto; margin-bottom: clamp(12px, 2.4vh, 26px); }
-      .proj-hero-visual img { max-height: 36dvh; object-fit: cover; border-radius: 14px; }
-      .proj-hero-text { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-      .gr-logo-mark { display: none; }
-      .proj-eyebrow { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.56rem, 1.3dvh, 0.72rem); }
-      .proj-title { margin: 0 0 clamp(0.35rem, 1dvh, 0.7rem); font-size: clamp(2.25rem, 6.6dvh, 3.3rem); line-height: 0.96; }
-      .proj-tagline { margin: 0 0 clamp(0.4rem, 1.1dvh, 0.75rem); font-size: clamp(0.9rem, 2.1dvh, 1.18rem); line-height: 1.32; }
-      .proj-desc { margin: 0; font-size: clamp(0.8rem, 1.8dvh, 1rem); line-height: 1.5; }
-      .proj-meta { margin-top: clamp(0.7rem, 1.8dvh, 1.1rem); padding-top: 0; }
-    }
-  </style>
 </head>
-<body class="grmps-page" style="--ph-bg:#080f1c; --ph-ink:#f0ece4; --ph-accent:#c4a882; --ph-line:rgba(232,224,208,0.14);">
+<body class="pj-page" style="--pj-accent:#d77a57; --pj-accent-l:#bc593e;">
 <div id="page-fx" aria-hidden="true"></div>
 <script>requestAnimationFrame(function(){var f=document.getElementById('page-fx');if(f){f.classList.add('fx-anim','fx-reveal');}});</script>
+<!-- el fondo de la home (manchas y tema día / noche, lo pinta script.js) -->
+<div id="vanta-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;"></div>
+
   <a href="index.html" class="back-btn" title="Volver al inicio">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
     </svg>
   </a>
   <div class="top-bar">
-      <a href="index.html" class="top-bar-left back-top-link" id="home-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
-      <div class="top-bar-right">THE GRMPS</div>
+    <a href="index.html" class="top-bar-left nav-link back-top-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> ATRÁS</a>
+    <div class="top-bar-center">
+      <a href="index.html" class="top-logo" aria-label="César del Valle — inicio">
+      <svg viewBox="122.89 71.46 714.21 817.09" aria-hidden="true"><path class="tl-face" d="M794.74,234.16l5.81-16.3,2-17.06c2.39-3.1,11.81.84,13.42,3.61,1.8,3.09,3.53,14.52,3.93,18.53,1.77,17.64.61,38.41-3.59,55.61-3.26,13.36-10.03,25.77-11.35,39.63l1.37.78c5.15-1.48,11.6-7.82,16.68-7.9,3.31-.05,9.71,1.91,9.86,5.82.2,5.12-5.38,19.48-6.63,26.05-4.81,25.26-1.5,48.74-.85,73.97,1.11,43.53-2.71,87.27,1.34,130.72,2.16,23.18,9.62,47.41,8.19,71.51l-2.08,26.51c-22.42,136.92-119.72,246.79-266.52,240.67-71.17-2.97-153.65-42.01-205.9-89.53-35.17-31.98-71.57-61.65-108.53-91.59-24.38-19.75-51.18-48.29-66.51-75.75-21.09-37.77-26-81.42-39.85-122.16-5.27-15.51-11.87-28.56-17.9-43.36-1.57-3.84-3.23-8.31-2.6-12.49,1.89-.48,3.46-2.15,5.49-2.01,10.82.73,24.15,13.06,34.56,16.19-18.99-27.44-34.28-58.48-31.98-92.9,1.34-20.15,10.49-39.63,11.59-59.88.25-4.64-.79-11.49,0-15.67,1.09-5.86,11.55-4.38,15.59-2.69,3.17,1.33,21.38,20.24,24.91,24.1,6.55,7.17,12.21,15.25,18.7,22.47.61-6.83.43-13.91,1.44-20.69,4.5-30.18,34.34-58.58,34.51-91.97.03-6.65-5.64-24.36,5.3-24.81,13.77-.57,31.15,29.1,34.63,40.83l4.44,6.78c-.3-15.97-3.04-36.38,9.51-48.69,14.9-14.62,59.27-21.22,80.35-27.2,24.31-6.9,63.79-19.73,84.88-32.88,6.09-3.79,12.98-13.11,18.25-15.79,2.58-1.31,4.92-1.72,7.71-.9.53.16,4.5,2.21,4.71,2.43,2.48,2.65.63,13.92-.13,17.57-1.62,7.75-5.33,15.2-6.5,23.11,3.8-2.05,6.54-5.54,9.98-8.05,40.84-29.84,100.67-14.13,147.59-13.72,2.32.78,4.84.41,7.17,1,2.53.65,10.18,3.78,10.74,6.29,1.35,6.07-8.34,19.96-10.03,27.12-.75,3.17,4.57-2.55,5.08-3.1,8.69-9.54,16.63-25.7,20.56-37.99,2.28-7.14,2.99-15.37,5.14-22.09,1.39-4.34,4.26-5.7,8.83-5.15,8.88,1.07,11.4,7.28,13.98,14.67,3.84,11.02,5.82,22.92,6.29,34.55l1.35,6.46c5.03-18.37,8.97-37.16,10.89-56.16.79-7.82.48-16.65,1.38-24.49.31-2.71,1.3-9.62,2.7-11.6,1.22-1.74,6.43-3.25,8.52-3.1,1.81.12,9.75,3.35,11.21,4.51,4.78,3.76,17.7,29.93,21.03,36.83,18.06,37.34,32,77.09,29.37,119.36ZM753.88,179.71c-.95-.97-1.24.05-1.35,1.01-1.25,10.67.03,21.35-.69,32-1.47,21.66-8.79,46.35-20.54,64.55-2.04,3.16-12.38,16.06-12.02,18.35.32,2.08,3.12,4.19,5.18,4.46,3.68.47,16.29-8.22,19.24-11.08,16.14-15.62,19.8-54.25,18.34-75.58-.76-11.12-4.85-23.12-8.17-33.7ZM787.25,375.07c-2.5-.07-3.76,2.5-5.49,3.69-31.95,22.1-76.68,32.27-114.46,21.29-4.48-1.3-9.31-2.28-12.54-5.86l-2.84,1.41c-.93,1.57,1.07,3.72,1.93,4.96,4.96,7.13,20.45,21.12,27.57,26.89,3.1,2.52,12.27,7.4,13.11,10.75,1.76,7-10.33,5.79-14.48,5.6-42.9-1.91-81.2-21.12-113.7-47.63-.64-.52-4.64-3.92-5.08-3.42,1.16,10.6,4.45,21.28,6.05,31.72,1.43,9.36,4.15,30.94-2.62,38.08-4.19,4.42-6.66.48-9.91-3.08-5.19-5.69-7.97-11.8-13.94-17.38-16.46-15.39-39.27-29.03-60.75-35.91-5.99-1.92-12.66-4.1-18.9-2.54,7.21,6.8,31.63,22.17,33.24,31.82.2,1.19-.25,3.33-.75,4.41-.7,1.51-12.5,10.64-14.85,12.38-20.15,14.92-43.57,27.43-67.37,35.42-22.13,7.43-44.91,7.25-66.18,16.19-22.05,9.26-34.94,24.42-50.52,41.37-4.12,4.48-9.01,8.27-12.6,13.27,1.5.4,3.78-1.65,4.99-2.5,12.05-8.48,22.93-18.87,35.84-26.11,7.5-4.2,17.66-10.34,21.92,1.25,4.18,11.37-5.96,34.6-8.64,46.75-2.42,10.99-3.74,25.9-3.09,37.13.25,4.29,1.48,8.9,1.71,13.26,5.14,2.95,13.93,8.35,12.59,15.28-1.17,6.05-12.34.31-16.73-.25-7.9-1.02-25.74-.87-30.13,7.17-1.45,2.66-2.66,9.74-2.8,12.85-.92,19.45,8.63,41.68,25.24,52.35,10.6,6.8,16.95,6.25,25.47-2.99,3.13-3.4,11.72-18.63,17.07-14.37,2.63,2.1-1.95,13.08-3.22,15.96-3.72,8.4-9.46,18-18.96,20.18-.89.98,8.19,20.24,9.66,22.67,8.75,14.39,40.8,34.76,55.74,44.32,68.85,44.07,137.88,71.98,221.2,53.86,67.8-14.75,116.4-57.3,148.73-117.43,35.13-65.35,39.42-122.72,23.96-194.85-9.61-44.83-25.51-89.92-50.88-128.17-.01-1.81,5.96-5.85,7.52-7.46,5.39-5.56,11.57-12.23,16.67-18.05,3.93-4.49,7.66-9.51,11.22-14.3ZM203.88,494.19c2.32-26.75-.4-55.97-15.37-78.9-5.77-8.85-15.64-19.01-26.83-19.11-.6.55,2.31,5.43,2.85,6.33,11.83,19.72,26.52,38.68,32.49,61.45,2.46,9.38,3.08,19.3,5.48,28.58.29,1.12-.7,1.99,1.37,1.66ZM437.36,432.25c-1.87-1.83-18.18,7.58-21.32,8.97-31.71,14.01-86.6,19.1-107.33,47.87-1.02,1.41-3.87,6.46.03,5.49,27.66-18.6,61.2-16.3,90.75-30.43,10.77-5.15,24.26-14.02,32.45-22.69,1.16-1.22,6.95-7.71,5.43-9.2ZM712.88,736.01c5.42,5.22-12.91,11.01-15.98,11.6-21.46,28.44-43.17,61.65-77.63,75.19-44.86,17.64-120.23,18.19-154.36-20.92-21.17-24.25-30.39-64.83-36.77-95.97-.86-4.21-4.45-19.4-2.41-22.2,2.89-3.96,10.89-3.63,15.04-2.01,3.17,1.24,13.2,10.69,17.08,13.56,66.43,49.17,138.1,50.29,217.41,43.29,5.93-.52,34.58-5.48,37.62-2.55ZM672.21,752.87c-8.83,1.17-18.05,3.29-26.9,4.07-15.96,1.39-34.2,1.69-50.33,2.08-40.8,1-90.2-11.3-125.4-31.9l-22-14.41c2.37,5.9,3.49,20.93,6.78,25.54,1.73,2.43,13.89,10.82,17.09,12.86,9.59,6.11,22.47,10.37,28.65,20.36,3.24,5.23,5.43,11.87,8.06,17.47,1.56.39,1.11-.31,1.55-.86,4.27-5.44,3.95-9.53,11.7-12.77,7.4-3.11,23.56-2.4,32-2.02,11.86.54,24.15,3,36.07,3.41l2.39,1.7c.39,1.87-6.3,2.26-7.83,2.37-17.14,1.18-37.33-1.65-54.14.99-2.97.47-7.16,2.19-9.43,4.18-2.98,2.63-7.34,12.74-11.24,12.54-7.59-.39-13.38-19.28-19.12-23.84-4.2-3.34-15.17-6.95-20.68-9.95-3.13-1.71-6.05-3.6-8.92-5.7,17.18,58.44,89.92,63.73,139.82,49.64,34.2-9.66,40.28-23.36,62.67-46.92,2.96-3.12,6.64-5.34,9.2-8.83ZM481.61,829.1l47.38,11.5c7.9-.08,15.91,1.23,23.72,1.46,8.49.25,39.14-2.44,44.17.75,5.48,3.48-4.34,5.62-7.04,6.37-26.77,7.5-72.48-.09-97.59-12.02-.98-.46-12.56-6.35-10.64-8.07ZM325.79,665.79c-1.07,3.71,2.85,11.11,6.08,12.52,2.29,1,5.84-.32,6.62,3.51-1.01,5.34-4.31,7.71-9.4,8.76-.84.58-.29,1.32,0,2.04,2.05,5.12,9.58,5.47,14.05,7.1,3.44,5.84-12.2,6.69-15.39,5.85-5.71-1.5-9.54-11.59-9.33-16.86.1-2.56,2.35-5.96,2.35-6.3,0-.27-2.18-3.55-2.65-4.65-3.11-7.32-6.44-19.18,4.18-21.92,4.47-1.15,14.51.67,16.52,5.3,2.62,6.03-3.88,3.15-6.6,3.2-2.04.04-4.31,1.34-6.43,1.45Z"/><path class="tl-eyes" d="M485.54,463.07c18.38-1.83,43,2.02,58.24,12.86,34.69,24.68,57.46,105.65,59.67,146.58,2.47,45.89-8.51,109.99-69.58,98.17-27.56-5.33-42.37-26.19-54.66-49.49-5.21-9.88-15.5-29.07-5.8-38.5,11.89-11.56,39.84-7.3,46.89-19.14,3.18-5.34-.19-6.95-5.3-8.11-19.84-4.5-45.72,13.23-60.63-6.08-11.15-14.45-14.73-50.42-16.34-68.75-.92-10.47-2.67-18.22.5-28.78,5.3-17.69,28.63-36.94,47.01-38.76ZM560.81,614.43c7.69,7.63,22.02,3.26,23.52-7.64,1.52-11.04-9.21-44.89-13.54-56.45-6.54-17.47-27.45-57.17-44.69-64.91-8.57-3.85-19.7-.43-20.71,9.75-1.06,10.7,4.93,11.97,10.94,18.4,15.79,16.88,28.37,49.69,35.04,71.84,2.12,7.04,4.99,24.61,9.44,29.02ZM571.97,641.39c-11.1,1.92-12.55,17.76-11.33,26.66,1.88,13.77,23.57,15.72,27.55.44,3.23-12.42.28-29.96-16.21-27.1ZM621.39,457.67c17.91-17.91,48.76-16.35,69.39-4.18,46.57,27.48,73.55,118.64,70.63,169.72-1.52,26.55-15.97,53.13-39.61,65.9-28.88,15.59-50.24,6.56-68.93-17.99-9.38-12.32-27.18-40.96-16.03-55.41,11.4-14.78,37.53-15.92,44.52-26.27,7.77-11.52-14.33-6.52-19.5-5.21-8.09,2.05-23.01,8.46-30.78,7.25-8.24-1.29-15.7-19.8-17.88-27.04-8.19-27.17-13.45-85.12,8.21-106.78ZM667.94,461c-8.99,1.53-13.38,11.48-9.72,19.61,2.29,5.09,13.02,13.07,17.41,17.99,14.07,15.76,27.95,40.14,35.39,59.91,3.86,10.26,5.7,29.41,20.66,28.2,20.48-1.65,10.88-30.03,6.57-41.82-8.99-24.55-27.6-50.61-45.6-69.44-6.27-6.55-14.81-16.14-24.7-14.45ZM738.06,595.78c-16.26,2.8-13.14,32.36,4.5,31.11,19.66-1.4,17.04-34.82-4.5-31.11Z"/></svg>
+    </a>
     </div>
-  <section class="proj-hero" style="--ph-bg:#080f1c; --ph-ink:#f0ece4; --ph-accent:#c4a882; --ph-line:rgba(232,224,208,0.14); --ph-num:'06';">
-    <div class="proj-hero-inner">
-      <div class="proj-hero-text">
-        <img class="gr-logo gr-logo-mark ph-rise" style="animation-delay:0.06s;" src="img/GRMPS_LOGO.svg" alt="The Grmps — art toys" width="132" height="106">
-        <p class="proj-eyebrow ph-rise" style="animation-delay:0.10s;"><span class="n">Project 06</span><span class="bar"></span>TFG · Branding · Art Toys</p>
-        <h1 class="proj-title ph-rise" style="animation-delay:0.18s;">The Grmps</h1>
-        <p class="proj-tagline ph-rise" style="animation-delay:0.26s;">El legado de los abuelos, elevado a icono del coleccionismo — <em>nostalgia con flow</em>.</p>
-        <p class="proj-desc ph-rise" style="animation-delay:0.34s;">Trabajo de Fin de Grado desarrollado de principio a fin: naming e identidad, diseño de personaje, escultura y render <strong>3D</strong>, packaging premium, film y web. <strong>The Grmps</strong> transforma el respeto generacional en Art Toys de autor: la sabiduría de la veteranía, contada en el lenguaje del streetwear.</p>
-        <div class="proj-meta ph-rise" style="animation-delay:0.42s;">
-          <div><span class="m-label">Role</span><span class="m-value">Brand & 3D Designer</span></div>
-          <div><span class="m-label">Proyecto</span><span class="m-value">TFG — marca completa</span></div>
-          <div><span class="m-label">Piezas</span><span class="m-value">Figura · Packaging · Film · Web</span></div>
-        </div>
-      </div>
-      <div class="proj-hero-visual ph-rise" style="animation-delay:0.30s;">
-        <div class="ph-tilt">
-          <img src="img/GRMP_ENTORNO_2.jpg" alt="Figura GRMP en una estantería, junto a piezas clásicas del coleccionismo de art toys">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="gx-section gr-manif" aria-label="Manifiesto de The Grmps">
-    <div class="gx-inner">
-      <img class="gr-logo gr-manif-logo gx-reveal" src="img/GRMPS_LOGO.svg" alt="Logotipo de The Grmps art toys" width="480" height="384">
-      <p class="gr-state gx-reveal">Los abuelos no son para toda la vida. <em>Su flow, sí.</em></p>
-      <div class="gr-idea gx-reveal">
-        <p>The Grmps nace de una idea muy sencilla: quien ha tenido abuelos les guarda un cariño, un respeto y unos recuerdos enormes — y, por desgracia, no se quedan para siempre. Mucha gente querría conservar <strong>algo físico</strong> que se los recuerde.</p>
-        <p>Eso es exactamente esta marca: abuelos con mucho flow — ropa ancha y moderna, accesorios de moda — esculpidos como <strong>art toys de colección</strong>. Para la generación que colecciona figuras y drops, y que también quiere tener cerca un recuerdo de los suyos.</p>
-      </div>
-      <ul class="gr-pillars">
-        <li class="gx-reveal">
-          <h3>Misión</h3>
-          <p>Elevar el legado de nuestros abuelos a la categoría de icono del coleccionismo: transformar la nostalgia y el respeto generacional en Art Toys premium que fusionan la sabiduría de la veteranía con el lenguaje del streetwear. El recuerdo emocional, materializado en un objeto de diseño exclusivo.</p>
-        </li>
-        <li class="gx-reveal">
-          <h3>Visión</h3>
-          <p>Ser la marca de referencia del coleccionismo de diseño que logra humanizar el hype: liderar el mercado de los Art Toys de autor uniendo el lujo emocional con la cultura urbana, y celebrar — y preservar — el legado generacional.</p>
-        </li>
-        <li class="gx-reveal">
-          <h3>Valores</h3>
-          <p>Respeto a nuestros abuelos y pasión por la cultura urbana. Piezas con alma, con cada detalle de cada figura cuidado al máximo, para mantener vivo su recuerdo de una forma que conecte de verdad con nuestra generación.</p>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="gx-section gr-craft" aria-label="Del boceto a la figura">
-    <div class="gx-inner">
-      <div class="gx-head gx-reveal">
-        <span class="gx-eyebrow">El personaje</span>
-        <h2 class="gx-title">Del trazo <em>al vinilo</em></h2>
-        <p class="gx-sub">El GRMP nace como ilustración: un abuelo de barrio con gorra, puffer y bastón. Mueve el divisor y mira cómo el boceto se convierte en vinilo — sin perder ni una arruga del carácter original.</p>
-      </div>
-      <div class="gr-mix-wrap gx-reveal">
-        <div class="gr-mix gr-card" id="gr-mix" role="slider" tabindex="0" data-cursor="Compara"
-             aria-label="Comparador entre la ilustración original y la figura de vinilo. Arrastra o usa las flechas del teclado."
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Mitad trazo, mitad vinilo">
-          <img src="img/grmp_front_web.jpg" alt="Escultura digital del GRMP, vista frontal del render 3D" loading="lazy" decoding="async" draggable="false">
-          <div class="gr-mix-top" aria-hidden="true">
-            <img src="img/GRMP_TRAZO_web.jpg" alt="" loading="lazy" decoding="async" draggable="false">
-          </div>
-          <span class="gr-mix-tag tl" aria-hidden="true"><b>01</b> · Trazo</span>
-          <span class="gr-mix-tag tr" aria-hidden="true"><b>02</b> · Vinilo</span>
-          <div class="gr-mix-bar" aria-hidden="true">
-            <span class="gr-mix-knob">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </span>
-          </div>
-        </div>
-        <p class="gr-3d-hint gx-reveal"><b>←</b> Mueve el divisor <b>→</b></p>
-      </div>
-      <ul class="gr-steps gx-reveal">
-        <li>Diseño<small>Ilustración y hoja de personaje: proporciones, ropa, actitud.</small></li>
-        <li>Esculpido<small>Modelado 3D de la figura y sus accesorios, pensado para producción.</small></li>
-        <li>Acabado manual<small>Pintura a mano y control de calidad, pieza a pieza.</small></li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="gx-section gr-3d" aria-label="La figura en 3D">
-    <div class="gx-inner">
-      <div class="gx-head gx-reveal">
-        <span class="gx-eyebrow">La figura</span>
-        <h2 class="gx-title">Gírala <em>tú mismo</em></h2>
-        <p class="gx-sub">La escultura real del GRMP, en tres dimensiones. Arrastra para inspeccionarla desde cualquier ángulo, como si la tuvieras en la mano.</p>
-      </div>
-      <div class="gr-3d-stage gx-reveal" data-cursor="Gira">
-        <span class="gr-3d-meta tl" aria-hidden="true">GRMP — Classic</span>
-        <span class="gr-3d-meta tr" aria-hidden="true">001 / 100</span>
-        <model-viewer id="gr-model" src="assets/GRMP_optimized.glb"
-          camera-controls disable-zoom disable-pan auto-rotate auto-rotate-delay="1800" rotation-per-second="24deg"
-          interaction-prompt="none" loading="lazy" reveal="auto"
-          alt="Modelo 3D interactivo de la figura GRMP"></model-viewer>
-        <span class="gr-dizzy" aria-hidden="true">El GRMP está mareado · dale un respiro 😵‍💫</span>
-      </div>
-      <p class="gr-3d-hint gx-reveal"><b>←</b> Arrastra para girar <b>→</b></p>
-    </div>
-  </section>
-
-  <section class="gx-section gr-drop" aria-label="El drop 001 y su packaging">
-    <div class="gx-inner">
-      <div class="gx-head gx-reveal">
-        <span class="gx-eyebrow">Drop 001 — Urban Series</span>
-        <h2 class="gx-title">Cien piezas, <em>ni una más</em></h2>
-        <p class="gx-sub">El lanzamiento se comporta como un drop de streetwear, pero se guarda como una pieza de museo.</p>
-      </div>
-      <div class="gr-drop-grid">
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <span class="gr-ix" aria-hidden="true">01</span>
-            <img src="img/GRMP_PACKAGING_web.jpg" alt="Packaging de The Grmps abierto: caja rígida azul noche con la figura GRMP en espuma troquelada" loading="lazy" decoding="async" data-lightbox>
-          </div>
-          <figcaption class="gr-cap"><span class="gr-num">01</span> La caja, por dentro</figcaption>
-        </figure>
-        <div class="gr-drop-copy gx-reveal">
-          <p>Caja rígida <strong>azul noche</strong> con el tag de la marca serigrafiado, espuma troquelada a la silueta de la figura y la historia del personaje impresa en la tapa. Abrirla forma parte del producto.</p>
-          <p>Cada GRMP se numera a mano y viaja con su <strong>certificado de autenticidad</strong>. Cuando se agota, se agota: el valor de la pieza está también en su escasez.</p>
-          <ul class="gr-specs">
-            <li><span>Edición</span>100 unidades numeradas</li>
-            <li><span>Acabado</span>Pintado a mano</li>
-            <li><span>Certificado</span>De autenticidad, firmado</li>
-            <li><span>Restock</span>Nunca</li>
-          </ul>
-        </div>
-      </div>
-      <div class="gr-pkg-row">
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <span class="gr-ix" aria-hidden="true">02</span>
-            <img src="img/GRMP_PKG_hero_web.jpg" alt="Caja cerrada de The Grmps junto a la figura GRMP" loading="lazy" decoding="async" data-lightbox>
-          </div>
-          <figcaption class="gr-cap"><span class="gr-num">02</span> La caja</figcaption>
-        </figure>
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <span class="gr-ix" aria-hidden="true">03</span>
-            <img src="img/GRMP_PKG_open_angle_web.jpg" alt="Packaging de The Grmps abierto en ángulo" loading="lazy" decoding="async" data-lightbox>
-          </div>
-          <figcaption class="gr-cap"><span class="gr-num">03</span> La apertura</figcaption>
-        </figure>
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <span class="gr-ix" aria-hidden="true">04</span>
-            <img src="img/GRMP_PKG_open_front_web.jpg" alt="Packaging de The Grmps abierto de frente, con la figura en su interior" loading="lazy" decoding="async" data-lightbox>
-          </div>
-          <figcaption class="gr-cap"><span class="gr-num">04</span> Primer contacto</figcaption>
-        </figure>
-      </div>
-      <p class="gr-slogan gx-reveal">Made to be kept, <em>not consumed</em>.</p>
-    </div>
-  </section>
-
-  <section class="gx-section gr-film" aria-label="El film de The Grmps">
-    <div class="gx-inner">
-      <div class="gx-head gx-reveal">
-        <span class="gx-eyebrow">El film</span>
-        <h2 class="gx-title">La marca, <em>en movimiento</em></h2>
-        <p class="gx-sub">Pieza audiovisual del drop: el GRMP llega a la estantería del coleccionista.</p>
-      </div>
-      <figure class="gr-film-frame gx-reveal">
-        <video id="gr-film-video" src="video/VIDEOSHOOT_GRMPS.mp4" poster="img/FILM_POSTER_GRMP_web.jpg" loop muted playsinline preload="metadata"></video>
-        <button id="gr-film-sound" class="gr-sound" type="button" aria-label="Activar sonido del film" aria-pressed="false">
-          <span class="gr-sound-ico" aria-hidden="true"></span>
-          Sonido
-        </button>
-      </figure>
-    </div>
-  </section>
-
-  <section class="gx-section gr-hab" aria-label="La figura en su hábitat">
-    <div class="gx-inner">
-      <div class="gx-head gx-reveal">
-        <span class="gx-eyebrow">En su hábitat</span>
-        <h2 class="gx-title">Un objeto que <em>habita</em></h2>
-        <p class="gx-sub">De la vitrina de museo a la estantería de casa: el GRMP convive con los grandes del coleccionismo y con la vida real.</p>
-      </div>
-      <div class="gr-hab-lead">
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <img src="img/GRMP_EXPO.jpg" alt="Figura GRMP expuesta en una vitrina de museo, iluminada con placas de autor" loading="lazy" decoding="async" data-lightbox>
-            <span class="gr-hab-cap"><span class="sub">01 — Museo</span><span class="tit">La vitrina</span></span>
-          </div>
-        </figure>
-      </div>
-      <div class="gr-hab-grid">
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <img src="img/GRMP_ENTORNO_web.jpg" alt="GRMP en una estantería de madera con luz cálida de tarde, junto a una vela y libros de diseño" loading="lazy" decoding="async" data-lightbox>
-            <span class="gr-hab-cap"><span class="sub">02 — Casa</span><span class="tit">Luz de tarde</span></span>
-          </div>
-        </figure>
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <img src="img/GRMP_ENTORNO_3.jpg" alt="GRMP sobre un escritorio nórdico, entre libros de diseño de Phaidon" loading="lazy" decoding="async" data-lightbox>
-            <span class="gr-hab-cap"><span class="sub">03 — Estudio</span><span class="tit">El escritorio</span></span>
-          </div>
-        </figure>
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <img src="img/GRMP_ENTORNO_4.jpg" alt="GRMP en una balda con libros de KAWS y Eames y un objeto de latón" loading="lazy" decoding="async" data-lightbox>
-            <span class="gr-hab-cap"><span class="sub">04 — Lectura</span><span class="tit">Entre gigantes</span></span>
-          </div>
-        </figure>
-        <figure class="gx-reveal">
-          <div class="gr-card">
-            <img src="img/GRMP_ENTORNO_5.jpg" alt="GRMP en una estantería negra junto al libro Modern Vinyl" loading="lazy" decoding="async" data-lightbox>
-            <span class="gr-hab-cap"><span class="sub">05 — Colección</span><span class="tit">Vinilo moderno</span></span>
-          </div>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="gx-section sys" aria-label="El sistema del proyecto">
-    <div class="gx-inner">
-      <div class="gx-head gx-reveal">
-        <span class="gx-eyebrow">El sistema</span>
-        <h2 class="gx-title">Reto, respuesta y <em>paleta</em></h2>
-      </div>
-      <div class="sys-grid">
-        <div class="sys-block gx-reveal">
-          <h3>El reto</h3>
-          <p>Convertir un recuerdo íntimo — el abuelo — en objeto de deseo para una generación que colecciona hype. Sin caer en lo tierno, sin caer en lo genérico.</p>
-        </div>
-        <div class="sys-block gx-reveal">
-          <h3>La solución</h3>
-          <p>Una marca de autor completa: personaje con alma, escultura cuidada al detalle, drop limitado y un universo visual que une museo y calle. Del boceto a la vitrina.</p>
-        </div>
-        <ul class="sys-pal gx-reveal" aria-label="Paleta del proyecto">
-        <li style="--sw:#BC593E"><i aria-hidden="true"></i><span>Gorra</span><b>#BC593E</b></li>
-        <li style="--sw:#E9BA83"><i aria-hidden="true"></i><span>Piel</span><b>#E9BA83</b></li>
-        <li style="--sw:#FAE3BE"><i aria-hidden="true"></i><span>Camiseta</span><b>#FAE3BE</b></li>
-        <li style="--sw:#A9AFBB"><i aria-hidden="true"></i><span>Puffer</span><b>#A9AFBB</b></li>
-        <li style="--sw:#626B85"><i aria-hidden="true"></i><span>Vaquero</span><b>#626B85</b></li>
-        <li style="--sw:#664122"><i aria-hidden="true"></i><span>Bastón</span><b>#664122</b></li>
-        <li style="--sw:#082534"><i aria-hidden="true"></i><span>Noche</span><b>#082534</b></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="gx-section gr-cta" aria-label="La web de The Grmps">
-    <div class="gx-inner gx-reveal">
-      <img class="gr-logo gr-cta-logo" src="img/GRMPS_LOGO.svg" alt="" aria-hidden="true" width="118" height="94">
-      <span class="gx-eyebrow">La marca, en vivo</span>
-      <br>
-      <a class="gr-cta-link" href="https://cesardelvallee.github.io/THE_GRMPS/" target="_blank" rel="noopener" data-cursor="Visitar">
-        Visita The&nbsp;Grmps
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-      </a>
-      <p class="gr-cta-note">El proyecto incluye la web de la marca: manifiesto, proceso, visor 3D y el drop 001 con las tres versiones del GRMP — Classic, Midnight y Dusk.</p>
-    </div>
-  </section>
-
-  <div class="proj-marquee" aria-hidden="true" style="--pm-bg:#05080e; --pm-fg:#e8e0d0; --pm-accent:#c4a882;">
-    <div class="proj-marquee-track">
-      <span class="seg">The Grmps <span class="dot">✦</span> Limited Edition <span class="dot">✦</span> Hand-Painted <span class="dot">✦</span> Numbered 001 / 100 <span class="dot">✦</span> No Restocks <span class="dot">✦</span> The Grmps <span class="dot">✦</span> Limited Edition <span class="dot">✦</span> Hand-Painted <span class="dot">✦</span> Numbered 001 / 100 <span class="dot">✦</span> No Restocks <span class="dot">✦</span> </span>
-      <span class="seg">The Grmps <span class="dot">✦</span> Limited Edition <span class="dot">✦</span> Hand-Painted <span class="dot">✦</span> Numbered 001 / 100 <span class="dot">✦</span> No Restocks <span class="dot">✦</span> The Grmps <span class="dot">✦</span> Limited Edition <span class="dot">✦</span> Hand-Painted <span class="dot">✦</span> Numbered 001 / 100 <span class="dot">✦</span> No Restocks <span class="dot">✦</span> </span>
+    <div class="top-bar-right">
+      <a href="contact.html" class="contact-link nav-link">CONTACT ME</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema día / noche" aria-pressed="false">
+      <svg class="tt-icon tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="tt-icon tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <span class="tt-knob" aria-hidden="true"></span>
+      </button>
     </div>
   </div>
 
+  <!-- Caso de estudio: cabecera y portada, ficha fija + láminas, siguiente
+       proyecto. Mismo layout en img1–img6 (css/case.css). -->
+  <main class="pj">
+    <header class="pj-hero">
+      <div class="pj-head">
+        <p class="pj-kicker"><b>06</b><span>/ 06</span><i></i><span>TFG · Branding · Art Toys</span></p>
+        <h1 class="pj-title"><span class="pj-line"><span>The Grmps</span></span></h1>
+      </div>
+      <figure class="pj-cover" style="--bg:#0b1520; --fit:cover">
+        <div class="pj-cover-in">
+          <div class="pj-cover-px">
+            <video src="video/VIDEOSHOOT_GRMPS.mp4" poster="img/FILM_POSTER_GRMP_web.jpg" autoplay muted loop playsinline preload="auto" data-play aria-label="The Grmps — film del drop 001"></video>
+          </div>
+          <button type="button" class="pj-sound" aria-pressed="false" aria-label="Activar sonido"><i aria-hidden="true"><b></b><b></b><b></b></i>Sonido</button>
+        </div>
+      </figure>
+    </header>
 
-  <footer class="site-footer">
-    <div class="sf-inner">
-      <p class="sf-eyebrow">¿Buscas un diseñador para tu equipo?</p>
-      <a href="mailto:cesardelvallefuentes@gmail.com" class="sf-mail">cesardelvallefuentes@gmail.com</a>
-      <nav class="sf-nav">
-        <a href="index.html">Inicio</a>
-        <a href="about.html">Sobre mí</a>
-        <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
-      </nav>
-      <p class="sf-copy">© 2025 César Del Valle · Graphic Designer</p>
-    </div>
+    <section class="pj-body" aria-label="Sobre el proyecto">
+      <aside class="pj-info">
+        <p class="pj-label"><i></i>Sobre el proyecto</p>
+        <p class="pj-lead">Trabajo de Fin de Grado desarrollado de principio a fin: naming e identidad, personaje, escultura 3D, packaging, film y web. <strong>The Grmps</strong> eleva el legado de los abuelos a <strong>art toy de colección</strong> —abuelos con mucho flow, en el lenguaje del streetwear— para la generación que colecciona figuras y drops.</p>
+        <dl class="pj-facts">
+          <div><dt>Rol</dt><dd>Brand &amp; 3D Designer</dd></div>
+          <div><dt>Proyecto</dt><dd>TFG — marca completa</dd></div>
+          <div><dt>Piezas</dt><dd>Figura · Packaging · Film · Web</dd></div>
+          <div><dt>Edición</dt><dd>Drop 001 · 100 piezas</dd></div>
+        </dl>
+        <a class="pj-ext" href="https://cesardelvallee.github.io/THE_GRMPS/" target="_blank" rel="noopener" data-cursor="Visitar"><span class="pj-ico" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1.6 8.4L8.4 1.6M3 1.6h5.4V7"/></svg><svg viewBox="0 0 10 10"><path d="M1.6 8.4L8.4 1.6M3 1.6h5.4V7"/></svg></span>Visita la web de The Grmps</a>
+        <p class="pj-now" aria-hidden="true"><span class="pj-now-n"><span>01</span></span><span class="pj-now-of">/ 05</span><span class="pj-now-t"><span>Del trazo al vinilo</span></span></p>
+      </aside>
+      <div class="pj-gallery">
+        <figure class="pj-plate" data-cap="Del trazo al vinilo">
+          <div class="pj-row">
+            <div class="pj-item" style="--r:0.995; --bg:#ffffff"><div class="pj-media"><img src="img/GRMP_ILUSTRACION_web.jpg" alt="The Grmps — ilustración original del GRMP" loading="lazy" decoding="async" data-lightbox></div></div>
+            <div class="pj-item" style="--r:1; --bg:#ffffff"><div class="pj-media"><img src="img/grmp_34_front_web.jpg" alt="The Grmps — render 3D del GRMP en tres cuartos" loading="lazy" decoding="async" data-lightbox></div></div>
+          </div>
+          <figcaption class="pj-cap"><b>01</b>Del trazo al vinilo</figcaption>
+        </figure>
+        <figure class="pj-plate" data-cap="La figura en 3D">
+          <div class="pj-row">
+            <div class="pj-item" style="--r:1.6; --bg:#0b1a26"><div class="pj-media"><model-viewer id="gr-model" src="assets/GRMP_optimized.glb" camera-controls disable-zoom disable-pan auto-rotate auto-rotate-delay="1800" rotation-per-second="24deg" interaction-prompt="none" touch-action="pan-y" loading="lazy" reveal="auto" alt="Modelo 3D interactivo de la figura GRMP" data-cursor="Gira"></model-viewer><span class="gr-dizzy" aria-hidden="true">El GRMP está mareado · dale un respiro 😵‍💫</span><span class="pj-hint" aria-hidden="true">← Arrastra para girar →</span></div></div>
+          </div>
+          <figcaption class="pj-cap"><b>02</b>La figura en 3D</figcaption>
+        </figure>
+        <figure class="pj-plate" data-cap="Drop 001 · Cien piezas">
+          <div class="pj-row">
+            <div class="pj-item" style="--r:0.8; --bg:#0b1520"><div class="pj-media"><img src="img/GRMP_PACKAGING_web.jpg" alt="Packaging de The Grmps abierto: caja rígida azul noche con la figura en espuma troquelada" loading="lazy" decoding="async" data-lightbox></div></div>
+            <div class="pj-item" style="--r:0.917; --bg:#0b1520"><div class="pj-media"><img src="img/GRMP_PKG_open_front_web.jpg" alt="Packaging de The Grmps abierto de frente, con la figura dentro" loading="lazy" decoding="async" data-lightbox></div></div>
+            <div class="pj-item" style="--r:1.217; --bg:#0b1520"><div class="pj-media"><img src="img/GRMP_PKG_hero_web.jpg" alt="Caja cerrada de The Grmps junto a la figura GRMP" loading="lazy" decoding="async" data-lightbox></div></div>
+          </div>
+          <figcaption class="pj-cap"><b>03</b>Drop 001 · Cien piezas</figcaption>
+        </figure>
+        <figure class="pj-plate" data-cap="La vitrina">
+          <div class="pj-row">
+            <div class="pj-item" style="--r:1.79"><div class="pj-media"><img src="img/GRMP_EXPO.jpg" alt="Figura GRMP expuesta en una vitrina de museo, iluminada con placas de autor" loading="lazy" decoding="async" data-lightbox></div></div>
+          </div>
+          <figcaption class="pj-cap"><b>04</b>La vitrina</figcaption>
+        </figure>
+        <figure class="pj-plate" data-cap="En casa">
+          <div class="pj-row">
+            <div class="pj-item" style="--r:1.5"><div class="pj-media"><img src="img/GRMP_ENTORNO_web.jpg" alt="GRMP en una estantería de madera con luz cálida de tarde" loading="lazy" decoding="async" data-lightbox></div></div>
+            <div class="pj-item" style="--r:1.79"><div class="pj-media"><img src="img/GRMP_ENTORNO_5.jpg" alt="GRMP en una estantería negra junto al libro Modern Vinyl" loading="lazy" decoding="async" data-lightbox></div></div>
+          </div>
+          <figcaption class="pj-cap"><b>05</b>En casa</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <nav class="pj-next" aria-label="Siguiente proyecto">
+      <a class="pj-next-link" href="img1.html">
+        <span class="pj-next-k"><span>Volver al primero</span><span><b>01</b> / 06</span></span>
+        <span class="pj-next-t"><span>Coffee <span class="pj-nb">Rituals<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></span></span>
+      </a>
+      <div class="pj-next-media" aria-hidden="true"><div><img src="img/CAFE_BOLSAS_web.jpg" alt="" loading="lazy" decoding="async"></div></div>
+    </nav>
+  </main>
+
+  <footer class="pj-foot">
+    <a class="pj-mail" href="mailto:cesardelvallefuentes@gmail.com">cesardelvallefuentes@gmail.com</a>
+    <nav aria-label="Redes">
+      <a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>
+    </nav>
+    <span>© 2025 César del Valle</span>
   </footer>
 
-  <nav class="proj-next" aria-label="Siguiente proyecto" style="--ph-ink:#05080e; --ph-bg:#e8e0d0; --pn-ink:#2d4a1f; --pn-accent:#a87d22;">
-    <div class="pn-wash" aria-hidden="true"></div>
-    <div class="pn-media" aria-hidden="true"><img src="img/CAFE_PACKAGING_EXTERIOR_web.png" alt="" loading="lazy" decoding="async"></div>
-    <a class="proj-next-link" href="img1.html">
-      <span>
-        <span class="proj-next-eyebrow">Volver al primero</span>
-        <span class="proj-next-title"><span class="pn-num">01</span>Coffee Rituals</span>
-      </span>
-      <span class="proj-next-arrow" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-  </nav>
-
-
   <div id="egg-cursor"></div>
-  <script src="script.js?v=97"></script>
-  <script>
-    document.getElementById('home-link').addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location.href = 'index.html';
-    });
-
-    /* Reveal de las secciones. Sin observer o con reduced-motion → visible. */
-    (function() {
-      var items = document.querySelectorAll('.gx-reveal');
-      if (!items.length) return;
-      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce || !('IntersectionObserver' in window)) return;
-      items.forEach(function(el) { el.classList.add('gx-hidden'); });
-      var io = new IntersectionObserver(function(entries) {
-        entries.forEach(function(en) {
-          if (en.isIntersecting) { en.target.classList.remove('gx-hidden'); io.unobserve(en.target); }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
-      items.forEach(function(el) { io.observe(el); });
-    })();
-  </script>
+  <script src="script.js?v=104"></script>
 </body>
 </html>

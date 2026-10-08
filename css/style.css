@@ -2210,9 +2210,12 @@ body.theme-light .top-logo { color: #6b5d47; }
 @media (max-width: 768px) {
   .top-bar-side .contact-link { font-size: 0.65rem; }
   .top-logo svg { height: 50px; }
+  /* con logo, la barra baja un poco: el logo no toca el borde de arriba y
+     los textos de los lados quedan a su misma altura */
+  .top-bar:has(.top-logo) { height: 42px; padding-top: 14px; }
 }
 @media (max-width: 480px) {
-  .top-logo svg { height: 44px; margin-top: 8px; }
+  .top-logo svg { height: 44px; }
 }
 
 /* ================================================
@@ -4024,7 +4027,7 @@ body.menu-open .menu-btn .mb-label > span + span { transform: none; }
   visibility: hidden;
   pointer-events: none;
   /* se oculta cuando la última persiana ha terminado de recogerse */
-  transition: visibility 0s linear 0.8s;
+  transition: visibility 0s linear 0.84s;
 }
 body.menu-open #site-menu {
   visibility: visible;
@@ -4039,7 +4042,11 @@ html.menu-open { overflow: hidden; }
 .menu-btn { box-sizing: border-box; }
 
 /* persianas: capa A (beige) debajo, capa B (tinta) encima.
-   Abrir: A sube y B la sigue. Cerrar: B se recoge y luego A. */
+   Abrir: crecen desde abajo, primero A y luego B, de izquierda a derecha.
+   Cerrar: el camino inverso, como rebobinar la apertura: bajan primero B
+   y luego A, de derecha a izquierda (--r es el índice al revés). El origen
+   es siempre el de abajo, así que si se interrumpe a medias, cada persiana
+   vuelve desde donde está, sin saltos. */
 .sm-sh {
   position: absolute;
   inset: 0;
@@ -4051,17 +4058,16 @@ html.menu-open { overflow: hidden; }
   margin-right: -1px;
   background: #c7b299;
   transform: scaleY(0);
-  transform-origin: top;
+  transform-origin: bottom;
   transition: transform 0.46s cubic-bezier(0.76, 0, 0.24, 1);
-  transition-delay: calc(200ms + var(--c) * 30ms);
+  transition-delay: calc(210ms + var(--r) * 30ms);
 }
 .sm-sh-b i {
   background: #100f0d;
-  transition-delay: calc(60ms + var(--c) * 30ms);
+  transition-delay: calc(90ms + var(--r) * 30ms);
 }
 body.menu-open .sm-sh i {
   transform: scaleY(1);
-  transform-origin: bottom;
   transition-duration: 0.58s;
   transition-delay: calc(var(--c) * 40ms);
 }

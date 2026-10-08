@@ -68,10 +68,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   const isMobileDevice = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 'ontouchstart' in window;
 
-  // el logo de la cabecera de la home: ya estás en la home, así que en
-  // vez de recargar, la cara saluda (se ladea y parpadea)
+  // el logo de la cabecera: en la home ya estás en la home, así que en vez
+  // de recargar la cara saluda (se ladea y parpadea). En los proyectos es un
+  // enlace normal a la home.
   const topLogo = document.querySelector('.top-logo');
-  if (topLogo) {
+  if (topLogo && document.body.classList.contains('home-page')) {
     topLogo.addEventListener('click', (e) => {
       e.preventDefault();
       topLogo.classList.remove('is-hi');
@@ -757,6 +758,13 @@ document.addEventListener('DOMContentLoaded', function() {});
     syncToggle(isDay);
     try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
     if (!el) return;
+    // sin GSAP (páginas de proyecto): el navegador funde toda la página de un
+    // tema al otro (View Transitions); si no lo soporta, el cambio es directo
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (animate && !window.gsap && document.startViewTransition && !calm) {
+      document.startViewTransition(function() { paint(isDay); });
+      return;
+    }
     if (animate && window.gsap) {
       gsap.to(el, { opacity: 0, duration: 0.4, ease: 'power2.inOut', onComplete: function() {
         paint(isDay);
@@ -1768,7 +1776,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var html = '';
     ['a', 'b'].forEach(function(layer) {
       html += '<div class="sm-sh sm-sh-' + layer + '" aria-hidden="true">';
-      for (var i = 0; i < COLS; i++) html += '<i style="--c:' + i + '"></i>';
+      // --c: orden al abrir (izquierda → derecha); --r: al cerrar (al revés)
+      for (var i = 0; i < COLS; i++) html += '<i style="--c:' + i + ';--r:' + (COLS - 1 - i) + '"></i>';
       html += '</div>';
     });
 
@@ -2982,6 +2991,251 @@ try {
       look.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ')');
       requestAnimationFrame(loop);
     })(performance.now());
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   CASO DE ESTUDIO (img1–img6, css/case.css)
+   · Portada: empieza dentro de los márgenes y crece hasta llenar la
+     pantalla al bajar (scale desde arriba), con parallax dentro.
+   · Láminas: entran al verse (sube la pieza, la imagen se asienta).
+   · La ficha fija dice qué lámina estás viendo.
+   · Vídeos: solo se reproducen mientras se ven; botón de sonido en los
+     que tienen audio (suena uno a la vez).
+   · Siguiente proyecto: su imagen sigue al cursor.
+   Solo transform / opacity. Con movimiento reducido: sin crecer ni
+   parallax, láminas visibles y vídeos con controles en vez de autoplay.
+   ============================================================ */
+(function() {
+  function init() {
+    var page = document.querySelector('.pj');
+    if (!page) return;
+    var body = document.body;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    page.classList.add('pj-js');
+
+    /* --- portada --- */
+    var cover = page.querySelector('.pj-cover');
+    var frame = cover && cover.querySelector('.pj-cover-in');
+    var px = cover && cover.querySelector('.pj-cover-px');
+    var top0 = 1, H = 1, s0 = 1, vh = window.innerHeight;
+    function measure() {
+      vh = window.innerHeight;
+      if (!cover) return;
+      var gut = parseFloat(getComputedStyle(body).getPropertyValue('--pj-gut')) || 0;
+      var vw = document.documentElement.clientWidth;
+      s0 = (vw - 2 * gut) / vw;
+      top0 = Math.max(1, cover.getBoundingClientRect().top + window.scrollY);
+      H = cover.offsetHeight;
+    }
+
+    /* --- qué lámina estás viendo --- */
+    var plates = Array.prototype.slice.call(page.querySelectorAll('.pj-plate'));
+    var now = page.querySelector('.pj-now');
+    var nowN = now && now.querySelector('.pj-now-n > span');
+    var nowT = now && now.querySelector('.pj-now-t > span');
+    var cur = 0;
+    function nowUpdate() {
+      if (!nowN || !plates.length) return;
+      var mid = vh * 0.5, best = 0, bd = 1e9;
+      plates.forEach(function(pl, i) {
+        var r = pl.getBoundingClientRect();
+        var d = r.top > mid ? r.top - mid : (r.bottom < mid ? mid - r.bottom : 0);
+        if (d < bd) { bd = d; best = i; }
+      });
+      if (best === cur) return;
+      var dir = best > cur ? 1 : -1;
+      cur = best;
+      nowN.textContent = pad(best + 1);
+      nowT.textContent = plates[best].getAttribute('data-cap') || '';
+      if (!reduce && nowN.animate) {
+        [nowN, nowT].forEach(function(el) {
+          el.animate([{ transform: 'translateY(' + (dir * 105) + '%)' }, { transform: 'none' }], { duration: 450, easing: EASE });
+        });
+      }
+    }
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var y = window.scrollY;
+      if (frame) {
+        var p = reduce ? 0 : Math.min(1, Math.max(0, y / top0));
+        var e = p * p * (3 - 2 * p);                    // suave al empezar y al llegar
+        frame.style.transform = 'scale(' + (s0 + (1 - s0) * e).toFixed(4) + ')';
+        if (px && !reduce) {
+          var rel = (y + vh - top0) / (vh + H);         // 0 → 1 mientras se ve
+          if (rel > -0.1 && rel < 1.1) px.style.transform = 'translate3d(0,' + ((rel - 0.5) * 7).toFixed(2) + '%,0)';
+        }
+      }
+      // la barra superior gana fondo cuando la portada llega a ella
+      body.classList.toggle('pj-past', y > top0 - 72);
+      nowUpdate();
+    }
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function() { measure(); onScroll(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { measure(); onScroll(); });
+
+    /* --- láminas: entran al verse (escalonadas dentro de su fila) --- */
+    var items = page.querySelectorAll('.pj-item');
+    page.querySelectorAll('.pj-row').forEach(function(row) {
+      Array.prototype.forEach.call(row.children, function(it, i) { it.style.setProperty('--i', i); });
+    });
+    if (reduce || !('IntersectionObserver' in window)) {
+      items.forEach(function(it) { it.classList.add('is-in'); });
+    } else {
+      var io = new IntersectionObserver(function(es) {
+        es.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+      items.forEach(function(it) { io.observe(it); });
+    }
+
+    /* --- vídeos: solo mientras se ven --- */
+    var vids = page.querySelectorAll('video[data-play]');
+    function play(v) { var pr = v.play(); if (pr && pr.catch) pr.catch(function() {}); }
+    // la primera vez arrancan desde data-start (el spot de Loewe empieza en
+    // negro: así enlaza con el póster, que es ese mismo fotograma)
+    page.querySelectorAll('video[data-start]').forEach(function(v) {
+      var t = parseFloat(v.getAttribute('data-start')) || 0;
+      var go = function() { try { v.currentTime = t; } catch (e) {} };
+      if (v.readyState >= 1) go(); else v.addEventListener('loadedmetadata', go, { once: true });
+    });
+    if (reduce) {
+      vids.forEach(function(v) {
+        v.removeAttribute('autoplay');
+        v.pause();
+        if (!v.hasAttribute('data-key')) v.controls = true;
+      });
+    } else if ('IntersectionObserver' in window) {
+      var vio = new IntersectionObserver(function(es) {
+        // al salir de pantalla se pausa y se silencia (no vuelve a sonar solo)
+        es.forEach(function(en) {
+          if (en.isIntersecting) play(en.target);
+          else { en.target.pause(); en.target.muted = true; }
+        });
+      }, { threshold: 0.15 });
+      vids.forEach(function(v) { vio.observe(v); });
+    } else {
+      vids.forEach(play);
+    }
+
+    /* --- vídeo sin fondo negro: un canvas WebGL lo pinta y vuelve
+       transparente el negro (con una rampa para que los bordes no queden
+       recortados; el color del borde se recupera dividiendo por el alfa).
+       Sin WebGL, o si el navegador no deja leer el vídeo, se ve tal cual. --- */
+    page.querySelectorAll('video[data-key]').forEach(function(v) {
+      var media = v.parentElement;
+      var cv = media.querySelector('canvas');
+      var gl = null;
+      try { gl = cv && cv.getContext('webgl', { premultipliedAlpha: false, alpha: true, antialias: false }); } catch (e) {}
+      var plain = function() { media.classList.add('is-plain'); };
+      if (!gl) { plain(); return; }
+      var sh = function(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+      var pr = gl.createProgram();
+      gl.attachShader(pr, sh(gl.VERTEX_SHADER,
+        'attribute vec2 p;uniform vec4 c;varying vec2 uv;' +
+        'void main(){uv=c.xy+vec2(p.x*.5+.5,.5-p.y*.5)*c.zw;gl_Position=vec4(p,0.,1.);}'));
+      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER,
+        'precision mediump float;uniform sampler2D t;varying vec2 uv;' +
+        'void main(){vec4 s=texture2D(t,uv);float m=max(s.r,max(s.g,s.b));' +
+        'float a=smoothstep(.07,.42,m);gl_FragColor=vec4(min(s.rgb/max(a,.001),1.),a);}'));
+      gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { plain(); return; }
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(pr, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+      [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(function(k) { gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE); });
+      [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(function(k) { gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR); });
+      var uc = gl.getUniformLocation(pr, 'c');
+      var dead = false;
+      function size() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var w = Math.max(1, Math.round(cv.clientWidth * dpr)), h = Math.max(1, Math.round(cv.clientHeight * dpr));
+        if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+        gl.viewport(0, 0, w, h);
+        // recorte tipo cover: llena el canvas sin deformar
+        var va = (v.videoWidth || 16) / (v.videoHeight || 9), ca = w / h;
+        if (ca < va) gl.uniform4f(uc, (1 - ca / va) / 2, 0, ca / va, 1);
+        else gl.uniform4f(uc, 0, (1 - va / ca) / 2, 1, va / ca);
+      }
+      function draw() {
+        if (dead || v.readyState < 2) return;
+        try {
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v);
+        } catch (e) { dead = true; plain(); return; }   // p. ej. abierto como archivo (file://)
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+      v.addEventListener('loadeddata', function() { size(); draw(); });
+      v.addEventListener('seeked', draw);
+      window.addEventListener('resize', function() { size(); draw(); });
+      if (v.requestVideoFrameCallback) {
+        var onFrame = function() { draw(); if (!dead) v.requestVideoFrameCallback(onFrame); };
+        v.requestVideoFrameCallback(onFrame);
+      } else {
+        (function loop() { if (!v.paused) draw(); if (!dead) requestAnimationFrame(loop); })();
+      }
+      size();
+      draw();
+    });
+
+    /* --- sonido: uno a la vez --- */
+    page.querySelectorAll('.pj-sound').forEach(function(btn) {
+      var v = btn.parentElement.querySelector('video');
+      if (!v) return;
+      function sync() {
+        var on = !v.muted;
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', String(on));
+        btn.setAttribute('aria-label', on ? 'Silenciar' : 'Activar sonido');
+      }
+      btn.addEventListener('click', function() {
+        v.muted = !v.muted;
+        if (!v.muted) {
+          page.querySelectorAll('video').forEach(function(o) { if (o !== v) o.muted = true; });
+          play(v);
+        }
+        sync();
+      });
+      v.addEventListener('volumechange', sync);
+      sync();
+    });
+
+    /* --- siguiente proyecto: la imagen sigue al cursor --- */
+    var next = page.querySelector('.pj-next');
+    var nm = next && next.querySelector('.pj-next-media');
+    if (next && nm && fine) {
+      var tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+      var lerp = reduce ? 1 : 0.16;
+      var loop = function() {
+        x += (tx - x) * lerp;
+        y += (ty - y) * lerp;
+        nm.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+        raf = (Math.abs(tx - x) > 0.3 || Math.abs(ty - y) > 0.3) ? requestAnimationFrame(loop) : 0;
+      };
+      next.addEventListener('pointermove', function(e) {
+        var r = next.getBoundingClientRect();
+        tx = e.clientX - r.left - nm.offsetWidth * 0.5;
+        ty = e.clientY - r.top - nm.offsetHeight * 0.66;
+        if (!next.classList.contains('is-hover')) { x = tx; y = ty; next.classList.add('is-hover'); }
+        if (!raf) raf = requestAnimationFrame(loop);
+      });
+      next.addEventListener('pointerleave', function() { next.classList.remove('is-hover'); });
+    }
+
+    measure();
+    update();
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);

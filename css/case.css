@@ -1,0 +1,622 @@
+/* ============================================================
+   CASO DE ESTUDIO — sistema común de las páginas de proyecto
+   (img1–img6). Mismo layout para todas:
+
+   1. Cabecera: número y disciplina, y el nombre del proyecto en la
+      tipografía de PORTFOLIO (Clash Display), al mismo tamaño en las
+      seis: el del título más largo, justo de margen a margen.
+   2. Portada: la imagen o vídeo principal. Empieza dentro de los
+      márgenes y, al bajar, crece hasta ocupar toda la pantalla.
+   3. Cuerpo: a la izquierda una columna fija con el texto y la ficha
+      (y, debajo, qué lámina estás viendo); a la derecha pasan las
+      láminas de la galería. Las piezas de cada fila comparten altura
+      sin recortarse (cada una crece según su proporción, --r).
+   4. Siguiente proyecto en grande y un pie mínimo.
+
+   Fondo y colores: los de la home (#vanta-bg con sus manchas y el
+   tema día / noche que se elija allí). Cada proyecto solo aporta un
+   acento (--pj-accent, y --pj-accent-l para el tema claro).
+   El movimiento lo pone script.js (bloque "CASO DE ESTUDIO"); aquí
+   solo transform / opacity.
+   ============================================================ */
+
+body.pj-page {
+  --pj-gut: 50px;
+  --pj-gap: clamp(10px, 1.05vw, 16px);
+  --pj-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --pj-ink: #ece6da;
+  --pj-soft: rgba(236, 230, 218, 0.74);
+  --pj-mute: rgba(236, 230, 218, 0.48);
+  --pj-line: rgba(236, 230, 218, 0.14);
+  --pj-panel: rgba(236, 230, 218, 0.045);
+  --pj-title: #e6d6ad;
+  --pj-bar: #0e0d0b;
+  --pj-acc: var(--pj-accent, #c7b299);
+  /* el título más largo ("Ottolinger × Mykita") mide 8.66em de tinta en
+     Clash 600 con -0.03em: con este tamaño cabe justo de margen a margen */
+  --pj-tfs: min(calc((100vw - 2 * var(--pj-gut)) / 8.7), 24svh);
+  margin: 0;
+  background: #0e0d0b;
+  color: var(--pj-ink);
+  font-family: 'Inter', sans-serif;
+}
+/* en móvil #vanta-bg está oculto: el fondo claro lo pone el propio body
+   (el mismo degradado crema que la home en móvil) */
+body.theme-light.pj-page {
+  background: radial-gradient(125% 92% at 50% -8%, #f6f1e7 0%, #ece2d1 55%, #e1d5c0 100%);
+  background-attachment: fixed;
+  --pj-ink: #2a2620;
+  --pj-soft: rgba(42, 38, 32, 0.76);
+  --pj-mute: rgba(42, 38, 32, 0.54);
+  --pj-line: rgba(42, 38, 32, 0.16);
+  --pj-panel: rgba(42, 38, 32, 0.05);
+  --pj-title: #6b5d47;
+  --pj-bar: #efe7da;
+  --pj-acc: var(--pj-accent-l, var(--pj-accent, #8a6f4a));
+}
+
+.pj { position: relative; z-index: 1; }
+.pj *, .pj *::before, .pj *::after { box-sizing: border-box; }
+/* las reglas globales limitan las imágenes a 800px y las preparan todas
+   para transform: aquí no */
+.pj img, .pj video { display: block; max-width: none; will-change: auto; }
+.pj-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* la barra superior gana fondo en cuanto la portada pasa por debajo */
+body.pj-page .top-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 72px;
+  background: var(--pj-bar);
+  box-shadow: 0 1px 0 var(--pj-line);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--pj-ease);
+}
+body.pj-page.pj-past .top-bar::before { opacity: 1; }
+/* sin el relleno inferior de los enlaces, ATRÁS, el logo y CONTACT ME
+   quedan centrados en la misma línea */
+body.pj-page .top-bar-right,
+body.pj-page .top-bar-right .contact-link { padding-bottom: 0; }
+/* el logo, más discreto que en la home: aquí el protagonista es el proyecto */
+body.pj-page .top-logo svg { height: 42px; }
+/* a la derecha, CONTACT ME y el interruptor día / noche (en el extremo,
+   como en la home). La caja de la derecha deja de subrayarse entera: solo
+   el enlace lleva su subrayado */
+body.pj-page .top-bar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 26px;
+  overflow: visible;
+}
+body.pj-page .top-bar-right::after { content: none; }
+/* el cambio de tema funde la página entera (script.js, View Transitions) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---- 1. cabecera ---- */
+.pj-hero { padding-top: clamp(100px, 14.5vh, 136px); }
+.pj-head { padding: 0 var(--pj-gut); }
+.pj-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 clamp(14px, 2.2vh, 22px);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pj-mute);
+}
+.pj-kicker b { font-weight: 600; color: var(--pj-acc); font-variant-numeric: tabular-nums; }
+.pj-kicker i { width: 18px; height: 1px; background: currentColor; opacity: 0.7; }
+.pj-title {
+  margin: 0;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: var(--pj-tfs);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  color: var(--pj-title);
+  white-space: nowrap;
+}
+/* la línea sube desde detrás de su base (como PORTFOLIO en la home);
+   el relleno deja sitio a las descendentes (la g, la y) */
+.pj-line { display: block; overflow: hidden; padding: 0.05em 0 0.16em; margin: -0.05em 0 -0.16em; }
+.pj-line > span { display: block; }
+
+/* ---- 2. portada ---- */
+.pj-cover {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  margin: clamp(22px, 3.4vh, 36px) 0 0;
+}
+/* a sangre de verdad: script.js la encoge hasta los márgenes y la deja
+   crecer con el scroll (transform: scale desde arriba) */
+.pj-cover-in {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg, var(--pj-panel));
+  transform-origin: 50% 0;
+  transform: scale(0.93);
+}
+.pj-cover-px { position: absolute; inset: -5% 0; }
+/* --inset: aire alrededor de un producto recortado (sin panel detrás) */
+.pj-cover-px > img,
+.pj-cover-px > video {
+  box-sizing: border-box;
+  padding: var(--inset, 0);
+  width: 100%;
+  height: 100%;
+  object-fit: var(--fit, cover);
+  object-position: var(--pos, 50% 50%);
+}
+
+/* ---- 3. cuerpo: ficha fija + láminas ---- */
+.pj-body {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  column-gap: clamp(32px, 4.4vw, 80px);
+  padding: clamp(80px, 13vh, 150px) var(--pj-gut) 0;
+}
+.pj-info {
+  position: sticky;
+  top: clamp(96px, 13vh, 120px);
+  align-self: start;
+}
+.pj-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pj-mute);
+}
+.pj-label i { width: 18px; height: 1px; background: var(--pj-acc); }
+.pj-lead {
+  margin: 0;
+  max-width: 36ch;
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  font-weight: 300;
+  line-height: 1.62;
+  color: var(--pj-soft);
+  text-wrap: pretty;
+}
+.pj-lead strong { font-weight: 500; color: var(--pj-ink); }
+.pj-lead em { font-style: italic; }
+.pj-facts { margin: clamp(26px, 4vh, 40px) 0 0; max-width: 42ch; }
+.pj-facts > div {
+  display: grid;
+  grid-template-columns: 8.6em minmax(0, 1fr);
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--pj-line);
+}
+.pj-facts > div:last-child { border-bottom: 1px solid var(--pj-line); }
+.pj-facts dt {
+  padding-top: 0.25em;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pj-mute);
+}
+.pj-facts dd { margin: 0; font-size: 0.86rem; font-weight: 500; line-height: 1.45; color: var(--pj-ink); }
+
+/* enlace externo (la web de The Grmps): mismo diseño que el botón del menú */
+.pj-ext {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  height: 44px;
+  margin-top: 22px;
+  padding: 0 20px 0 16px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: none;
+  transition: transform 0.25s var(--pj-ease), background-color 0.4s var(--pj-ease), border-color 0.4s ease;
+}
+.pj-ext:active { transform: scale(0.96); }
+.pj-ext .pj-ico { position: relative; width: 10px; height: 10px; overflow: hidden; flex: none; }
+.pj-ext .pj-ico svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.5s var(--pj-ease);
+}
+.pj-ext .pj-ico svg + svg { transform: translate(-110%, 110%); }
+
+/* qué lámina estás viendo (lo actualiza script.js) */
+.pj-now {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-top: clamp(28px, 5vh, 56px);
+  color: var(--pj-mute);
+}
+.pj-now-n {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(1.6rem, 2.2vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--pj-ink);
+  font-variant-numeric: tabular-nums;
+}
+.pj-now-n > span, .pj-now-t > span { display: block; }
+.pj-now-of { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; }
+.pj-now-t {
+  display: block;
+  overflow: hidden;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pj-soft);
+}
+
+/* las láminas */
+.pj-gallery { display: flex; flex-direction: column; gap: var(--pj-gap); }
+.pj-plate { margin: 0; }
+.pj-row { display: flex; gap: var(--pj-gap); align-items: flex-start; }
+/* cada pieza crece según su proporción: misma altura en la fila, sin recortes */
+.pj-item { flex: var(--r) 1 0; min-width: 0; }
+.pj-media {
+  position: relative;
+  aspect-ratio: var(--r);
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--bg, var(--pj-panel));
+}
+.pj-media > img,
+.pj-media > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: var(--fit, cover);
+  object-position: var(--pos, 50% 50%);
+}
+/* vídeo sobre negro (la botella de Loewe): script.js lo pinta en el canvas
+   con WebGL y vuelve transparente el negro. El vídeo sigue reproduciéndose
+   debajo, casi invisible (con opacidad 0 algunos navegadores lo pausan). */
+.pj-keyed > video { opacity: 0.001; pointer-events: none; }
+.pj-keyed > canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/* sin WebGL: el vídeo tal cual; en oscuro el negro se funde con el fondo */
+.pj-keyed.is-plain > video { opacity: 1; mix-blend-mode: screen; }
+.pj-keyed.is-plain > canvas { display: none; }
+body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
+
+/* el pie se lee en la ficha fija; en móvil va debajo de cada lámina */
+.pj-cap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* entrada de cada lámina: sube y la imagen se asienta (script.js pone .is-in) */
+.pj-js .pj-item {
+  opacity: 0;
+  transform: translateY(44px);
+  transition: opacity 0.9s var(--pj-ease), transform 1.1s var(--pj-ease);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.pj-js .pj-media > img,
+.pj-js .pj-media > video,
+.pj-js .pj-media > canvas,
+.pj-js .pj-media > model-viewer {
+  transform: scale(1.1);
+  transition: transform 1.5s var(--pj-ease);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.pj-js .pj-item.is-in { opacity: 1; transform: none; }
+.pj-js .pj-item.is-in .pj-media > * { transform: none; }
+
+/* botón de sonido (vídeos con audio) */
+.pj-sound {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.36);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.92);
+  font: 600 0.6rem/1 'Inter', sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: transform 0.16s var(--pj-ease), background-color 0.3s var(--pj-ease);
+}
+.pj-sound:active { transform: scale(0.95); }
+/* tres barras: quietas en silencio, se mueven con sonido */
+.pj-sound i { display: flex; align-items: flex-end; gap: 2px; height: 10px; }
+.pj-sound i b { width: 2px; height: 100%; border-radius: 1px; background: currentColor; transform: scaleY(0.3); transform-origin: 50% 100%; }
+.pj-sound.is-on i b { animation: pj-eq 0.9s ease-in-out infinite alternate; }
+.pj-sound.is-on i b:nth-child(2) { animation-delay: -0.3s; }
+.pj-sound.is-on i b:nth-child(3) { animation-delay: -0.6s; }
+@keyframes pj-eq { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+
+/* figura 3D (The Grmps) */
+.pj-media > model-viewer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+  background: transparent;
+}
+.pj-hint {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 218, 0.6);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.gr-dizzy {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translate(-50%, -6px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: #ece6da;
+  font-size: 0.66rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--pj-ease), transform 0.3s var(--pj-ease);
+}
+.gr-dizzy.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- 4. siguiente proyecto + pie ---- */
+.pj-next {
+  position: relative;
+  margin-top: clamp(110px, 18vh, 200px);
+  border-top: 1px solid var(--pj-line);
+}
+.pj-next-link {
+  display: block;
+  padding: clamp(24px, 3.6vh, 36px) var(--pj-gut) clamp(46px, 8vh, 80px);
+  color: inherit;
+  text-decoration: none;
+  cursor: none;
+}
+.pj-next-k {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: clamp(16px, 2.6vh, 26px);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pj-mute);
+}
+.pj-next-k b { font-weight: 600; color: var(--pj-acc); font-variant-numeric: tabular-nums; }
+.pj-next-t {
+  display: flex;
+  align-items: center;
+  gap: 0.16em;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  /* un poco menor que la cabecera para que quepa también la flecha */
+  font-size: calc(var(--pj-tfs) * 0.92);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  color: var(--pj-title);
+  white-space: nowrap;
+}
+.pj-next-t > span { transition: transform 0.7s var(--pj-ease); }
+.pj-nb { white-space: nowrap; }
+.pj-next-t svg {
+  display: inline-block;
+  margin-left: 0.16em;
+  vertical-align: 0.04em;
+  width: 0.36em;
+  height: 0.36em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.7s var(--pj-ease);
+}
+/* la imagen del siguiente proyecto sigue al cursor (script.js mueve el
+   contenedor; aquí solo aparece y se asienta) */
+.pj-next-media {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: clamp(190px, 17vw, 270px);
+  aspect-ratio: 4 / 5;
+  pointer-events: none;
+}
+.pj-next-media > div {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  opacity: 0;
+  transform: scale(0.86) rotate(-4deg);
+  transition: opacity 0.3s var(--pj-ease), transform 0.5s var(--pj-ease);
+}
+.pj-next-media img { width: 100%; height: 100%; object-fit: cover; }
+.pj-next.is-hover .pj-next-media > div { opacity: 1; transform: none; }
+
+.pj-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 28px;
+  /* abajo deja sitio a los botones fijos (atrás y menú) */
+  padding: 22px var(--pj-gut) calc(96px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--pj-line);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pj-mute);
+}
+.pj-foot nav { display: flex; gap: 24px; }
+.pj-foot a { color: var(--pj-soft); text-decoration: none; cursor: none; transition: color 0.3s var(--pj-ease); }
+.pj-foot .pj-mail { text-transform: none; letter-spacing: 0.02em; font-size: 0.86rem; font-weight: 500; color: var(--pj-ink); }
+
+@media (hover: hover) and (pointer: fine) {
+  .pj-ext:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.34); }
+  .pj-ext:hover .pj-ico svg:first-child { transform: translate(110%, -110%); }
+  .pj-ext:hover .pj-ico svg + svg { transform: none; }
+  .pj-sound:hover { background: rgba(0, 0, 0, 0.56); }
+  .pj-next-link:hover .pj-next-t > span { transform: translateX(0.05em); }
+  .pj-next-link:hover .pj-next-t svg { transform: translateX(0.12em); }
+  .pj-foot a:hover { color: var(--pj-acc); }
+}
+
+/* ---- entrada de la página (tras la cortina, que dura 0.7 s) ---- */
+.pj-kicker { animation: pj-rise 0.9s var(--pj-ease) 0.32s both; }
+.pj-line > span { animation: pj-up 1.15s var(--pj-ease) 0.36s both; }
+.pj-cover-in { animation: pj-fade 1s var(--pj-ease) 0.5s both; }
+.pj-cover-px > * { animation: pj-settle 1.8s var(--pj-ease) 0.5s both; }
+@keyframes pj-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pj-up { from { transform: translateY(108%); } to { transform: none; } }
+@keyframes pj-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pj-settle { from { transform: scale(1.14); } to { transform: none; } }
+
+/* ---- tablet ---- */
+@media (max-width: 1024px) {
+  body.pj-page { --pj-gut: 20px; }
+  .pj-body { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+}
+
+/* ---- móvil: todo en una columna; las filas de varias piezas se
+   deslizan en horizontal y cada lámina lleva su pie debajo ---- */
+@media (max-width: 768px) {
+  body.pj-page { --pj-gut: 16px; --pj-tfs: 13.4vw; }
+  /* los dos lados de la barra, del mismo ancho: el logo queda justo en el
+     centro aunque ATRÁS sea más corto que CONTACT ME (las reglas globales
+     de móvil usan !important) */
+  body.pj-page .top-bar-left,
+  body.pj-page .top-bar-right { flex: 1 1 0 !important; }
+  body.pj-page .top-bar-center { flex: 0 0 auto !important; }
+  body.pj-page .top-bar-right { gap: 12px; }
+  body.pj-page .top-logo svg { height: 34px; }
+  .pj-hero { padding-top: calc(env(safe-area-inset-top, 0px) + 84px); }
+  .pj-title { white-space: normal; text-wrap: balance; }
+  /* --cover-mh: alto propio en móvil (p. ej. un producto recortado y
+     apaisado no necesita una portada vertical) */
+  .pj-cover { height: var(--cover-mh, min(100svh, 125vw)); margin-top: 20px; }
+  .pj-cover-px > img, .pj-cover-px > video { padding: 0; }
+  .pj-next-t { font-size: var(--pj-tfs); }
+  .pj-body { grid-template-columns: minmax(0, 1fr); row-gap: 44px; padding-top: 64px; }
+  .pj-info { position: static; }
+  .pj-now { display: none; }
+  .pj-gallery { gap: 28px; }
+  .pj-row {
+    --mh: 66vw;
+    margin: 0 calc(-1 * var(--pj-gut));
+    padding: 0 var(--pj-gut);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--pj-gut);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+  }
+  .pj-row::-webkit-scrollbar { display: none; }
+  .pj-row > .pj-item {
+    flex: 0 0 auto;
+    width: min(calc(var(--mh) * var(--r)), 86vw);
+    scroll-snap-align: start;
+  }
+  .pj-row > .pj-item:only-child { width: 100%; }
+  .pj-row > .pj-item:not(:only-child) .pj-media { aspect-ratio: auto; height: var(--mh); }
+  .pj-cap {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--pj-mute);
+  }
+  .pj-cap b { font-weight: 600; color: var(--pj-acc); }
+  /* en móvil el título puede partirse; la flecha va pegada a la última palabra */
+  .pj-next-t { display: block; white-space: normal; }
+  .pj-next-media { display: none; }
+  .pj-foot { justify-content: flex-start; padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---- movimiento reducido: sin desplazamientos, solo fundidos ---- */
+@media (prefers-reduced-motion: reduce) {
+  .pj-kicker, .pj-cover-in { animation: pj-fade 0.5s ease 0.3s both; }
+  .pj-line > span, .pj-cover-px > * { animation: none; }
+  .pj-js .pj-item { transform: none; transition: opacity 0.5s ease; }
+  .pj-js .pj-media > img, .pj-js .pj-media > video, .pj-js .pj-media > model-viewer { transform: none; transition: none; }
+  .pj-sound.is-on i b { animation: none; transform: scaleY(0.8); }
+  .pj-next-t > span, .pj-next-t svg, .pj-ext .pj-ico svg { transition: none; }
+}
