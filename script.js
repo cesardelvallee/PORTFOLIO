@@ -213,26 +213,101 @@ document.addEventListener('DOMContentLoaded', () => {
       .add(() => { if (window.initWhatsitIn) window.initWhatsitIn(); }, 2.1);
   }
 
-  function startInitialAnimations() { playHeroTitleAnimation(); }
+  // la entrada del hero se lanza una sola vez: la disparan la pantalla de
+  // carga o la vuelta a la home, y el 3D al terminar de cargar volvía a
+  // lanzarla (título y cards se repetían a mitad). El doble clic en el
+  // título la repite a propósito.
+  let heroStarted = false;
+  function startInitialAnimations() {
+    if (heroStarted) return;
+    heroStarted = true;
+    playHeroTitleAnimation();
+  }
   window.startInitialAnimations = startInitialAnimations;
 
   const modelViewer = document.querySelector('model-viewer');
   if (modelViewer) {
-    modelViewer.addEventListener('load', () => { if (!document.getElementById('loading-screen')) { playHeroTitleAnimation(); } });
-  } else { if (!document.getElementById('loading-screen')) { playHeroTitleAnimation(); } }
+    modelViewer.addEventListener('load', () => { if (!document.getElementById('loading-screen')) { startInitialAnimations(); } });
+  } else { if (!document.getElementById('loading-screen')) { startInitialAnimations(); } }
 
   const heroTitle = document.querySelector('.hero-title');
   if (heroTitle) { heroTitle.addEventListener('dblclick', playHeroTitleAnimation); }
 
+  /* Entrada de las cards: se reparten como cartas sobre la mesa. Suben
+     desde abajo una tras otra, inclinadas en 3D como lanzadas; se abren
+     en abanico (se ven los seis proyectos) y se recogen en el montón con
+     un pequeño rebote, la de arriba la última.
+     Va con Web Animations sobre el envoltorio de cada card, no sobre la
+     imagen (esa es de GSAP: arrastre y física): así corre en el
+     compositor y no se traba aunque el 3D o el título estén trabajando.
+     Una sola animación por card, sin encadenar nada en el hilo principal. */
+  let dealAnims = [];
   function animateStackedImages() {
-    const stackedImgs = document.querySelectorAll('.stacked-images .img-drag');
-    stackedImgs.forEach(img => { img.style.setProperty('opacity', '0', ''); img.style.setProperty('transform', (img.style.transform.replace(/scale\([^)]*\)/, '') + ' scale(0)').trim(), ''); });
-    stackedImgs.forEach((img, i) => {
-      const delayMs = 60 + i * 90;
-      gsap.delayedCall(delayMs / 1000, () => {
-        gsap.to(img, { scale: 1.06, opacity: 1, duration: 0.18, ease: 'back.out(1.3)', overwrite: true, onComplete: () => { gsap.to(img, { scale: 1, duration: 0.06, ease: 'power1.out' }); } });
-      });
+    const stack = document.querySelector('.stacked-images');
+    const imgs = Array.prototype.slice.call(document.querySelectorAll('.stacked-images .img-drag'));
+    if (!stack || !imgs.length) return;
+    dealAnims.forEach((a) => a.cancel());
+    dealAnims = [];
+    // al montón y en su orden (en la repetición, las que se habían arrastrado vuelven)
+    imgs.forEach((img) => {
+      gsap.killTweensOf(img, 'opacity,scale,x,y');
+      gsap.set(img, { opacity: 1, scale: 1, x: 0, y: 0 });
+      img.style.zIndex = '';
     });
+    const wraps = imgs.map((img) => img.parentElement);
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!wraps[0].animate) return;
+    stack.classList.add('is-dealing');
+    if (window._holdModel) window._holdModel('deal', true);   // el 3D espera quieto mientras se reparten
+    // el orden de las capas, fijo mientras dura: si no, la que aterriza
+    // antes salta por encima de las que aún vuelan
+    wraps.forEach((w, i) => { w.style.zIndex = String(i + 1); });
+    if (reduce) {
+      // sin desplazamientos: aparecen fundiéndose, una tras otra
+      dealAnims = wraps.map((w, i) => w.animate([{ opacity: 0 }, { opacity: 1 }],
+        { duration: 420, delay: i * 60, easing: 'ease-out', fill: 'backwards' }));
+    } else {
+      const n = wraps.length, mid = (n - 1) / 2;
+      const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+      const cw = imgs[0].offsetWidth || 280;
+      const gut = vw <= 768 ? 16 : 50;
+      const step = Math.min(165, Math.max(18, (vw - cw - 2 * gut) / (n - 1)));   // separación del abanico
+      const k = step / 165;
+      const DEAL = 860, STAG = 72;                       // reparto: cada card y el escalonado
+      const HOLD = (n - 1) * STAG + DEAL + 90;           // abanico completo + un respiro
+      const LIFT = 8 * cw / 282;                         // lo que suben de más antes de asentarse
+      const GSTAG = 34, GATHER = 560;                    // recogida
+      const T = (x, y, r, rx, s) => 'perspective(1000px) translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) +
+        'px,0) rotate(' + r.toFixed(2) + 'deg) rotateX(' + rx + 'deg) scale(' + s + ')';
+      dealAnims = wraps.map((w, i) => {
+        const base = gsap.getProperty(imgs[i], 'rotation') || 0;   // su giro en el montón
+        const d = i - mid;
+        const fx = d * step, fy = (d * d * 9 - 22) * k, fr = d * 5.5;   // abanico en arco
+        const delay = i * STAG;
+        const gs = HOLD + i * GSTAG - delay;               // cuándo empieza a recogerse esta
+        const total = gs + GATHER;
+        const fan = T(fx, fy, fr - base, 0, 1);
+        // salen justo por debajo de la pantalla, agrupadas como una baraja, y
+        // se abren al subir; llegan frenando, suben un pelín de más y se asientan
+        return w.animate([
+          { offset: 0, transform: T(fx * 0.4, vh * 0.5 + cw * 0.62, fr * 1.6 - base + (i % 2 ? 5 : -5), 24, 0.92), opacity: 0, easing: 'cubic-bezier(0.33, 1, 0.68, 1)' },
+          // opacas enseguida: semitransparentes y solapadas se ven turbias
+          { offset: 230 / total, opacity: 1 },
+          { offset: DEAL * 0.8 / total, transform: T(fx, fy - LIFT, fr - base, 0, 1), opacity: 1, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+          { offset: DEAL / total, transform: fan, opacity: 1, easing: 'linear' },
+          { offset: gs / total, transform: fan, opacity: 1, easing: 'cubic-bezier(0.62, 0, 0.3, 1.22)' },
+          { offset: 1, transform: T(0, 0, 0, 0, 1), opacity: 1 }
+        ], { duration: total, delay: delay, fill: 'backwards' });
+      });
+    }
+    Promise.all(dealAnims.map((a) => a.finished))
+      .then(() => {
+        // el orden vuelve a las imágenes (el arrastre sube al frente la que coges)
+        wraps.forEach((w) => { w.style.zIndex = ''; });
+        stack.classList.remove('is-dealing');
+        if (window._holdModel) window._holdModel('deal', false);
+      })
+      .catch(() => {});
   }
 
   document.body.style.cursor = 'none';
@@ -319,8 +394,11 @@ function cardsStep() {
       cardSpring(c, 's', 'vs', c.dragging ? 1.06 : (c.hover ? 1.03 : 1), 0.0005) &
       cardSpring(c, 'rx', 'vrx', tilt ? (0.5 - c.hy) * 14 : 0, 0.02) &
       cardSpring(c, 'ry', 'vry', tilt ? (c.hx - 0.5) * 14 : 0, 0.02);
-    gsap.set(c.img, { rotation: c.r, scale: c.s, rotationX: c.rx, rotationY: c.ry });
-    if (!done || moving) active = true;
+    // la que ya está quieta no se vuelve a escribir en cada fotograma
+    const settled = done && !moving;
+    if (!(settled && c.still)) gsap.set(c.img, { rotation: c.r, scale: c.s, rotationX: c.rx, rotationY: c.ry });
+    c.still = settled;
+    if (!settled) active = true;
   });
   cardsRunning = active;
   if (active) requestAnimationFrame(cardsStep);
@@ -336,7 +414,30 @@ function playSweep(c) {
     { opacity: 1, offset: 0.75 },
     { transform: 'translateX(30%)', opacity: 0 }
   ], { duration: 1100, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' });   // ease-out suave: cruza a ritmo casi constante
+  glossFollow(c);
 }
+/* El muñeco 3D deja de girar mientras se reparten o se tocan las cards
+   (solo donde gira solo: en escritorio lo mueve el cursor). Así el móvil no
+   tiene que pintar el 3D a la vez que mueve las cards. Vuelve a girar un
+   momento después de soltarlas. */
+const heroModel = document.querySelector('.model-3d-bg model-viewer');
+const modelHolds = new Set();
+let modelResume = 0;
+function holdModel(reason, on) {
+  if (!heroModel) return;
+  if (on) modelHolds.add(reason); else modelHolds.delete(reason);
+  clearTimeout(modelResume);
+  if (modelHolds.size) {
+    if (heroModel.hasAttribute('auto-rotate')) { heroModel.removeAttribute('auto-rotate'); heroModel.dataset.held = '1'; }
+  } else if (heroModel.dataset.held) {
+    modelResume = setTimeout(() => {
+      if (modelHolds.size) return;
+      heroModel.setAttribute('auto-rotate', '');
+      delete heroModel.dataset.held;
+    }, 600);
+  }
+}
+window._holdModel = holdModel;
 /* Título del proyecto encima de la card al pasar el cursor (solo con ratón).
    Una sola etiqueta para todas, con el estilo del botón del menú: cada
    fotograma se coloca sobre el borde de arriba de su card (que se mueve,
@@ -411,13 +512,13 @@ class DraggableImg {
     gsap.set(Image, { transformPerspective: 1000 });
 
     // destello: capa hermana de la imagen (un <img> no admite capas dentro)
-    // que copia su transform en cada fotograma (ver glossLoop)
+    // que copia su transform mientras pasa el destello (ver glossFollow)
     const gloss = document.createElement('span');
     gloss.className = 'card-gloss';
     gloss.setAttribute('aria-hidden', 'true');
     gloss.innerHTML = '<i class="cg-sweep"></i>';
     Image.after(gloss);
-    Object.assign(c, { gloss, sweep: gloss.firstChild, sweepAnim: null, gT: null, gO: null, gZ: null });
+    Object.assign(c, { gloss, sweep: gloss.firstChild, sweepAnim: null, gT: null, gO: null, gZ: null, z0: getComputedStyle(Image).zIndex });
     const placeGloss = () => {
       c.w = Image.offsetWidth; c.h = Image.offsetHeight;
       Object.assign(gloss.style, { left: Image.offsetLeft + 'px', top: Image.offsetTop + 'px', width: c.w + 'px', height: c.h + 'px' });
@@ -457,11 +558,13 @@ class DraggableImg {
       onPress() {
         Image.style.zIndex = proxy.style.zIndex; window._setGrabbingCursor(true);
         c.dragging = true; c.throwing = false; stackHover = false; kickCards();
+        holdModel(c, true);
         if (!cardFine) playSweep(c);                // en táctil no hay hover: el destello sale al tocarla
         hideTitle();                                // arrastrando, la etiqueta estorba
       },
       onDrag(e) {
         gsap.set(Image, {x: this.x, y: this.y});
+        if (!cardFine) return;                      // en táctil no hay cursor ni bocadillo que mover
         const evt = (e && e.type && e.clientX !== undefined) ? e : (window.event || {});
         if (evt.clientX !== undefined && evt.clientY !== undefined) {
           const eggCursor = document.getElementById('egg-cursor'); eggCursor.style.left = evt.clientX + 'px'; eggCursor.style.top = evt.clientY + 'px';
@@ -475,10 +578,11 @@ class DraggableImg {
       onRelease() {
         window._setGrabbingCursor(false); const dragmeBubble = document.getElementById('dragme-bubble'); dragmeBubble.style.opacity = '0'; dragmeBubble.style.visibility = 'hidden';
         c.dragging = false; kickCards();
+        holdModel(c, false);
         if (cardFine && Image.matches(':hover')) showTitle(c);
       },
-      onThrowUpdate() { gsap.set(Image, {x: this.x, y: this.y}); c.throwing = true; kickCards(); },
-      onThrowComplete() { c.throwing = false; kickCards(); },
+      onThrowUpdate() { gsap.set(Image, {x: this.x, y: this.y}); c.throwing = true; kickCards(); holdModel(c, true); },
+      onThrowComplete() { c.throwing = false; kickCards(); holdModel(c, false); },
       inertia: true
     })[0];
   }
@@ -486,18 +590,21 @@ class DraggableImg {
 
 let draggables = gsap.utils.toArray(".img-drag").map(el => new DraggableImg(el));
 
-/* Destello de las cards: cada capa copia transform, opacidad y z-index de
-   su imagen, así el destello viaja con la card (giro, inclinación, entrada). */
-(function glossLoop() {
-  for (let i = 0; i < cards.length; i++) {
-    const c = cards[i], st = c.img.style;
-    if (st.transform !== c.gT) { c.gT = st.transform; c.gloss.style.transform = st.transform; }
-    if (st.opacity !== c.gO) { c.gO = st.opacity; c.gloss.style.opacity = st.opacity; }
-    const z = st.zIndex || getComputedStyle(c.img).zIndex;
-    if (z !== c.gZ) { c.gZ = z; c.gloss.style.zIndex = z; }
-  }
-  requestAnimationFrame(glossLoop);
-})();
+/* Destello de las cards: la capa copia transform, opacidad y z-index de su
+   imagen solo mientras el destello está pasando (así viaja con la card:
+   giro, inclinación, arrastre). El resto del tiempo es invisible y no se toca:
+   antes se copiaba en cada fotograma y consultaba los estilos de las seis. */
+function syncGloss(c) {
+  const st = c.img.style;
+  if (st.transform !== c.gT) { c.gT = st.transform; c.gloss.style.transform = st.transform; }
+  if (st.opacity !== c.gO) { c.gO = st.opacity; c.gloss.style.opacity = st.opacity; }
+  const z = st.zIndex || c.z0;
+  if (z !== c.gZ) { c.gZ = z; c.gloss.style.zIndex = z; }
+}
+function glossFollow(c) {
+  syncGloss(c);
+  if (c.sweepAnim && c.sweepAnim.playState === 'running') requestAnimationFrame(() => glossFollow(c));
+}
 
 }
 
@@ -687,7 +794,8 @@ window.addEventListener('DOMContentLoaded', function() {
       zoom.style.transformOrigin = target.Ox.toFixed(2) + 'px ' + target.Oy.toFixed(2) + 'px';
       ld.classList.add('is-exit');
       revealMain();
-      const T = 1400, A = 0.94, t1 = 0.16, n = 12, p = 1.5;
+      // T: duración total (antes 1400 ms: él la quería más rápida)
+      const T = 850, A = 0.94, t1 = 0.14, n = 12, p = 1.4;
       const frames = [{ offset: 0, transform: 'scale(1)', easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
                       { offset: t1, transform: 'scale(' + A + ')' }];
       for (let i = 1; i <= n; i++) {
@@ -710,9 +818,9 @@ window.addEventListener('DOMContentLoaded', function() {
         }, 300);
         return;
       }
-      // 1) parpadea  2) entra por el brillo del ojo
+      // 1) parpadea  2) entra por el brillo del ojo (en cuanto acaba el parpadeo)
       setTimeout(() => ld.classList.add('is-blink'), 160);
-      setTimeout(enter, 700);
+      setTimeout(enter, 600);
     }
   }
 
@@ -3236,6 +3344,41 @@ try {
 
     measure();
     update();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   CONTACT ME (y SOBRE MÍ en el contacto) — trocea el texto del enlace
+   de la barra superior en letras para el hover del CSS (.cl-roll): ruedan
+   una tras otra y entra su copia en beige; al salir vuelven en orden
+   inverso (--i al entrar, --r al salir). El enlace conserva su nombre
+   accesible con aria-label.
+   ============================================================ */
+(function() {
+  function init() {
+    document.querySelectorAll('.top-bar .contact-link').forEach(function(a) {
+      if (a.classList.contains('cl-split')) return;
+      var text = a.textContent.replace(/\s+/g, ' ').trim();
+      if (!text) return;
+      a.setAttribute('aria-label', text.charAt(0) + text.slice(1).toLowerCase());
+      var roll = document.createElement('span');
+      roll.className = 'cl-roll';
+      roll.setAttribute('aria-hidden', 'true');
+      var chars = Array.from(text);
+      chars.forEach(function(ch, i) {
+        var s = document.createElement('span');
+        s.className = 'cl-ch';
+        s.style.setProperty('--i', i);
+        s.style.setProperty('--r', chars.length - 1 - i);
+        s.textContent = ch === ' ' ? ' ' : ch;   // un espacio normal se perdería entre letras
+        roll.appendChild(s);
+      });
+      a.textContent = '';
+      a.appendChild(roll);
+      a.classList.add('cl-split');
+    });
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
