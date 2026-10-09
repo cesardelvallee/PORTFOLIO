@@ -24,10 +24,10 @@
 (function () {
   'use strict';
 
-  /* Ranking global: Firebase → Configuración del proyecto → Tus apps → la
-     configuración de la app web (solo hacen falta estos dos datos). Vacío =
-     ranking local, en el navegador de cada uno. */
-  const FIREBASE = { projectId: '', apiKey: '' };
+  /* Ranking global (Firestore). Basta con el ID del proyecto de Firebase;
+     apiKey es opcional (las reglas de Firestore son las que protegen los
+     datos). Vacío = ranking local, en el navegador de cada uno. */
+  const FIREBASE = { projectId: 'break-time-4b68f', apiKey: '' };
 
   const trigger = document.querySelector('.gb');
   if (!trigger) return;
@@ -49,20 +49,26 @@
 
   /* ---------- ranking: Firestore por REST, o local ---------- */
   const Board = (() => {
-    const on = !!(FIREBASE.projectId && FIREBASE.apiKey);
+    const on = !!FIREBASE.projectId;
+    const qs = FIREBASE.apiKey ? '?key=' + encodeURIComponent(FIREBASE.apiKey) : '';
+    let warned = false;
     const base = 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(FIREBASE.projectId)
       + '/databases/(default)/documents';
     function post(path, body) {
       const ctl = typeof AbortController === 'function' ? new AbortController() : null;
       const t = setTimeout(() => { if (ctl) ctl.abort(); }, 7000);
-      return fetch(base + path + '?key=' + encodeURIComponent(FIREBASE.apiKey), {
+      return fetch(base + path + qs, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
         signal: ctl ? ctl.signal : undefined,
       }).then(r => {
         clearTimeout(t);
-        if (!r.ok) throw new Error('HTTP ' + r.status);
+        if (!r.ok) {
+          // una vez, para depurar: 403 = reglas de Firestore; 404 = ID mal o base de datos sin crear
+          if (!warned) { warned = true; console.warn('[Break Time] Firestore respondió ' + r.status + ': se usa el ranking local.'); }
+          throw new Error('HTTP ' + r.status);
+        }
         return r.json();
       }, e => { clearTimeout(t); throw e; });
     }
