@@ -2016,22 +2016,54 @@ html { scroll-behavior: smooth; }
   #dragme-bubble { display: none !important; }
 }
 
-/* Pista bajo el bocadillo: sin fondo, sigue al cursor junto al DRAG ME */
+/* Pista bajo el bocadillo: una etiqueta pequeña de cristal translúcido (el
+   mismo material que el título de la card), que se lee sobre cualquier card
+   sin taparla. Lleva el gesto
+   dibujado: el botón izquierdo del ratón hace doble clic de vez en cuando.
+   Sale un instante después que el bocadillo, como desplegándose de él (el
+   bocadillo pasa de display:none a block, y eso reinicia las animaciones). */
 .drag-hint {
   position: absolute;
   top: 100%;
   left: 50%;
-  transform: translateX(-50%);
-  margin-top: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  margin-top: 6px;
+  padding: 0 9px 0 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
   white-space: nowrap;
   font-family: 'Inter', sans-serif;
-  font-size: 0.66rem;
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: 0.02em;
-  color: rgba(236, 230, 218, 0.72);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
   pointer-events: none;
+  transform: translateX(-50%);
+  /* backwards: al acabar no queda sujetando nada, manda el estilo de arriba */
+  animation: dh-in 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s backwards;
+}
+.dh-ico { display: block; flex: none; width: 7px; height: 10px; color: #e6d6ad; }
+.dh-btn { opacity: 0.3; animation: dh-dbl 2.6s linear 0.9s infinite; }
+@keyframes dh-in {
+  from { opacity: 0; transform: translate(-50%, -4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes dh-fade { from { opacity: 0; } }
+@keyframes dh-dbl {
+  0%, 5%, 8%, 13%, 100% { opacity: 0.3; }
+  1%, 4%, 9%, 12% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drag-hint { animation-name: dh-fade; }
+  .dh-btn { animation: none; opacity: 0.8; }
 }
 
 
@@ -2066,7 +2098,6 @@ body.theme-light .top-bar-left:hover,
 body.theme-light .top-bar-right:hover,
 body.theme-light .contact-link:hover,
 body.theme-light .nav-link:hover { color: rgba(27,23,18,0.96); }
-body.theme-light .drag-hint { color: rgba(27,23,18,0.82); text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
 /* ---- Reproductor en tema claro: sin fondo, solo la línea del recuadro ---- */
 body.theme-light .vinyl-player {
   --vp-ink: #2a2620;

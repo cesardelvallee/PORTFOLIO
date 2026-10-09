@@ -37,7 +37,7 @@
   <meta name="twitter:description" content="Branding, packaging, 3D & motion. Selected work in visual identity and creative direction.">
   <meta name="twitter:image" content="https://cesardelvallee.github.io/PORTFOLIO/assets/og-image.jpg?v=2">
 
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=4">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=5">
 
   <!-- Structured data -->
   <script type="application/ld+json">
@@ -60,13 +60,14 @@
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net/" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=128">
+  <link rel="stylesheet" href="css/style.css?v=132">
   <link rel="stylesheet" href="css/dragme.css">
+  <link rel="stylesheet" href="css/game.css?v=5">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@500&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=4">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=5">
 </head>
 <body class="home-page">
 <div id="page-fx" aria-hidden="true"></div>
@@ -219,6 +220,41 @@
   </div>
 </div>
 
+<!-- minijuego: una consolita junto al reproductor (game.js). Su pantalla
+     muestra una partida en miniatura y al pulsarla se abre el juego -->
+<button type="button" class="gb" aria-label="Jugar a Break Time, un minijuego" aria-haspopup="dialog">
+  <span class="gb-body" aria-hidden="true">
+    <span class="gb-glass"></span>
+    <svg class="gb-shell" viewBox="0 0 46 66">
+      <filter id="gb-soft"><feGaussianBlur stdDeviation="0.35"/></filter>
+      <!-- lo de dentro, visto a través del plástico: placa, chips, altavoz y tornillos -->
+      <g class="gb-guts" filter="url(#gb-soft)">
+        <rect x="3" y="38.5" width="40" height="24" rx="2.5"/>
+        <rect x="20.5" y="33" width="5" height="7"/>
+        <rect x="15.5" y="40.6" width="9" height="5" rx="0.8"/>
+        <rect x="25.6" y="52.4" width="6" height="4" rx="0.6"/>
+        <circle cx="37.5" cy="58.6" r="4.6"/>
+        <circle cx="4.8" cy="40.4" r="1"/>
+        <circle cx="41.2" cy="40.4" r="1"/>
+        <circle cx="4.8" cy="60.6" r="1"/>
+      </g>
+      <rect class="gb-bezel" x="4" y="5" width="38" height="31" rx="3"/>
+      <circle class="gb-led" cx="5.6" cy="14" r="0.8"/>
+      <rect class="gb-ink" x="5.4" y="45" width="11.2" height="3.4" rx="0.7"/>
+      <rect class="gb-ink" x="9.3" y="41.1" width="3.4" height="11.2" rx="0.7"/>
+      <circle class="gb-ink gb-a" cx="36.4" cy="44.6" r="3.1"/>
+      <circle class="gb-ink gb-b" cx="29.6" cy="48.2" r="3.1"/>
+      <rect class="gb-ink gb-ss" x="15.6" y="57.2" width="5.2" height="1.6" rx="0.8" transform="rotate(-24 18.2 58)"/>
+      <rect class="gb-ink gb-ss" x="22.4" y="57.2" width="5.2" height="1.6" rx="0.8" transform="rotate(-24 25 58)"/>
+      <path class="gb-grill" d="M33.4 61.6l6.2-6.2M35.8 62.8l5.4-5.4M38.4 63.6l4-4"/>
+      <!-- brillo plano del plástico -->
+      <path class="gb-gloss" d="M0 7A7 7 0 0 1 7 0H17L0 25Z"/>
+    </svg>
+    <canvas class="gb-screen" width="64" height="48"></canvas>
+  </span>
+  <span class="gb-tip" aria-hidden="true">Break Time</span>
+</button>
+
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Draggable.min.js"></script>
 <script>
@@ -245,10 +281,11 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
-<script src="script.js?v=112"></script>
+<script src="script.js?v=115"></script>
+<script src="game.js?v=3" defer></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
-  <span id="dragme-bubble" class="img-drag-bubble">DRAG ME<span class="drag-hint">“double-click to open”</span></span>
+  <span id="dragme-bubble" class="img-drag-bubble">DRAG ME<span class="drag-hint"><svg class="dh-ico" viewBox="0 0 12 16" aria-hidden="true"><rect x="1.1" y="1.1" width="9.8" height="13.8" rx="4.9" fill="none" stroke="currentColor" stroke-width="1.3"/><path class="dh-btn" d="M6 6.2H1.1V6A4.9 4.9 0 0 1 6 1.1Z" fill="currentColor"/><path d="M6 1.4v4.8" stroke="currentColor" stroke-width="1.1"/></svg>Double-click to open</span></span>
   <div id="egg-cursor"></div>
 
 

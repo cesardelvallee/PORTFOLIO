@@ -84,23 +84,10 @@ body.pj-page .top-bar::before {
   transition: opacity 0.25s var(--pj-ease);
 }
 body.pj-page.pj-past .top-bar::before { opacity: 1; }
-/* sin el relleno inferior de los enlaces, ATRÁS, el logo y CONTACT ME
-   quedan centrados en la misma línea */
-body.pj-page .top-bar-right,
-body.pj-page .top-bar-right .contact-link { padding-bottom: 0; }
-/* el logo, más discreto que en la home: aquí el protagonista es el proyecto */
+/* la cabecera es la de la home (.top-bar-side, en style.css): contacto,
+   logo e interruptor. Solo cambia el logo, más discreto que en la home:
+   aquí el protagonista es el proyecto */
 body.pj-page .top-logo svg { height: 42px; }
-/* a la derecha, CONTACT ME y el interruptor día / noche (en el extremo,
-   como en la home). La caja de la derecha deja de subrayarse entera: solo
-   el enlace lleva su subrayado */
-body.pj-page .top-bar-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 26px;
-  overflow: visible;
-}
-body.pj-page .top-bar-right::after { content: none; }
 /* el cambio de tema funde la página entera (script.js, View Transitions) */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -550,13 +537,6 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
    deslizan en horizontal y cada lámina lleva su pie debajo ---- */
 @media (max-width: 768px) {
   body.pj-page { --pj-gut: 16px; --pj-tfs: 13.4vw; }
-  /* los dos lados de la barra, del mismo ancho: el logo queda justo en el
-     centro aunque ATRÁS sea más corto que CONTACT ME (las reglas globales
-     de móvil usan !important) */
-  body.pj-page .top-bar-left,
-  body.pj-page .top-bar-right { flex: 1 1 0 !important; }
-  body.pj-page .top-bar-center { flex: 0 0 auto !important; }
-  body.pj-page .top-bar-right { gap: 12px; }
   body.pj-page .top-logo svg { height: 34px; }
   .pj-hero { padding-top: calc(env(safe-area-inset-top, 0px) + 84px); }
   .pj-title { white-space: normal; text-wrap: balance; }
