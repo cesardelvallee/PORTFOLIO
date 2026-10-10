@@ -145,6 +145,7 @@ body.theme-light .gb {
   --bk-num: #1a1714;
   --bk-acc: #c7b299;
   --bk-fire: #d4a947;
+  --bk-well: rgba(243, 237, 225, 0.04);
   position: fixed;
   inset: 0;
   z-index: 8600;              /* sobre la home y el botón del menú; bajo la cortina y el cursor */
@@ -166,6 +167,7 @@ body.theme-light .gb {
   --bk-num: #f3ede1;
   --bk-acc: #8a6f4a;
   --bk-fire: #b8862b;
+  --bk-well: rgba(42, 38, 32, 0.05);
 }
 .bk *, .bk *::before, .bk *::after { box-sizing: border-box; }
 /* reseteo sin especificidad: los márgenes de cada pieza mandan */
@@ -386,8 +388,10 @@ body.theme-light .gb {
   opacity: 0;
   transform: translate(-50%, -50%);
 }
-.bk-toast span { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--bk-mute); }
+.bk-toast span { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; white-space: nowrap; color: var(--bk-mute); }
 .bk-toast b {
+  text-transform: uppercase;
+  white-space: nowrap;
   font-family: 'Clash Display', 'Inter', sans-serif;
   font-weight: 600;
   font-size: clamp(2.4rem, 10vw, 3.6rem);
@@ -617,6 +621,160 @@ body.theme-light .gb {
 /* con el juego abierto, el fondo de la home se queda quieto */
 body.bk-open .bg-blob { animation-play-state: paused; }
 
+/* ---- monedas: el contador de arriba (abre la tienda fuera de la partida) ---- */
+.bk-coins {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  margin-right: 2px;
+  padding: 0 12px 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--bk-line);
+  background: transparent;
+  color: var(--bk-ink);
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.2s var(--e), transform 0.16s var(--e);
+}
+.bk-coins:not(:disabled):active { transform: scale(0.95); }
+.bk-coins:focus-visible { outline: 1px solid var(--bk-ink); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .bk-coins:not(:disabled):hover { background: var(--bk-line); }
+}
+.bk-coin-ico { display: block; flex: none; width: 15px; height: 15px; overflow: visible; }
+.bk-coin-ico circle { fill: var(--bk-fire); }
+.bk-coin-ico .bk-coin-in { fill: none; stroke: var(--bk-bg); stroke-opacity: 0.5; stroke-width: 1.3; }
+/* un puntito cuando ya te llega para una bola */
+.bk-coins.has-new::after,
+.bk-shop-b.has-new::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bk-fire);
+  box-shadow: 0 0 0 2px var(--bk-bg);
+  animation: bk-ping 1.6s ease-in-out infinite alternate;
+}
+.bk-shop-b { position: relative; }
+@keyframes bk-ping { from { transform: scale(1); } to { transform: scale(0.7); } }
+
+/* la moneda que vuela del tablero al contador (game.js la anima) */
+.bk-fly {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--bk-fire);
+  box-shadow: inset 0 0 0 3px var(--bk-fire), inset 0 0 0 4.3px rgba(var(--bk-bg-rgb), 0.45);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ---- tienda de bolas ---- */
+.bk-title-s { margin-top: 8px; font-size: clamp(2.6rem, 11vw, 3.6rem); }
+.bk-wallet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bk-mute);
+}
+.bk-wallet .bk-coin-ico { width: 17px; height: 17px; }
+.bk-wallet b {
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--bk-ink);
+}
+.bk-skins {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: min(380px, 100%);
+  margin-top: 22px;
+}
+.bk-skin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 14px 14px;
+  border: 1px solid var(--bk-line);
+  border-radius: 18px;
+  transition: border-color 0.3s var(--e);
+}
+.bk-skin.is-on { border-color: var(--bk-ink); }
+.bk-skin.is-ready { border-color: var(--bk-fire); }
+.bk-skin-pv {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 104px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  background: var(--bk-well);
+  color: var(--bk-ink);
+}
+.bk-skin-pv > * { transition: transform 0.45s var(--e), opacity 0.3s var(--e); }
+.bk-skin-dot { display: block; width: 30px; height: 30px; border-radius: 50%; background: currentColor; }
+.bk-skin-logo { display: block; width: auto; height: 58px; overflow: visible; }
+.bk-skin-logo path { fill: currentColor; }
+.bk-skin.is-locked:not(.is-ready) .bk-skin-pv > * { opacity: 0.3; }
+@media (hover: hover) and (pointer: fine) {
+  .bk-skin:hover .bk-skin-pv > * { transform: translateY(-5px) rotate(-10deg); }
+}
+.bk-skin-n {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bk-ink);
+}
+.bk-skin-p { font-size: 0.7rem; color: var(--bk-mute); font-variant-numeric: tabular-nums; }
+/* lo que llevas ahorrado para esa bola */
+.bk-skin-bar {
+  display: block;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bk-line);
+}
+.bk-skin-bar i {
+  display: block;
+  height: 100%;
+  background: var(--bk-fire);
+  transform-origin: left center;
+  transition: transform 0.6s var(--e);
+}
+.bk-skin:not(.is-locked) .bk-skin-bar { visibility: hidden; }
+.bk-skin-b { width: 100%; height: 40px; margin-top: 4px; padding: 0 12px; font-size: 0.6rem; letter-spacing: 0.14em; }
+.bk-skin-b .bk-coin-ico { width: 12px; height: 12px; margin-right: -4px; }
+.bk-skin-b .bk-coin-ico .bk-coin-in { stroke: var(--bk-ink); }
+.bk-btn:disabled { cursor: default; opacity: 0.5; }
+.bk-btn.is-on:disabled { opacity: 1; }
+.bk-shop-note { max-width: 320px; margin-top: 16px; font-size: 0.74rem; line-height: 1.5; color: var(--bk-mute); }
+.bk-s-shop .bk-actions { margin-top: 18px; }
+/* opaca: desde el inicio, la muestra de bloques no se ve por detrás */
+.bk-s-shop { background: var(--bk-bg); }
+
 /* ---- móvil: pantalla completa ---- */
 @media (max-width: 640px) {
   .bk-panel {
@@ -632,6 +790,9 @@ body.bk-open .bg-blob { animation-play-state: paused; }
   }
   .bk-score { font-size: 1.45rem; }
   .bk-ibtn { width: 36px; height: 36px; cursor: pointer; }
+  .bk-coins { height: 32px; padding: 0 10px 0 8px; cursor: pointer; }
+  .bk-hud-r { gap: 6px; }
+  .bk-skin-pv { height: 92px; }
   .bk-screen { padding: 18px 20px calc(18px + env(safe-area-inset-bottom, 0px)); }
   .bk-s-start { padding-top: calc(var(--bk-gb, 200px) + 18px); }
   .bk-how { font-size: 0.8rem; }

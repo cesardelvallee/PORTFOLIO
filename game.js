@@ -10,9 +10,17 @@
      (su pantalla muestra una partida en miniatura; el juego crece desde
      ella al abrir y vuelve a meterse al cerrar): pones tu nombre, juegas
      y al perder sale el top 3.
-   · Extras: láseres (horizontal / vertical) que golpean toda su fila o
-     columna cada vez que una bola los cruza y bloques dobles; si una
-     ronda se alarga, se acelera sola y aparece «Recoger».
+   · Filas al azar (unas casi vacías, otras llenas, algunas «de respiro»)
+     y, si el tablero se llena, las siguientes vienen más ligeras: la
+     partida no se convierte en un muro. Bloques cuadrados y triangulares
+     (desvían en diagonal), con golpes variados y alguno doble.
+   · Objetos: +1 (una bola más), láser horizontal / vertical / en cruz
+     (golpea su fila, su columna o las dos), rebote (desvía la bola al
+     azar) y bomba (revienta lo que la rodea). Si una ronda se alarga, se
+     acelera sola y aparece «Recoger».
+   · Monedas: salen de vez en cuando; se guardan en el dispositivo y en la
+     tienda se cambian por bolas nuevas (la bola César, con la forma del
+     logo de la cabecera, cuesta 20).
    · Ranking global en Firebase (Firestore por su API REST, sin SDK).
      Mientras FIREBASE esté vacío, o si no hay red, ranking local.
    · Canvas 2D con la física a paso fijo (240 Hz): ninguna bola atraviesa
@@ -187,11 +195,53 @@
       },
       plus() { [0, 7, 12].forEach((s, i) => tone(784 * Math.pow(2, s / 12), 0.1, 'triangle', 0.3, i * 0.045)); },
       laser() { tone(1400, 0.16, 'sawtooth', 0.06, 0, 260); },
+      scatter() { tone(640, 0.09, 'triangle', 0.22, 0, 1500); },
+      bomb() { tone(160, 0.42, 'sawtooth', 0.2, 0, 38); tone(90, 0.5, 'triangle', 0.45, 0.01, 45); },
       shift() { tone(140, 0.16, 'sine', 0.35, 0, 90); },
+      coin() { tone(1318.5, 0.06, 'triangle', 0.3); tone(1975.5, 0.2, 'triangle', 0.24, 0.06); },
+      buy() { [0, 4, 7, 11, 14].forEach((q, i) => tone(659.25 * Math.pow(2, q / 12), 0.14, 'triangle', 0.32, i * 0.055)); },
       record() { [0, 4, 7, 12].forEach((s, i) => tone(523.25 * Math.pow(2, s / 12), 0.18, 'triangle', 0.35, i * 0.07)); },
       over() { tone(262, 0.25, 'triangle', 0.35); tone(196, 0.5, 'triangle', 0.35, 0.22); },
     };
   })();
+
+
+  /* ---------- monedas y bolas: se guardan en el dispositivo ---------- */
+  const SKINS = [
+    { id: 'classic', name: 'Clásica', price: 0 },
+    { id: 'logo', name: 'César', price: 20 },
+  ];
+  const Wallet = (() => {
+    const v = parseInt(store.get('cdv_bbtan_coins'), 10);
+    let coins = isFinite(v) && v > 0 ? v : 0;
+    let owned;
+    try { owned = JSON.parse(store.get('cdv_bbtan_owned')) || []; } catch (e) { owned = []; }
+    if (owned.indexOf('classic') === -1) owned.unshift('classic');
+    let skin = store.get('cdv_bbtan_skin') || 'classic';
+    if (owned.indexOf(skin) === -1) skin = 'classic';
+    const save = () => {
+      store.set('cdv_bbtan_coins', String(coins));
+      store.set('cdv_bbtan_owned', JSON.stringify(owned));
+      store.set('cdv_bbtan_skin', skin);
+    };
+    return {
+      get coins() { return coins; },
+      get skin() { return skin; },
+      owns: id => owned.indexOf(id) !== -1,
+      add(k) { coins += k; save(); },
+      buy(sk) {
+        if (owned.indexOf(sk.id) !== -1 || coins < sk.price) return false;
+        coins -= sk.price;
+        owned.push(sk.id);
+        skin = sk.id;
+        save();
+        return true;
+      },
+      use(id) { if (owned.indexOf(id) !== -1) { skin = id; save(); } },
+    };
+  })();
+  // la primera bola que ya te puedes comprar (o null)
+  const affordable = () => SKINS.find(sk => !Wallet.owns(sk.id) && Wallet.coins >= sk.price) || null;
 
 
   /* ---------- reglas ---------- */
@@ -222,12 +272,13 @@
   let W = 0, H = 0, DPR = 1, narrow = false;
   let cell = 0, gx = 0, gy = 0, floorY = 0, br = 5, speed = 600;
   let state = 'idle', prevState = 'aim', shiftT = 0, doomed = false;
-  let round = 1, ballsN = 1, gained = 0, broken = 0, brokeRound = 0, best = 0, bestToast = false;
+  let round = 1, ballsN = 1, gained = 0, broken = 0, brokeRound = 0, best = 0, bestToast = false, coinsGame = 0;
+  let screenNow = null, shopFrom = 'start', shownCoins = 0;
   let items = [], at = [];
   const shooter = { x: 0, nx: null };
   let balls = [], toFire = 0, fireT = 0, dirX = 0, dirY = -1, flyT = 0, tscale = 1, landed = 0;
   const aim = { on: false, a: Math.PI / 2, press: false, kind: '', sx: 0, sy: 0, mx: null, my: null };
-  let parts = [], pops = [], beams = [];
+  let parts = [], pops = [], beams = [], waves = [], shake = 0;
   let playerName = cleanName(store.get('cdv_bk_name') || '');
   const keys = { l: 0, r: 0 };
   let COL = {}, LIGHT = [0, 0, 0], DARK = [0, 0, 0];
@@ -240,6 +291,7 @@
   const ICON_X = '<svg viewBox="0 0 16 16"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>';
   const ICON_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v7M2 5.5l3 3 3-3"/></svg>';
   const ARROW = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5h7M5.5 2l3 3-3 3"/></svg>';
+  const ICON_COIN = '<svg class="bk-coin-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/><circle class="bk-coin-in" cx="8" cy="8" r="4.3"/></svg>';
   const BOARD = '<div class="bk-board"><p class="bk-board-h"><span>Top 3</span><span class="bk-scope">Global</span></p><ol class="bk-list"></ol></div>';
 
   function build() {
@@ -250,8 +302,8 @@
     root.setAttribute('aria-modal', 'true');
     root.setAttribute('aria-label', 'Minijuego: Break Time');
     const how = FINE
-      ? 'Un respiro entre proyecto y proyecto. Apunta con el ratón y haz clic: sale una ráfaga con todas tus bolas. Cada golpe resta 1 al bloque y cada <b>+1</b> que tocas es una bola más. Si un bloque llega abajo, se acabó.<span class="bk-keys">← → para afinar · Espacio lanza · P pausa</span>'
-      : 'Un respiro entre proyecto y proyecto. Arrastra el dedo <b>hacia abajo</b> para apuntar (como un tirachinas) y suelta. Cada golpe resta 1 al bloque y cada <b>+1</b> es una bola más. Si un bloque llega abajo, se acabó.';
+      ? 'Un respiro entre proyecto y proyecto. Apunta con el ratón y haz clic: sale una ráfaga con todas tus bolas. Cada golpe resta 1 al bloque y cada <b>+1</b> que tocas es una bola más. Si un bloque llega abajo, se acabó. Las <b>monedas</b> se guardan para la tienda.<span class="bk-keys">← → para afinar · Espacio lanza · P pausa</span>'
+      : 'Un respiro entre proyecto y proyecto. Arrastra el dedo <b>hacia abajo</b> para apuntar (como un tirachinas) y suelta. Cada golpe resta 1 al bloque y cada <b>+1</b> es una bola más. Si un bloque llega abajo, se acabó. Las <b>monedas</b> se guardan para la tienda.';
     root.innerHTML = ''
       + '<div class="bk-backdrop"></div>'
       + '<div class="bk-panel" tabindex="-1">'
@@ -262,6 +314,7 @@
       +     '</div>'
       +     '<div class="bk-hud-c"><span class="bk-best"></span></div>'
       +     '<div class="bk-hud-r">'
+      +       '<button type="button" class="bk-coins" aria-label="Monedas: 0. Abrir la tienda de bolas">' + ICON_COIN + '<b class="bk-coins-n">0</b></button>'
       +       '<button type="button" class="bk-ibtn bk-mute" aria-label="Silenciar" aria-pressed="false">' + ICON_ON + ICON_OFF + '</button>'
       +       '<button type="button" class="bk-ibtn bk-x" aria-label="Cerrar el juego">' + ICON_X + '</button>'
       +     '</div>'
@@ -295,7 +348,15 @@
       +       '<p class="bk-stats"></p>'
       +       BOARD
       +       '<p class="bk-rank"></p>'
-      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-again">Otra partida' + ARROW + '</button><button type="button" class="bk-btn bk-ghost bk-quit">Salir</button></div>'
+      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-again">Otra partida' + ARROW + '</button><button type="button" class="bk-btn bk-ghost bk-shop-b">Tienda</button><button type="button" class="bk-btn bk-ghost bk-quit">Salir</button></div>'
+      +     '</section>'
+      +     '<section class="bk-screen bk-s-shop" aria-label="Tienda de bolas">'
+      +       '<p class="bk-k">Tienda</p>'
+      +       '<h2 class="bk-title bk-title-s">Bolas</h2>'
+      +       '<p class="bk-wallet">' + ICON_COIN + '<span><b class="bk-wallet-n">0</b> monedas</span></p>'
+      +       '<div class="bk-skins"></div>'
+      +       '<p class="bk-shop-note">Las monedas salen de vez en cuando en el tablero: tócalas con una bola y se guardan para siempre.</p>'
+      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-ghost bk-back">Volver</button></div>'
       +     '</section>'
       +     '<p class="bk-sr" aria-live="polite"></p>'
       +   '</div>'
@@ -315,8 +376,11 @@
       startBoard: $('.bk-s-start .bk-board'), overBoard: $('.bk-s-over .bk-board'),
       final: $('.bk-final'), badge: $('.bk-badge'), stats: $('.bk-stats'), rank: $('.bk-rank'),
       resume: $('.bk-resume'), again: $('.bk-again'),
-      screens: { start: $('.bk-s-start'), pause: $('.bk-s-pause'), over: $('.bk-s-over') },
+      coins: $('.bk-coins'), coinsN: $('.bk-coins-n'), walletN: $('.bk-wallet-n'), skins: $('.bk-skins'),
+      shopBtn: $('.bk-shop-b'), back: $('.bk-back'),
+      screens: { start: $('.bk-s-start'), pause: $('.bk-s-pause'), over: $('.bk-s-over'), shop: $('.bk-s-shop') },
     });
+    buildShop();
     ui.input.value = playerName;
     ui.mute.setAttribute('aria-pressed', Sfx.isMuted() ? 'true' : 'false');
 
@@ -325,6 +389,9 @@
     ui.resume.addEventListener('click', resume);
     ui.again.addEventListener('click', () => { Sfx.init(); newGame(); });
     ui.recall.addEventListener('click', recall);
+    ui.coins.addEventListener('click', () => { if (!ui.coins.disabled) openShop(); });
+    ui.shopBtn.addEventListener('click', openShop);
+    ui.back.addEventListener('click', closeShop);
     ui.mute.addEventListener('click', () => {
       Sfx.init();
       ui.mute.setAttribute('aria-pressed', Sfx.toggle() ? 'true' : 'false');
@@ -430,6 +497,7 @@
     cell = 0;
     layout();
     attract();
+    syncCoins();
     setScreen('start');
     loadTop(ui.startBoard);
     void root.offsetWidth;
@@ -499,6 +567,7 @@
   }
 
   function setScreen(name) {
+    screenNow = name;
     Object.keys(ui.screens).forEach(k => {
       const el = ui.screens[k], on = k === name;
       el.classList.toggle('is-on', on);
@@ -508,6 +577,149 @@
   }
 
   function announce(t) { ui.live.textContent = t; }
+
+  /* ---------- monedas y tienda ---------- */
+  // el contador de arriba; con bump, la moneda que llega hace saltar el icono
+  function syncCoins(bump) {
+    if (bump) shownCoins = Math.min(Wallet.coins, shownCoins + 1); else shownCoins = Wallet.coins;
+    ui.coinsN.textContent = fmt(shownCoins);
+    ui.coins.setAttribute('aria-label', 'Monedas: ' + Wallet.coins + '. Abrir la tienda de bolas');
+    const ready = !!affordable();
+    ui.coins.classList.toggle('has-new', ready);
+    ui.shopBtn.classList.toggle('has-new', ready);
+    if (bump && !REDUCE && ui.coins.animate) {
+      ui.coins.firstChild.animate([{ transform: 'scale(1.45) rotate(-20deg)' }, { transform: 'none' }], { duration: 320, easing: EASE });
+    }
+  }
+  // la moneda vuela del tablero al contador
+  function flyCoin(x, y) {
+    if (REDUCE || !document.body.animate) { syncCoins(true); return; }
+    const r = cv.getBoundingClientRect(), k = r.width / (W || 1);
+    const sx = r.left + x * k, sy = r.top + y * k;
+    const t = ui.coins.firstChild.getBoundingClientRect();
+    const tx = t.left + t.width / 2, ty = t.top + t.height / 2;
+    const el = document.createElement('i');
+    el.className = 'bk-fly';
+    root.appendChild(el);
+    const at2 = (px, py, sc) => 'translate(' + px.toFixed(1) + 'px,' + py.toFixed(1) + 'px) translate(-50%,-50%) scale(' + sc + ')';
+    const an = el.animate([
+      { transform: at2(sx, sy, 1) },
+      { transform: at2(sx + (tx - sx) * 0.35, Math.min(sy, ty) - 36, 1.2), offset: 0.4 },
+      { transform: at2(tx, ty, 0.6) },
+    ], { duration: 640, easing: EASE });
+    an.onfinish = () => { el.remove(); syncCoins(true); };
+  }
+
+  // las tarjetas: la clásica (un círculo) y la del logo (el SVG de la cabecera)
+  function buildShop() {
+    const logo = document.querySelector('.top-logo svg');
+    SKINS.forEach(sk => {
+      const card = document.createElement('article');
+      card.className = 'bk-skin';
+      card.dataset.skin = sk.id;
+      const pv = document.createElement('span');
+      pv.className = 'bk-skin-pv';
+      pv.setAttribute('aria-hidden', 'true');
+      if (sk.id === 'logo' && logo) {
+        const svg = logo.cloneNode(true);
+        svg.removeAttribute('class');
+        svg.classList.add('bk-skin-logo');
+        pv.appendChild(svg);
+      } else {
+        const dot = document.createElement('i');
+        dot.className = 'bk-skin-dot';
+        pv.appendChild(dot);
+      }
+      const name = document.createElement('span');
+      name.className = 'bk-skin-n';
+      name.textContent = sk.name;
+      const meta = document.createElement('span');
+      meta.className = 'bk-skin-p';
+      const bar = document.createElement('span');
+      bar.className = 'bk-skin-bar';
+      bar.appendChild(document.createElement('i'));
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bk-btn bk-skin-b';
+      btn.addEventListener('click', () => pickSkin(sk, card));
+      card.append(pv, name, meta, bar, btn);
+      ui.skins.appendChild(card);
+    });
+  }
+  function renderShop() {
+    ui.walletN.textContent = fmt(Wallet.coins);
+    ui.skins.querySelectorAll('.bk-skin').forEach(card => {
+      const sk = SKINS.find(q => q.id === card.dataset.skin);
+      const owned = Wallet.owns(sk.id), on = Wallet.skin === sk.id, can = !owned && Wallet.coins >= sk.price;
+      const btn = card.querySelector('.bk-skin-b'), meta = card.querySelector('.bk-skin-p');
+      card.classList.toggle('is-on', on);
+      card.classList.toggle('is-locked', !owned);
+      card.classList.toggle('is-ready', can);
+      card.querySelector('.bk-skin-bar i').style.transform = 'scaleX(' + (owned ? 1 : Math.min(1, Wallet.coins / sk.price)).toFixed(3) + ')';
+      meta.textContent = owned ? (on ? 'En juego' : 'Tuya') : fmt(Math.min(Wallet.coins, sk.price)) + ' / ' + fmt(sk.price) + ' monedas';
+      btn.classList.toggle('bk-ghost', !can);
+      btn.classList.toggle('is-on', on);
+      btn.disabled = on || (!owned && !can);
+      if (on) btn.textContent = 'Equipada';
+      else if (owned) btn.textContent = 'Usar';
+      else if (can) btn.innerHTML = 'Comprar · ' + ICON_COIN + fmt(sk.price);
+      else btn.textContent = 'Te faltan ' + fmt(sk.price - Wallet.coins);
+      btn.setAttribute('aria-label', on ? 'Bola ' + sk.name + ': equipada'
+        : owned ? 'Usar la bola ' + sk.name
+        : can ? 'Comprar la bola ' + sk.name + ' por ' + sk.price + ' monedas'
+        : 'Bola ' + sk.name + ': te faltan ' + (sk.price - Wallet.coins) + ' monedas');
+    });
+  }
+  function pickSkin(sk, card) {
+    Sfx.init();
+    if (!Wallet.owns(sk.id)) {
+      const before = Wallet.coins;
+      if (!Wallet.buy(sk)) return;
+      Sfx.buy();
+      announce('Bola ' + sk.name + ' comprada y equipada');
+      // la tarjeta salta, la bola da una vuelta y el saldo baja contando
+      if (!REDUCE && card.animate) {
+        card.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.05)', offset: 0.35 }, { transform: 'scale(1)' }], { duration: 520, easing: EASE });
+        card.querySelector('.bk-skin-pv > *').animate([
+          { transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-14px) rotate(-200deg)', offset: 0.45 }, { transform: 'translateY(0) rotate(-360deg)' },
+        ], { duration: 720, easing: EASE });
+        const t0 = performance.now(), to = Wallet.coins;
+        const tick = now => {
+          const p = Math.min(1, (now - t0) / 600);
+          ui.walletN.textContent = fmt(Math.round(before + (to - before) * easeOut(p)));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    } else {
+      Wallet.use(sk.id);
+      Sfx.plus();
+      announce('Bola ' + sk.name + ' equipada');
+    }
+    const wn = ui.walletN.textContent;
+    renderShop();
+    if (!REDUCE) ui.walletN.textContent = wn;   // lo termina la cuenta atrás
+    syncCoins();
+    ui.back.focus({ preventScroll: true });
+  }
+  function openShop() {
+    if (PLAYING[state] || state === 'pause' || screenNow === 'shop') return;
+    shopFrom = screenNow || 'start';
+    renderShop();
+    setScreen('shop');
+    setTimeout(() => {
+      const b = ui.skins.querySelector('.bk-skin-b:not(:disabled)') || ui.back;
+      b.focus({ preventScroll: true });
+    }, 60);
+  }
+  function closeShop() {
+    if (screenNow !== 'shop') return;
+    setScreen(shopFrom);
+    setTimeout(() => {
+      const f = shopFrom === 'over' ? ui.shopBtn : (FINE ? (ui.input.value ? ui.go : ui.input) : ui.coins);
+      f.focus({ preventScroll: true });
+    }, 60);
+  }
 
   function toast(small, big) {
     ui.toast.firstChild.textContent = small;
@@ -576,7 +788,8 @@
     const k = e.key;
     if (k === 'Escape') {
       e.preventDefault();
-      if (state === 'pause') resume();
+      if (screenNow === 'shop') closeShop();
+      else if (state === 'pause') resume();
       else if (PLAYING[state]) pause();
       else close();
       return;
@@ -653,36 +866,67 @@
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
-  /* una fila nueva: bloques que aguantan n golpes (alguno doble), un +1 (a
-     veces dos) y, a partir de la ronda 4, a veces un láser. Calibrado con
-     partidas simuladas: una partida normal llega a la ronda 25-40. */
+  /* objetos especiales: desde qué ronda salen y con qué peso */
+  const SPECIALS = [
+    { kind: 'laserH', from: 3, w: 22 },
+    { kind: 'laserV', from: 3, w: 22 },
+    { kind: 'scatter', from: 5, w: 18 },
+    { kind: 'bomb', from: 6, w: 20 },
+    { kind: 'laserX', from: 9, w: 12 },
+  ];
+  function pickSpecial(n) {
+    const pool = SPECIALS.filter(x => n >= x.from);
+    let r = Math.random() * pool.reduce((a, x) => a + x.w, 0);
+    for (const x of pool) { r -= x.w; if (r < 0) return x.kind; }
+    return pool[0].kind;
+  }
+  /* una fila nueva. Cada columna tiene una probabilidad de bloque que sube
+     despacio con la ronda (así unas filas salen casi vacías y otras llenas)
+     y que baja si la mitad de abajo del tablero ya está cargada: la partida
+     aprieta, pero no se convierte en un muro. De vez en cuando, una fila de
+     respiro: un solo bloque, bolas extra y un objeto. Los bloques aguantan
+     la ronda en golpes; algunos menos, alguno el doble, y algunos son
+     triángulos. Calibrado con partidas simuladas: antes el tablero llegaba
+     a ~30 bloques hacia la ronda 40 y las partidas morían en la 27-30;
+     ahora la presión sube de ~6 a ~11-15 bloques y llegan a la 40-60. */
   function makeRow(n, r, delay) {
     const cols = shuffle([0, 1, 2, 3, 4, 5, 6]);
-    const count = clamp(1 + Math.floor(Math.random() * 3) + Math.floor(n / 12), 1, 6);
     const now = performance.now() / 1000 + (delay || 0);
+    const low = items.filter(k => k.kind === 'block' && !k.gone && k.r >= 4).length;
+    const p = clamp(0.3 + n * 0.006, 0.3, 0.58) * (low > 12 ? 0.6 : low > 7 ? 0.8 : 1);
+    const breather = n >= 8 && Math.random() < 0.1;
+    let count = 0;
+    for (let q = 0; q < 6; q++) if (Math.random() < p) count++;
+    count = breather ? 1 : Math.max(1, count);
     let i = 0;
-    for (; i < count; i++) {
-      const dbl = n >= 12 && Math.random() < 0.1;
-      const hp = n * (dbl ? 2 : 1);
-      items.push({ kind: 'block', c: cols[i], r, from: r, hp, max: hp, hit: 0, born: now + i * 0.035 });
+    const put = (o) => { o.c = cols[i]; o.r = r; o.from = r; o.born = now + i * 0.035; items.push(o); i++; };
+    while (i < count) {
+      let hp = n;
+      if (n >= 6 && Math.random() < 0.3) hp = Math.max(1, Math.round(n * (0.4 + Math.random() * 0.45)));
+      else if (n >= 12 && Math.random() < 0.09) hp = n * 2;
+      const tri = n >= 4 && Math.random() < 0.16 ? Math.floor(Math.random() * 4) : null;
+      put({ kind: 'block', hp, max: hp, hit: 0, tri });
     }
-    items.push({ kind: 'plus', c: cols[i], r, from: r, born: now + i * 0.035 });
-    i++;
-    if (i < COLS && Math.random() < 0.35) { items.push({ kind: 'plus', c: cols[i], r, from: r, born: now + i * 0.035 }); i++; }
-    if (n >= 4 && i < COLS && Math.random() < 0.22) {
-      items.push({ kind: Math.random() < 0.5 ? 'laserH' : 'laserV', c: cols[i], r, from: r, born: now + i * 0.035, flash: 0 });
-    }
+    put({ kind: 'plus' });
+    if (i < COLS && (breather || Math.random() < 0.25)) put({ kind: 'plus' });
+    const specials = n < 3 ? 0 : breather ? 2 : Math.random() < clamp(0.26 + n * 0.004, 0.26, 0.42) ? 1 : 0;
+    for (let q = 0; q < specials && i < COLS; q++) put({ kind: pickSpecial(n), flash: 0 });
+    // de vez en cuando, una moneda (siempre en las filas de respiro). Medido con
+    // partidas simuladas: ~10 en una partida de 50 rondas; la bola César, en 2-4
+    if (n >= 2 && i < COLS && (breather || Math.random() < 0.12)) put({ kind: 'coin' });
   }
 
 
   /* ---------- flujo de la partida ---------- */
   /* en la pantalla de inicio, tres filas de muestra hacen de cabecera:
-     bloques numerados, aros +1 y un láser, entrando en cascada */
+     bloques (alguno triangular: t0-t3 = la esquina que le falta), aros +1
+     y objetos (v láser, o bomba, s rebote), entrando en cascada */
   const DEMO = [
-    ['b', 'b', '+', '.', 'b', 'v', 'b'],
-    ['+', 'b', 'b', 'b', '.', 'b', '.'],
-    ['b', '.', '.', 'b', 'b', '.', '+'],
+    ['b', 'b', '+', 't2', 'b', 'v', 'b'],
+    ['+', 't1', 'b', 'b', 'o', 'b', 'c'],
+    ['b', '.', 's', 'b', 'b', 't3', '+'],
   ];
+  const DEMO_KIND = { v: 'laserV', o: 'bomb', s: 'scatter', c: 'coin' };
   function attract() {
     state = 'attract';
     round = 3;
@@ -690,13 +934,13 @@
     const now = performance.now() / 1000 + 0.15;
     DEMO.forEach((row, r) => row.forEach((k, c) => {
       const born = now + r * 0.1 + c * 0.04;
-      if (k === 'b') items.push({ kind: 'block', c, r, from: r, hp: 3 - r, max: 3 - r, hit: 0, born });
+      if (k === 'b' || k[0] === 't') items.push({ kind: 'block', c, r, from: r, hp: 3 - r, max: 3 - r, hit: 0, born, tri: k[0] === 't' ? +k[1] : null });
       else if (k === '+') items.push({ kind: 'plus', c, r, from: r, born });
-      else if (k === 'v') items.push({ kind: 'laserV', c, r, from: r, born, flash: 0 });
+      else if (DEMO_KIND[k]) items.push({ kind: DEMO_KIND[k], c, r, from: r, born, flash: 0 });
     }));
     rebuildAt();
     root.style.setProperty('--bk-gb', Math.round(gy + DEMO.length * cell) + 'px');
-    balls = []; parts = []; pops = []; beams = [];
+    balls = []; parts = []; pops = []; beams = []; waves = []; shake = 0;
     toFire = 0;
     ballsN = 1;
     shooter.x = gx + COLS * cell / 2;
@@ -706,13 +950,15 @@
     ui.hint.classList.remove('is-on');
     ui.recall.classList.remove('is-on');
     ui.speed.classList.remove('is-on');
+    ui.coins.disabled = false;
     setBest();
   }
 
   function newGame() {
     token++;
-    round = 1; ballsN = 1; gained = 0; broken = 0; bestToast = false;
-    items = []; balls = []; parts = []; pops = []; beams = [];
+    round = 1; ballsN = 1; gained = 0; broken = 0; bestToast = false; coinsGame = 0;
+    ui.coins.disabled = true;
+    items = []; balls = []; parts = []; pops = []; beams = []; waves = []; shake = 0;
     toFire = 0; landed = 0; flyT = 0; tscale = 1;
     shooter.x = gx + COLS * cell / 2;
     shooter.nx = null;
@@ -794,11 +1040,41 @@
     Sfx.shift();
   }
 
+  // la primera vez que aparece cada cosa, un rótulo dice qué hace
+  const NEWS = {
+    tri: ['Rebota en diagonal', 'Triángulo'],
+    laserH: ['Golpea toda la fila', 'Láser'],
+    laserV: ['Golpea toda la columna', 'Láser'],
+    laserX: ['Fila y columna a la vez', 'Cruz'],
+    scatter: ['Desvía la bola al azar', 'Rebote'],
+    bomb: ['Revienta lo que la rodea', 'Bomba'],
+    coin: ['Júntalas para la tienda', 'Moneda'],
+  };
+  let seen = null;
+  function news() {
+    if (!seen) { try { seen = JSON.parse(store.get('cdv_bbtan_seen')) || []; } catch (e) { seen = []; } }
+    for (const k of items) {
+      if (k.r !== 0 || k.gone) continue;
+      const id = k.kind === 'block' ? (k.tri != null ? 'tri' : null) : NEWS[k.kind] ? k.kind : null;
+      if (!id || seen.indexOf(id) !== -1) continue;
+      seen.push(id);
+      store.set('cdv_bbtan_seen', JSON.stringify(seen));
+      return NEWS[id];
+    }
+    return null;
+  }
+
   function nextRound() {
     round++;
     ui.score.textContent = fmt(round);
     makeRow(round, 0, 0.02);
     rebuildAt();
+    const fresh = news();
+    // la primera vez que llegas al precio de una bola, se avisa (una sola vez)
+    let told = [];
+    try { told = JSON.parse(store.get('cdv_bbtan_told')) || []; } catch (e) { told = []; }
+    let ready = affordable();
+    if (ready && told.indexOf(ready.id) !== -1) ready = null;
     state = 'aim';
     // la guía vuelve sola: al cursor (desde la nueva salida) o al ángulo del teclado
     if (aim.kind === 'mouse' && aim.mx != null) pointAt({ x: aim.mx, y: aim.my });
@@ -808,6 +1084,13 @@
       bestToast = true;
       toast('Nuevo récord', 'Ronda ' + round);
       Sfx.record();
+    } else if (ready) {
+      toast('Ya puedes comprarla en la tienda', 'Bola ' + ready.name);
+      told.push(ready.id);
+      store.set('cdv_bbtan_told', JSON.stringify(told));
+      Sfx.buy();
+    } else if (fresh) {
+      toast('Nuevo · ' + fresh[0], fresh[1]);
     } else if (round % 10 === 0) {
       toast('Ronda', String(round));
     }
@@ -840,7 +1123,10 @@
     const record = score > prev;
     if (record) { store.set(KEY_BEST, String(score)); best = score; }
     countUp(ui.final, score);
-    ui.stats.textContent = fmt(broken) + (broken === 1 ? ' bloque' : ' bloques') + ' · ' + fmt(ballsN) + (ballsN === 1 ? ' bola' : ' bolas');
+    ui.stats.textContent = fmt(broken) + (broken === 1 ? ' bloque' : ' bloques') + ' · ' + fmt(ballsN) + (ballsN === 1 ? ' bola' : ' bolas')
+      + (coinsGame ? ' · ' + fmt(coinsGame) + (coinsGame === 1 ? ' moneda' : ' monedas') : '');
+    ui.coins.disabled = false;
+    syncCoins();
     ui.badge.classList.remove('is-on');
     ui.badge.textContent = '';
     ui.rank.textContent = '';
@@ -931,6 +1217,7 @@
       for (const b of balls) {
         if (!b.done || b.merged) continue;
         const k = Math.min(1, dt * (b.back ? 9 : 14));
+        b.rot = (b.rot || 0) + (tx - b.x) * k / br;   // rueda hasta la pila
         b.x += (tx - b.x) * k;
         b.y += (floorY - br - b.y) * k;
         if (Math.abs(tx - b.x) < 0.8 && Math.abs(floorY - br - b.y) < 0.8) b.merged = true;
@@ -950,6 +1237,8 @@
       if (k.flash > 0) k.flash = Math.max(0, k.flash - dt * 3);
     }
     for (let i = beams.length - 1; i >= 0; i--) { beams[i].life -= dt * 4; if (beams[i].life <= 0) beams.splice(i, 1); }
+    for (let i = waves.length - 1; i >= 0; i--) { waves[i].life -= dt * 2.6; if (waves[i].life <= 0) waves.splice(i, 1); }
+    shake = Math.max(0, shake - dt * 30);
     stepParts(dt);
   }
 
@@ -959,6 +1248,7 @@
       if (b.done) continue;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
+      b.rot = (b.rot || 0) + (b.vx < 0 ? -9 : 9) * dt;
       if (b.x < L) { b.x = L; b.vx = Math.abs(b.vx); }
       else if (b.x > R) { b.x = R; b.vx = -Math.abs(b.vx); }
       if (b.y < T) { b.y = T; b.vy = Math.abs(b.vy); }
@@ -974,28 +1264,88 @@
     }
   }
 
+  // las tres esquinas de un bloque triangular (tri = la esquina del cuadrado
+  // que le falta: 0 arriba izq., 1 arriba der., 2 abajo der., 3 abajo izq.),
+  // en el sentido de las agujas del reloj
+  function triVerts(x0, y0, s, tri) {
+    const q = [[x0, y0], [x0 + s, y0], [x0 + s, y0 + s], [x0, y0 + s]];
+    q.splice(tri, 1);
+    return q;
+  }
+  // bola contra triángulo: punto más cercano y normal hacia fuera (o null)
+  function triContact(k, bx, by) {
+    const g = gapPx(), s = cell - 2 * g;
+    const v = triVerts(gx + k.c * cell + g, gy + k.r * cell + g, s, k.tri);
+    let bd = Infinity, px = 0, py = 0, ex = 0, ey = 0, inside = true;
+    for (let i = 0; i < 3; i++) {
+      const a = v[i], z = v[(i + 1) % 3];
+      const dx = z[0] - a[0], dy = z[1] - a[1];
+      if (dx * (by - a[1]) - dy * (bx - a[0]) < 0) inside = false;
+      const t = clamp(((bx - a[0]) * dx + (by - a[1]) * dy) / (dx * dx + dy * dy), 0, 1);
+      const qx = a[0] + t * dx, qy = a[1] + t * dy;
+      const d = (bx - qx) * (bx - qx) + (by - qy) * (by - qy);
+      if (d < bd) { bd = d; px = qx; py = qy; ex = dx; ey = dy; }
+    }
+    if (inside) {
+      const l = Math.hypot(ex, ey) || 1;
+      return { d2: -1, nx: ey / l, ny: -ex / l, px, py };
+    }
+    if (bd >= br * br) return null;
+    const d = Math.sqrt(bd) || 1e-6;
+    return { d2: bd, nx: (bx - px) / d, ny: (by - py) / d, px, py };
+  }
+  // ¿la bola (en x, y) toca este bloque? (para la guía de tiro)
+  function touches(k, x, y) {
+    if (k.tri != null) return !!triContact(k, x, y);
+    const g = gapPx(), s = cell - 2 * g, x0 = gx + k.c * cell + g, y0 = gy + k.r * cell + g;
+    const nx = clamp(x, x0, x0 + s), ny = clamp(y, y0, y0 + s);
+    return (x - nx) * (x - nx) + (y - ny) * (y - ny) < br * br;
+  }
+  // que ninguna bola vaya casi en horizontal (se quedaría rebotando de pared a pared)
+  function steep(b) {
+    const sp = Math.hypot(b.vx, b.vy) || speed, m = Math.sin(MIN_A) * sp;
+    if (Math.abs(b.vy) < m) {
+      b.vy = (b.vy > 0 ? 1 : -1) * m;
+      b.vx = (b.vx < 0 ? -1 : 1) * Math.sqrt(sp * sp - m * m);
+    }
+  }
+
   function collide(b) {
     const c0 = Math.max(0, Math.floor((b.x - br - gx) / cell)), c1 = Math.min(COLS - 1, Math.floor((b.x + br - gx) / cell));
     const r0 = Math.max(0, Math.floor((b.y - br - gy) / cell)), r1 = Math.min(ROWS - 1, Math.floor((b.y + br - gy) / cell));
     if (c0 > c1 || r0 > r1) return;
     const g = gapPx(), s = cell - 2 * g;
-    let best = null, bd = Infinity;
+    let best = null, bd = Infinity, bc = null;
     for (let r = r0; r <= r1; r++) {
       for (let c = c0; c <= c1; c++) {
         const k = at[r * COLS + c];
         if (!k || k.kind !== 'block') continue;
+        if (k.tri != null) {
+          const ct = triContact(k, b.x, b.y);
+          if (ct && ct.d2 < bd) { bd = ct.d2; best = k; bc = ct; }
+          continue;
+        }
         const x0 = gx + c * cell + g, y0 = gy + r * cell + g;
         const nx = clamp(b.x, x0, x0 + s), ny = clamp(b.y, y0, y0 + s);
         const d = (b.x - nx) * (b.x - nx) + (b.y - ny) * (b.y - ny);
-        if (d < br * br && d < bd) { bd = d; best = k; }
+        if (d < br * br && d < bd) { bd = d; best = k; bc = null; }
       }
     }
     if (!best) return;
-    // rebota en el eje en el que menos se ha metido
-    const kx = cx(best), ky = cy(best), hs = s / 2;
-    const px = hs + br - Math.abs(b.x - kx), py = hs + br - Math.abs(b.y - ky);
-    if (px < py) { b.vx = b.x < kx ? -Math.abs(b.vx) : Math.abs(b.vx); b.x += b.x < kx ? -px : px; }
-    else { b.vy = b.y < ky ? -Math.abs(b.vy) : Math.abs(b.vy); b.y += b.y < ky ? -py : py; }
+    if (bc) {
+      // triángulo: refleja como en un espejo inclinado
+      const dot = b.vx * bc.nx + b.vy * bc.ny;
+      if (dot < 0) { b.vx -= 2 * dot * bc.nx; b.vy -= 2 * dot * bc.ny; }
+      b.x = bc.px + bc.nx * (br + 0.05);
+      b.y = bc.py + bc.ny * (br + 0.05);
+      steep(b);
+    } else {
+      // cuadrado: rebota en el eje en el que menos se ha metido
+      const kx = cx(best), ky = cy(best), hs = s / 2;
+      const px = hs + br - Math.abs(b.x - kx), py = hs + br - Math.abs(b.y - ky);
+      if (px < py) { b.vx = b.x < kx ? -Math.abs(b.vx) : Math.abs(b.vx); b.x += b.x < kx ? -px : px; }
+      else { b.vy = b.y < ky ? -Math.abs(b.vy) : Math.abs(b.vy); b.y += b.y < ky ? -py : py; }
+    }
     damage(best);
   }
 
@@ -1011,18 +1361,21 @@
     b.inItem = it;
     if (!it) return;
     if (it.kind === 'plus') collectPlus(it);
+    else if (it.kind === 'coin') collectCoin(it);
+    else if (it.kind === 'scatter') scatter(b, it);
+    else if (it.kind === 'bomb') explode(it);
     else fireLaser(it);
   }
 
-  function damage(k) {
-    k.hp--;
+  function damage(k, n) {
+    k.hp -= n || 1;
     k.hit = 1;
     if (k.hp > 0) { Sfx.hit(); return; }
     k.gone = true;
     at[k.r * COLS + k.c] = null;
     broken++;
     brokeRound++;
-    burst(cx(k), cy(k), tone(1), 9);
+    burst(k.tri != null ? cx(k) + ([0, 3].indexOf(k.tri) !== -1 ? 1 : -1) * cell * 0.12 : cx(k), cy(k), tone(1), 9);
     Sfx.brk(brokeRound);
   }
 
@@ -1035,17 +1388,61 @@
     Sfx.plus();
   }
 
-  // láser: cada bola que lo cruza golpea toda su fila (o columna)
+  // moneda: va al monedero (se guarda ya, aunque cierres a mitad de partida)
+  function collectCoin(it) {
+    it.gone = true;
+    at[it.r * COLS + it.c] = null;
+    coinsGame++;
+    Wallet.add(1);
+    pops.push({ x: cx(it), y: cy(it), t: '+1', life: 1, col: COL.fire });
+    burst(cx(it), cy(it), COL.fire, 6);
+    Sfx.coin();
+    flyCoin(cx(it), cy(it));
+  }
+
+  // láser: cada bola que lo cruza golpea toda su fila, su columna o las dos (cruz)
   function fireLaser(it) {
     it.fired = true;
     it.flash = 1;
-    const horiz = it.kind === 'laserH';
-    beams.push({ horiz, c: it.c, r: it.r, life: 1 });
+    const row = it.kind !== 'laserV', col = it.kind !== 'laserH';
+    if (row) beams.push({ horiz: true, c: it.c, r: it.r, life: 1 });
+    if (col) beams.push({ horiz: false, c: it.c, r: it.r, life: 1 });
     items.forEach(k => {
       if (k.kind !== 'block' || k.gone) return;
-      if (horiz ? k.r === it.r : k.c === it.c) damage(k);
+      if ((row && k.r === it.r) || (col && k.c === it.c)) damage(k);
     });
     Sfx.laser();
+  }
+
+  // rebote: cada bola que lo cruza sale en una dirección al azar
+  function scatter(b, it) {
+    it.fired = true;
+    it.flash = 1;
+    const sp = Math.hypot(b.vx, b.vy) || speed, a = Math.random() * Math.PI * 2;
+    b.vx = Math.cos(a) * sp;
+    b.vy = Math.sin(a) * sp;
+    steep(b);
+    burst(cx(it), cy(it), COL.fire, 4);
+    Sfx.scatter();
+  }
+
+  // bomba: la primera bola que la toca la hace estallar; golpea fuerte los 8 de alrededor
+  function explode(it) {
+    it.gone = true;
+    at[it.r * COLS + it.c] = null;
+    const x = cx(it), y = cy(it);
+    waves.push({ x, y, life: 1 });
+    shake = REDUCE ? 0 : 6;
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const r = it.r + dr, c = it.c + dc;
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+        const k = at[r * COLS + c];
+        if (k && k.kind === 'block' && !k.gone) damage(k, round);
+      }
+    }
+    burst(x, y, COL.fire, 14);
+    Sfx.bomb();
   }
 
   function burst(x, y, col, n) {
@@ -1087,7 +1484,6 @@
   function guideEnd() {
     const dx = Math.cos(aim.a), dy = -Math.sin(aim.a);
     const L = gx + br, R = gx + COLS * cell - br, T = gy + br;
-    const g = gapPx(), s = cell - 2 * g;
     let x = shooter.x, y = floorY - br, d = 0;
     const max = H * 1.6;
     while (d < max) {
@@ -1101,10 +1497,7 @@
         for (let cc = c - 1; cc <= c + 1 && !hit; cc++) {
           if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS) continue;
           const k = at[rr * COLS + cc];
-          if (!k || k.kind !== 'block') continue;
-          const x0 = gx + cc * cell + g, y0 = gy + rr * cell + g;
-          const nx = clamp(x, x0, x0 + s), ny = clamp(y, y0, y0 + s);
-          if ((x - nx) * (x - nx) + (y - ny) * (y - ny) < br * br) hit = true;
+          if (k && k.kind === 'block' && touches(k, x, y)) hit = true;
         }
       }
       if (hit) break;
@@ -1120,10 +1513,20 @@
     else c.rect(x, y, w, h);
   }
 
+  // polígono con las esquinas redondeadas (los triángulos)
+  function roundPoly(c, v, r) {
+    const n = v.length, a = v[n - 1], z = v[0];
+    c.beginPath();
+    c.moveTo((a[0] + z[0]) / 2, (a[1] + z[1]) / 2);
+    for (let i = 0; i < n; i++) c.arcTo(v[i][0], v[i][1], v[(i + 1) % n][0], v[(i + 1) % n][1], r);
+    c.closePath();
+  }
+
   function render(now) {
     const c = ctx, t = now / 1000;
     c.setTransform(DPR, 0, 0, DPR, 0, 0);
     c.clearRect(0, 0, W, H);
+    if (shake > 0.2) c.translate((Math.random() * 2 - 1) * shake, (Math.random() * 2 - 1) * shake);
     const fw = COLS * cell;
 
     const demo = state === 'attract';
@@ -1153,6 +1556,16 @@
       else c.fillRect(gx + bm.c * cell + cell / 2 - 1.5 * bm.life, gy, 3 * bm.life, ROWS * cell);
     }
     c.globalAlpha = 1;
+    // ondas de las bombas
+    for (const w of waves) {
+      c.globalAlpha = w.life;
+      c.strokeStyle = COL.fire;
+      c.lineWidth = Math.max(1, 3 * w.life);
+      c.beginPath();
+      c.arc(w.x, w.y, cell * (0.3 + 1.3 * easeOut(1 - w.life)), 0, Math.PI * 2);
+      c.stroke();
+    }
+    c.globalAlpha = 1;
 
     // bloques y objetos (bajan una fila animados; los nuevos aparecen creciendo)
     const g = gapPx(), s = cell - 2 * g, rad = cell * 0.16;
@@ -1173,18 +1586,83 @@
       c.globalAlpha = a;
       if (k.kind === 'block') {
         const hs = (s / 2) * sc * (1 - 0.07 * k.hit);
+        const isTri = k.tri != null;
+        let lx = x, ly = y, room = s * 0.78, fs = numSize * sc;
         c.fillStyle = tone(k.hp);
-        rr(c, x - hs, y - hs, hs * 2, hs * 2, rad * sc);
+        if (isTri) {
+          const v = triVerts(x - hs, y - hs, hs * 2, k.tri);
+          roundPoly(c, v, rad * sc * 0.75);
+          // el número, en la parte gruesa del triángulo
+          lx = (v[0][0] + v[1][0] + v[2][0]) / 3;
+          ly = (v[0][1] + v[1][1] + v[2][1]) / 3;
+          room = s * 0.4;
+          fs *= 0.78;
+        } else {
+          rr(c, x - hs, y - hs, hs * 2, hs * 2, rad * sc);
+        }
         c.fill();
         if (k.hit > 0) { c.globalAlpha = a * k.hit * 0.45; c.fillStyle = COL.ink; c.fill(); c.globalAlpha = a; }
         // el número de golpes que le quedan
         const label = k.hp >= 1000 ? fmt(k.hp) : String(k.hp);
-        let fs = numSize * sc;
         c.font = '600 ' + fs.toFixed(1) + 'px "Clash Display", Inter, sans-serif';
         const tw = c.measureText(label).width;
-        if (tw > s * 0.78) { fs *= (s * 0.78) / tw; c.font = '600 ' + fs.toFixed(1) + 'px "Clash Display", Inter, sans-serif'; }
+        if (tw > room) { fs *= room / tw; c.font = '600 ' + fs.toFixed(1) + 'px "Clash Display", Inter, sans-serif'; }
         c.fillStyle = COL.num;
-        c.fillText(label, x, y + fs * 0.04);
+        c.fillText(label, lx, ly + fs * 0.04);
+      } else if (k.kind === 'scatter') {
+        // rebote: un aro dorado de trazos que gira
+        const ra = cell * 0.2 * sc, rot = REDUCE ? 0 : t * 1.6;
+        c.globalAlpha = a * (k.fired ? 0.55 + 0.45 * (k.flash || 0) : 1);
+        c.strokeStyle = COL.fire;
+        c.lineWidth = Math.max(1.5, cell * 0.045);
+        c.lineCap = 'round';
+        for (let q = 0; q < 6; q++) {
+          c.beginPath();
+          c.arc(x, y, ra, rot + q * Math.PI / 3, rot + q * Math.PI / 3 + Math.PI / 6);
+          c.stroke();
+        }
+        c.fillStyle = COL.fire;
+        c.beginPath();
+        c.arc(x, y, cell * 0.06 * sc, 0, Math.PI * 2);
+        c.fill();
+      } else if (k.kind === 'bomb') {
+        // bomba: un disco dorado con su estallido alrededor, latiendo
+        const pulse = REDUCE ? 0.5 : 0.5 + 0.5 * Math.sin(t * 5 + k.c);
+        const ra = cell * 0.13 * sc;
+        c.fillStyle = COL.fire;
+        c.beginPath();
+        c.arc(x, y, ra, 0, Math.PI * 2);
+        c.fill();
+        c.strokeStyle = COL.fire;
+        c.lineWidth = Math.max(1.5, cell * 0.035);
+        c.lineCap = 'round';
+        c.globalAlpha = a * (0.45 + 0.55 * pulse);
+        const r1 = ra * 1.5, r2 = ra * (1.85 + 0.2 * pulse);
+        for (let q = 0; q < 8; q++) {
+          const an = q * Math.PI / 4 + Math.PI / 8;
+          c.beginPath();
+          c.moveTo(x + Math.cos(an) * r1, y + Math.sin(an) * r1);
+          c.lineTo(x + Math.cos(an) * r2, y + Math.sin(an) * r2);
+          c.stroke();
+        }
+      } else if (k.kind === 'coin') {
+        // moneda: un disco dorado que gira sobre sí mismo
+        const ra = cell * 0.16 * sc;
+        const flip = REDUCE ? 1 : 0.22 + 0.78 * Math.abs(Math.cos(t * 2.4 + k.c * 0.9));
+        c.save();
+        c.translate(x, y);
+        c.scale(flip, 1);
+        c.fillStyle = COL.fire;
+        c.beginPath();
+        c.arc(0, 0, ra, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = a * 0.5;
+        c.strokeStyle = COL.bg;
+        c.lineWidth = Math.max(1, cell * 0.024);
+        c.beginPath();
+        c.arc(0, 0, ra * 0.6, 0, Math.PI * 2);
+        c.stroke();
+        c.restore();
       } else if (k.kind === 'plus') {
         const pulse = REDUCE ? 1 : 1 + 0.07 * Math.sin(t * 4 + k.c);
         const ra = cell * 0.21 * sc * pulse;
@@ -1197,13 +1675,12 @@
         c.font = '700 ' + Math.round(cell * 0.17 * sc) + 'px Inter, sans-serif';
         c.fillText('+1', x + 0.5, y + 0.5);
       } else {
-        // láser: una barra dorada con su dirección
-        const horiz = k.kind === 'laserH';
+        // láser: una barra dorada con su dirección (la cruz, las dos)
         const len = cell * 0.5 * sc, th = Math.max(2, cell * 0.06);
         c.globalAlpha = a * (k.fired ? 0.55 + 0.45 * (k.flash || 0) : 1);
         c.fillStyle = COL.fire;
-        if (horiz) rr(c, x - len / 2, y - th / 2, len, th, th / 2); else rr(c, x - th / 2, y - len / 2, th, len, th / 2);
-        c.fill();
+        if (k.kind !== 'laserV') { rr(c, x - len / 2, y - th / 2, len, th, th / 2); c.fill(); }
+        if (k.kind !== 'laserH') { rr(c, x - th / 2, y - len / 2, th, len, th / 2); c.fill(); }
         c.beginPath();
         c.arc(x, y, cell * 0.09 * sc, 0, Math.PI * 2);
         c.fill();
@@ -1236,9 +1713,7 @@
     c.fillStyle = COL.ink;
     for (const b of balls) {
       if (b.merged) continue;
-      c.beginPath();
-      c.arc(b.x, b.y, br, 0, Math.PI * 2);
-      c.fill();
+      drawBall(c, b.x, b.y, REDUCE ? 0 : b.rot || 0);
     }
     // la pila: en la salida mientras quedan por salir; luego, donde cayó la primera
     // (nunca las dos cuentas a la vez: se pisarían)
@@ -1264,10 +1739,10 @@
     }
     c.globalAlpha = 1;
 
-    // +1 y +N que suben
+    // +1 y +N que suben (los de las monedas, en dorado)
     if (pops.length) {
-      c.fillStyle = COL.ink;
       for (const p of pops) {
+        c.fillStyle = p.col || COL.ink;
         c.font = (p.big ? '700 ' + Math.round(cell * 0.3) + 'px "Clash Display", Inter' : '700 ' + Math.round(cell * 0.2) + 'px Inter') + ', sans-serif';
         c.globalAlpha = clamp(p.life * 1.4, 0, 1);
         c.fillText(p.t, p.x, p.y - (1.3 - p.life) * cell * 0.5);
@@ -1276,13 +1751,59 @@
     }
   }
 
+  /* la bola con la forma del logo: el logo de la cabecera pintado una vez en
+     un canvas pequeño (a la resolución de la pantalla, en el color de la
+     tinta) y estampado en cada bola, girando. Un poco más grande que la
+     bola de verdad para que se lea; la física no cambia. */
+  let logoPath = null, sprite = null, spriteKey = '';
+  function logoSprite() {
+    const key = br + '|' + DPR + '|' + COL.ink;
+    if (sprite && spriteKey === key) return sprite;
+    if (logoPath === null) {
+      logoPath = false;
+      try {
+        const fp = document.querySelector('.top-logo .tl-face'), ep = document.querySelector('.top-logo .tl-eyes');
+        const svg = fp && fp.ownerSVGElement;
+        if (svg && typeof Path2D === 'function') {
+          logoPath = { vb: svg.viewBox.baseVal, face: new Path2D(fp.getAttribute('d')), eyes: ep ? new Path2D(ep.getAttribute('d')) : null };
+        }
+      } catch (e) { logoPath = false; }
+    }
+    if (!logoPath) return null;
+    const vb = logoPath.vb, h = br * 2.6, w = h * vb.width / vb.height;
+    const cvs = document.createElement('canvas');
+    cvs.width = Math.ceil(w * DPR) + 2;
+    cvs.height = Math.ceil(h * DPR) + 2;
+    const g = cvs.getContext('2d');
+    const k = (h * DPR) / vb.height;
+    g.setTransform(k, 0, 0, k, 1 - vb.x * k, 1 - vb.y * k);
+    g.fillStyle = COL.ink;
+    g.fill(logoPath.face);
+    if (logoPath.eyes) g.fill(logoPath.eyes);
+    sprite = { c: cvs, w: cvs.width / DPR, h: cvs.height / DPR };
+    spriteKey = key;
+    return sprite;
+  }
+  function drawBall(c, x, y, rot) {
+    const sp = Wallet.skin === 'logo' ? logoSprite() : null;
+    if (!sp) {
+      c.beginPath();
+      c.arc(x, y, br, 0, Math.PI * 2);
+      c.fill();
+      return;
+    }
+    c.save();
+    c.translate(x, y);
+    if (rot) c.rotate(rot);
+    c.drawImage(sp.c, -sp.w / 2, -sp.h / 2, sp.w, sp.h);
+    c.restore();
+  }
+
   // la bola de salida con su contador (×N)
   function stack(c, x, n) {
     if (n <= 0) return;
     c.fillStyle = COL.ink;
-    c.beginPath();
-    c.arc(x, floorY - br, br, 0, Math.PI * 2);
-    c.fill();
+    drawBall(c, x, floorY - br, 0);
     c.font = '600 ' + Math.max(10, Math.round(cell * 0.18)) + 'px Inter, sans-serif';
     c.textAlign = 'center';
     c.textBaseline = 'top';
