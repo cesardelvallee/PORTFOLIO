@@ -1,6 +1,6 @@
 /* ============================================================
    MINIJUEGO — BREAK TIME (game.js, solo en la home)
-   Una consolita junto al reproductor abre un modal con «Break Time»,
+   Una consolita junto al título abre un modal con «Break Time»,
    un juego al estilo de BBTAN: apuntas, sueltas la ráfaga de bolas y
    rompes los bloques numerados antes de que lleguen abajo.
    Mismo sistema que el resto: cristal del botón del menú, Clash
@@ -14,8 +14,9 @@
    la placa y los tornillos; la pantalla, la cruceta y los botones son
    opacos, como en las de verdad. Su pantalla es un canvas con una partida en
    miniatura (game.js). Al pasar el cursor se levanta y se ladea un poco,
-   como cuando la coges; el LED se enciende. Va apoyada en la misma línea
-   que el tocadiscos, como dos objetos en una estantería. */
+   como cuando la coges; el LED se enciende. En ordenador va junto al
+   título, en espejo del puntito de «Don’t click!» (ver más abajo); en
+   móvil, en la esquina. */
 .gb {
   --e: cubic-bezier(0.22, 0.61, 0.36, 1);
   --gb-glass: rgba(226, 210, 170, 0.66);
@@ -24,9 +25,9 @@
   --gb-ink: #2a2620;
   --gb-led: #d4a947;
   position: fixed;
-  right: 254px;               /* game.js la coloca junto al reproductor */
+  right: 254px;               /* sin game.js, junto al reproductor */
   bottom: 16px;
-  z-index: 3500;
+  z-index: 1;                 /* bajo las cards (z-index 2): al arrastrarlas pasan por encima */
   width: 46px;
   height: 66px;
   display: block;
@@ -85,37 +86,9 @@ body.theme-light .gb {
   image-rendering: pixelated;
 }
 
-/* etiqueta al pasar el cursor: el material del título de las cards */
-.gb-tip {
-  position: absolute;
-  right: calc(100% + 12px);
-  top: 50%;
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.32);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.92);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transform: translate(6px, -50%);
-  transition: opacity 0.14s var(--e), transform 0.2s var(--e);
-}
-
 @media (hover: hover) and (pointer: fine) {
   .gb:hover .gb-body { transform: translateY(-4px) rotate(-5deg); }
   .gb:hover .gb-led { opacity: 1; }
-  .gb:hover .gb-tip { opacity: 1; transform: translate(0, -50%); transition-duration: 0.2s, 0.3s; }
 }
 /* al pulsar se hunde un pelín y se aprieta la A */
 .gb:active .gb-body { transform: translateY(-1px) rotate(-2deg) scale(0.95); transition-duration: 0.16s; }
@@ -124,10 +97,95 @@ body.theme-light .gb {
   /* en móvil, en la esquina libre: espeja al botón del menú */
   .gb { right: 16px; bottom: 18px; width: 40px; height: 57.4px; cursor: pointer; }
   .gb-glass { border-radius: 6px 6px 14px 6px; }
-  .gb-tip { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gb-body, .gb:hover .gb-body, .gb:active .gb-body { transform: none; transition: none; }
+}
+
+/* ---- en ordenador: junto al título, en espejo del puntito ----
+   El puntito de «Don’t click!» está abajo a la izquierda con su nota y su
+   flecha a mano; la consola hace lo mismo a la derecha: la nota «Break
+   time!», en la misma letra y el mismo beige, y la flecha bajando hacia
+   ella. Entra a la vez que el puntito (game.js copia su posición en espejo
+   y su --fs). La consola va un poco girada, como dejada encima de la mesa. */
+.gb-hint { display: none; }
+@media (min-width: 769px) {
+  .gb.is-spot {
+    --gb-rot: 9deg;
+    right: auto;               /* game.js da left / top */
+    bottom: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.9);
+    transition: opacity 0.4s var(--e), transform 0.6s var(--e), visibility 0s linear 0.4s;
+  }
+  .gb.is-spot.is-in {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.6s var(--e) 0.45s, transform 0.9s var(--e) 0.45s, visibility 0s linear 0.45s;
+  }
+  .gb.is-spot .gb-body { transform: rotate(var(--gb-rot)); }
+  .gb.is-spot:active .gb-body { transform: translateY(-1px) rotate(calc(var(--gb-rot) - 3deg)) scale(0.95); }
+
+  .gb-hint {
+    --hint: #c7b299;
+    --fs: 90px;
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1;               /* como la consola: bajo las cards */
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  body.theme-light .gb-hint { --hint: #8a6f4a; }
+  .gb-note,
+  .gb-arrow {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.6s var(--e), transform 0.8s var(--e);
+  }
+  /* las mismas medidas que la nota del puntito, en espejo */
+  .gb-note {
+    right: calc(var(--fs) * -1.7);
+    top: calc(var(--fs) * -1.19);
+    white-space: nowrap;
+    font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+    font-size: calc(var(--fs) * 0.22);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--hint);
+    transform: rotate(14deg) translateY(8px);
+  }
+  .gb-arrow {
+    right: calc(var(--fs) * -1.27);
+    top: calc(var(--fs) * -0.955);
+    width: calc(var(--fs) * 0.65);
+    height: auto;
+    fill: none;
+    stroke: var(--hint);
+    stroke-width: 3.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transform: scaleX(-1) translate(-8px, -8px);
+  }
+  .gb-hint.is-in .gb-note { opacity: 0.95; transform: rotate(14deg); transition-delay: 0.15s; }
+  .gb-hint.is-in .gb-arrow { opacity: 0.9; transform: scaleX(-1); transition-delay: 0.3s; }
+  .gb-hint.is-settled .gb-note,
+  .gb-hint.is-settled .gb-arrow { transition-delay: 0s; transition-duration: 0.3s; }
+}
+@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+  /* cursor encima: la consola se levanta y la flecha se acerca a ella */
+  .gb.is-spot:hover .gb-body { transform: translateY(-5px) rotate(calc(var(--gb-rot) - 6deg)); }
+  .gb.is-spot:hover + .gb-hint.is-settled .gb-arrow { transform: scaleX(-1) translate(5px, 4px); }
+}
+@media (min-width: 769px) and (prefers-reduced-motion: reduce) {
+  .gb.is-spot, .gb.is-spot.is-in { transform: none; }
+  .gb.is-spot .gb-body, .gb.is-spot:hover .gb-body, .gb.is-spot:active .gb-body { transform: rotate(var(--gb-rot)); }
+  .gb-note, .gb-hint.is-in .gb-note { transform: rotate(14deg) !important; }
+  .gb-arrow, .gb-hint.is-in .gb-arrow { transform: scaleX(-1) !important; }
 }
 
 

@@ -395,6 +395,10 @@ a, button, input, textarea, .img-drag {
   transform: translate(-50%, -50%);
   width: 300px;
   height: 300px;
+  /* las cards pasan por encima de la consola del minijuego (z-index 1, en
+     game.css) al arrastrarlas; la cabecera, el menú y el reproductor siguen
+     por encima de ellas */
+  z-index: 2;
 }
 .stacked-images .img-drag {
   position: absolute;
@@ -1939,7 +1943,7 @@ html { scroll-behavior: smooth; }
 
 /* ---- móvil ---- */
 @media (max-width: 768px) {
-  .ld-mark { width: min(62vw, 36svh); }
+  .ld-mark { width: min(44vw, 26svh); }
   .ld-count { font-size: min(13vw, 7svh); }
 }
 

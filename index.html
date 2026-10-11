@@ -60,9 +60,9 @@
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net/" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=132">
+  <link rel="stylesheet" href="css/style.css?v=134">
   <link rel="stylesheet" href="css/dragme.css">
-  <link rel="stylesheet" href="css/game.css?v=8">
+  <link rel="stylesheet" href="css/game.css?v=10">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@500&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -220,8 +220,10 @@
   </div>
 </div>
 
-<!-- minijuego: una consolita junto al reproductor (game.js). Su pantalla
-     muestra una partida en miniatura y al pulsarla se abre el juego -->
+<!-- minijuego: una consolita (game.js). En ordenador, junto al título y en
+     espejo del puntito de «Don’t click!», con su nota y su flecha a mano; en
+     móvil, en la esquina. Su pantalla muestra una partida en miniatura y al
+     pulsarla se abre el juego -->
 <button type="button" class="gb" aria-label="Jugar a Break Time, un minijuego" aria-haspopup="dialog">
   <span class="gb-body" aria-hidden="true">
     <span class="gb-glass"></span>
@@ -252,8 +254,11 @@
     </svg>
     <canvas class="gb-screen" width="64" height="48"></canvas>
   </span>
-  <span class="gb-tip" aria-hidden="true">Break Time</span>
 </button>
+<div class="gb-hint" aria-hidden="true">
+  <span class="gb-note">Break time!</span>
+  <svg class="gb-arrow" viewBox="0 0 120 150"><path d="M14 6c3 18 9 36 19 55 12 23 32 46 62 70"/><path d="M78 136c7-1 13-2 19-4-1-7-3-13-6-19"/></svg>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Draggable.min.js"></script>
@@ -281,8 +286,8 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
-<script src="script.js?v=115"></script>
-<script src="game.js?v=8" defer></script>
+<script src="script.js?v=117"></script>
+<script src="game.js?v=11" defer></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <span id="dragme-bubble" class="img-drag-bubble">DRAG ME<span class="drag-hint"><svg class="dh-ico" viewBox="0 0 12 16" aria-hidden="true"><rect x="1.1" y="1.1" width="9.8" height="13.8" rx="4.9" fill="none" stroke="currentColor" stroke-width="1.3"/><path class="dh-btn" d="M6 6.2H1.1V6A4.9 4.9 0 0 1 6 1.1Z" fill="currentColor"/><path d="M6 1.4v4.8" stroke="currentColor" stroke-width="1.1"/></svg>Double-click to open</span></span>

@@ -1527,6 +1527,12 @@
     c.setTransform(DPR, 0, 0, DPR, 0, 0);
     c.clearRect(0, 0, W, H);
     if (shake > 0.2) c.translate((Math.random() * 2 - 1) * shake, (Math.random() * 2 - 1) * shake);
+    // en el inicio, la muestra de bloques es parte de la misma página que el
+    // texto: si no cabe y se hace scroll, sube con él (si no, el título la pisa)
+    if (state === 'attract' && screenNow === 'start') {
+      const sy = ui.screens.start.scrollTop;
+      if (sy) c.translate(0, -sy);
+    }
     const fw = COLS * cell;
 
     const demo = state === 'attract';
@@ -1824,23 +1830,65 @@
 
 
   /* ---------- la consolita: botón de acceso ---------- */
-  // en escritorio, apoyada en la misma línea que el reproductor, a su izquierda
+  /* En ordenador, junto al título y en espejo del puntito de «Don’t click!»
+     (script.js lo coloca abajo a la izquierda): su nota «Break time!» y su
+     flecha van al otro lado, con las mismas medidas pero algo más hacia el
+     centro, y la consola donde acaba la flecha. Entra a la vez que el puntito. Si el reproductor queda debajo,
+     sube todo junto lo justo. En móvil va en la esquina (CSS). */
   const vinyl = document.getElementById('music-player');
+  const ws = document.querySelector('.whatsit');
+  const hint = document.querySelector('.gb-hint');
   function placeTrigger() {
-    const r = vinyl && window.innerWidth > 768 ? vinyl.getBoundingClientRect() : null;
-    if (!r || !r.width) {
-      trigger.style.removeProperty('right');
-      trigger.style.removeProperty('bottom');
+    const desk = window.innerWidth > 768 && !!ws && !!hint && getComputedStyle(ws).display !== 'none';
+    trigger.classList.toggle('is-spot', desk);
+    if (!desk) {
+      trigger.style.removeProperty('left');
+      trigger.style.removeProperty('top');
       return;
     }
-    trigger.style.right = Math.round(window.innerWidth - r.left + 14) + 'px';
-    trigger.style.bottom = Math.round(window.innerHeight - r.bottom) + 'px';
+    const fs = parseFloat(ws.style.getPropertyValue('--fs')) || Math.min(window.innerWidth * 0.063, 110);
+    const r = ws.getBoundingClientRect();
+    const w = trigger.offsetWidth, h = trigger.offsetHeight;
+    // el ancla del puntito, en espejo y desplazada a la izquierda (2.2·fs, ~200px
+    // a 1440); la flecha acaba a (0.76, -0.25)·fs de ella
+    const ax = window.innerWidth - r.left - 2.2 * fs;
+    let ay = r.top;
+    const place = () => ({ x: ax + 0.76 * fs - 14 - w / 2, y: ay - 0.25 * fs + 14 + h / 2 });
+    let c = place();
+    const v = vinyl && vinyl.getBoundingClientRect();
+    if (v && v.height && c.x + w / 2 > v.left - 8) {
+      const over = c.y + h / 2 + 18 - v.top;
+      if (over > 0) { ay -= over; c = place(); }
+    }
+    hint.style.setProperty('--fs', fs + 'px');
+    hint.style.transform = 'translate(' + ax.toFixed(1) + 'px,' + ay.toFixed(1) + 'px)';
+    trigger.style.left = Math.round(c.x - w / 2) + 'px';
+    trigger.style.top = Math.round(c.y - h / 2) + 'px';
   }
-  if (vinyl) {
+  // después de que script.js recoloque el puntito
+  const replace = () => requestAnimationFrame(placeTrigger);
+  placeTrigger();
+  window.addEventListener('resize', replace);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(replace);
+  if (vinyl && 'ResizeObserver' in window) new ResizeObserver(replace).observe(vinyl);
+  // entra con el puntito (su clase is-in la pone script.js al acabar la entrada del título)
+  let entered = false;
+  function enter() {
+    if (entered) return;
+    entered = true;
     placeTrigger();
-    if ('ResizeObserver' in window) new ResizeObserver(placeTrigger).observe(vinyl);
-    window.addEventListener('resize', placeTrigger);
+    trigger.classList.add('is-in');
+    if (hint) {
+      hint.classList.add('is-in');
+      setTimeout(() => hint.classList.add('is-settled'), 1300);
+    }
   }
+  if (!ws || ws.classList.contains('is-in')) enter();
+  else if ('MutationObserver' in window) {
+    const mo = new MutationObserver(() => { if (ws.classList.contains('is-in')) { mo.disconnect(); enter(); } });
+    mo.observe(ws, { attributes: true, attributeFilter: ['class'] });
+  }
+  setTimeout(enter, 7000);   // por si la entrada del título no llega a avisar
 
   /* su pantalla: una partida en miniatura jugándose sola (un BBTAN de 6
      columnas en 32 × 24 px: apunta, ráfaga de 5 bolas, los bloques bajan).

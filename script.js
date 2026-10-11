@@ -3112,7 +3112,10 @@ try {
    · La ficha fija dice qué lámina estás viendo.
    · Vídeos: solo se reproducen mientras se ven; botón de sonido en los
      que tienen audio (suena uno a la vez).
-   · Siguiente proyecto: su imagen sigue al cursor.
+   · Siguiente proyecto: su imagen sigue al cursor (en táctil va fija bajo
+     el título y también lleva al proyecto).
+   · Móvil: los carruseles marcan en qué pieza estás y los botones fijos
+     de abajo se apartan mientras lees hacia abajo (vuelven al subir).
    Solo transform / opacity. Con movimiento reducido: sin crecer ni
    parallax, láminas visibles y vídeos con controles en vez de autoplay.
    ============================================================ */
@@ -3183,7 +3186,20 @@ try {
       }
       // la barra superior gana fondo cuando la portada llega a ella
       body.classList.toggle('pj-past', y > top0 - 72);
+      calmUpdate(y);
       nowUpdate();
+    }
+    // los botones fijos de abajo (atrás y menú) se apartan al bajar leyendo
+    // y vuelven al subir; arriba del todo y al final de la página, siempre
+    // a mano. Solo se nota en móvil (case.css)
+    var lastY = window.scrollY, calm = false;
+    function calmUpdate(y) {
+      var want = calm;
+      if (y > lastY + 8 && y > 160) want = true;
+      else if (y < lastY - 8) want = false;
+      if (y < 80 || y + vh > document.documentElement.scrollHeight - 160) want = false;
+      if (Math.abs(y - lastY) > 8) lastY = y;
+      if (want !== calm) { calm = want; body.classList.toggle('pj-calm', calm); }
     }
     function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -3194,6 +3210,52 @@ try {
     var items = page.querySelectorAll('.pj-item');
     page.querySelectorAll('.pj-row').forEach(function(row) {
       Array.prototype.forEach.call(row.children, function(it, i) { it.style.setProperty('--i', i); });
+    });
+
+    /* --- móvil: la pista de la figura 3D («arrastra para girar») va en el pie
+       de su lámina; encima de la figura no le queda hueco y la pisaba --- */
+    var hint = page.querySelector('.pj-hint');
+    var hcap = hint && hint.closest('.pj-plate') && hint.closest('.pj-plate').querySelector('.pj-cap');
+    if (hint && hcap && window.matchMedia) {
+      var hhome = hint.parentElement, hnext = hint.nextSibling;
+      var mqm = window.matchMedia('(max-width: 768px)');
+      var placeHint = function() { if (mqm.matches) hcap.appendChild(hint); else hhome.insertBefore(hint, hnext); };
+      placeHint();
+      if (mqm.addEventListener) mqm.addEventListener('change', placeHint);
+    }
+
+    /* --- carruseles (móvil): un trazo por pieza junto al pie; se llena el
+       de la que tienes delante. Si la fila cabe entera, no se muestra --- */
+    page.querySelectorAll('.pj-row').forEach(function(row) {
+      var n = row.children.length;
+      if (n < 2) return;
+      var dots = document.createElement('span');
+      dots.className = 'pj-dots';
+      dots.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < n; i++) dots.appendChild(document.createElement('i'));
+      var cap = row.parentElement.querySelector('.pj-cap');
+      (cap || row.parentElement).appendChild(dots);
+      var on = -1, t = 0;
+      function mark() {
+        t = 0;
+        var scrolls = row.scrollWidth > row.clientWidth + 2;
+        dots.style.display = scrolls ? '' : 'none';
+        if (!scrolls) return;
+        var r0 = row.getBoundingClientRect().left + (parseFloat(getComputedStyle(row).paddingLeft) || 0);
+        var best = 0, bd = 1e9;
+        Array.prototype.forEach.call(row.children, function(it, i) {
+          var d = Math.abs(it.getBoundingClientRect().left - r0);
+          if (d < bd) { bd = d; best = i; }
+        });
+        // al final del todo, la última (aunque no llegue a alinearse a la izquierda)
+        if (row.scrollLeft + row.clientWidth >= row.scrollWidth - 2) best = n - 1;
+        if (best === on) return;
+        on = best;
+        Array.prototype.forEach.call(dots.children, function(d, i) { d.classList.toggle('is-on', i === best); });
+      }
+      row.addEventListener('scroll', function() { if (!t) t = requestAnimationFrame(mark); }, { passive: true });
+      window.addEventListener('resize', function() { on = -1; mark(); });
+      mark();
     });
     if (reduce || !('IntersectionObserver' in window)) {
       items.forEach(function(it) { it.classList.add('is-in'); });
@@ -3340,6 +3402,10 @@ try {
         if (!raf) raf = requestAnimationFrame(loop);
       });
       next.addEventListener('pointerleave', function() { next.classList.remove('is-hover'); });
+    } else if (next && nm) {
+      // en táctil la imagen va fija bajo el título: tocarla también lleva al proyecto
+      var link = next.querySelector('.pj-next-link');
+      nm.addEventListener('click', function() { if (link) link.click(); });
     }
 
     measure();
