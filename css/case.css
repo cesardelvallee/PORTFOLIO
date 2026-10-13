@@ -533,8 +533,11 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   .pj-body { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
 }
 
-/* ---- móvil: todo en una columna; las filas de varias piezas se
-   deslizan en horizontal y cada lámina lleva su pie debajo ---- */
+/* ---- móvil: todo en una columna y todo con scroll vertical (nada se
+   desliza de lado). En cada fila, las piezas apaisadas van a todo el
+   ancho, una debajo de otra; las verticales o cuadradas, de dos en dos y
+   a la misma altura (script.js las agrupa en .pj-pair), y si queda una
+   sola, centrada a media anchura. Cada lámina lleva su pie debajo ---- */
 @media (max-width: 768px) {
   body.pj-page { --pj-gut: 16px; --pj-tfs: 13.4vw; }
   body.pj-page .top-logo svg { height: 34px; }
@@ -549,25 +552,12 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   .pj-info { position: static; }
   .pj-now { display: none; }
   .pj-gallery { gap: 28px; }
-  .pj-row {
-    --mh: 66vw;
-    margin: 0 calc(-1 * var(--pj-gut));
-    padding: 0 var(--pj-gut);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 0 var(--pj-gut);
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-x pan-y;
-  }
-  .pj-row::-webkit-scrollbar { display: none; }
-  .pj-row > .pj-item {
-    flex: 0 0 auto;
-    width: min(calc(var(--mh) * var(--r)), 86vw);
-    scroll-snap-align: start;
-  }
-  .pj-row > .pj-item:only-child { width: 100%; }
-  .pj-row > .pj-item:not(:only-child) .pj-media { aspect-ratio: auto; height: var(--mh); }
+  .pj-row { flex-direction: column; align-items: stretch; gap: 10px; }
+  .pj-row > .pj-item { flex: none; width: 100%; }
+  .pj-pair { display: flex; gap: 10px; align-items: flex-start; }
+  .pj-pair > .pj-item { flex: var(--r) 1 0; min-width: 0; }
+  .pj-pair.is-solo { justify-content: center; }
+  .pj-pair.is-solo > .pj-item { flex: 0 0 calc(50% - 5px); }
   .pj-cap {
     position: static;
     width: auto;
@@ -591,15 +581,17 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   .pj-foot { justify-content: flex-start; padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* indicador de los carruseles (solo en móvil, ver abajo) */
-.pj-dots { display: none; }
+/* parejas de piezas verticales (móvil, ver arriba); en ordenador, como si
+   no existieran: sus piezas siguen en la fila de siempre */
+@media (min-width: 769px) {
+  .pj-pair { display: contents; }
+}
 
 /* ---- móvil: pulido de lectura y de tacto ----
    En móvil la letra base de la web es de 14px y las etiquetas en 0.6rem
    se quedaban en 8px: aquí suben a 10.5-11px, el texto a 16px y la ficha
    a 14px. Los enlaces pequeños ganan zona de toque, sobra menos aire
-   muerto, los carruseles dicen cuántas piezas tienen y en cuál estás, y la
-   imagen del siguiente proyecto se ve fija (en táctil no hay cursor al que
+   muerto y la imagen del siguiente proyecto se ve fija (en táctil no hay cursor al que
    seguir). Los botones fijos de abajo se apartan mientras lees hacia abajo
    (script.js pone .pj-calm) y vuelven al subir o al llegar al final. */
 @media (max-width: 768px) {
@@ -619,17 +611,6 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
      encima de la figura no le queda hueco y pisaba la gorra o los pies */
   .pj-cap .pj-hint { position: static; flex: none; margin-left: auto; font-size: 10px; letter-spacing: 0.16em; color: var(--pj-mute); }
   .gr-dizzy { font-size: 11.5px; }
-
-  .pj-dots { display: flex; flex: none; gap: 5px; margin-left: auto; }
-  .pj-dots i {
-    display: block;
-    width: 16px;
-    height: 2px;
-    border-radius: 1px;
-    background: var(--pj-line);
-    transition: background-color 0.3s var(--pj-ease);
-  }
-  .pj-dots i.is-on { background: var(--pj-acc); }
 
   .pj-next { margin-top: 84px; }
   .pj-next-link { padding: 22px var(--pj-gut) 24px; }

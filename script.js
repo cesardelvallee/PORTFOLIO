@@ -3114,8 +3114,9 @@ try {
      que tienen audio (suena uno a la vez).
    · Siguiente proyecto: su imagen sigue al cursor (en táctil va fija bajo
      el título y también lleva al proyecto).
-   · Móvil: los carruseles marcan en qué pieza estás y los botones fijos
-     de abajo se apartan mientras lees hacia abajo (vuelven al subir).
+   · Móvil: sin carruseles (las piezas verticales se agrupan de dos en dos)
+     y los botones fijos de abajo se apartan mientras lees hacia abajo
+     (vuelven al subir).
    Solo transform / opacity. Con movimiento reducido: sin crecer ni
    parallax, láminas visibles y vídeos con controles en vez de autoplay.
    ============================================================ */
@@ -3224,38 +3225,30 @@ try {
       if (mqm.addEventListener) mqm.addEventListener('change', placeHint);
     }
 
-    /* --- carruseles (móvil): un trazo por pieza junto al pie; se llena el
-       de la que tienes delante. Si la fila cabe entera, no se muestra --- */
+    /* --- móvil, sin carruseles: las piezas verticales o cuadradas de cada
+       fila se agrupan de dos en dos (.pj-pair) para ir juntas y a la misma
+       altura; la que queda sola, centrada. Las apaisadas (--r ≥ 1.2) van
+       sueltas, a todo el ancho. En ordenador .pj-pair es display: contents
+       y la fila se ve como siempre --- */
     page.querySelectorAll('.pj-row').forEach(function(row) {
-      var n = row.children.length;
-      if (n < 2) return;
-      var dots = document.createElement('span');
-      dots.className = 'pj-dots';
-      dots.setAttribute('aria-hidden', 'true');
-      for (var i = 0; i < n; i++) dots.appendChild(document.createElement('i'));
-      var cap = row.parentElement.querySelector('.pj-cap');
-      (cap || row.parentElement).appendChild(dots);
-      var on = -1, t = 0;
-      function mark() {
-        t = 0;
-        var scrolls = row.scrollWidth > row.clientWidth + 2;
-        dots.style.display = scrolls ? '' : 'none';
-        if (!scrolls) return;
-        var r0 = row.getBoundingClientRect().left + (parseFloat(getComputedStyle(row).paddingLeft) || 0);
-        var best = 0, bd = 1e9;
-        Array.prototype.forEach.call(row.children, function(it, i) {
-          var d = Math.abs(it.getBoundingClientRect().left - r0);
-          if (d < bd) { bd = d; best = i; }
-        });
-        // al final del todo, la última (aunque no llegue a alinearse a la izquierda)
-        if (row.scrollLeft + row.clientWidth >= row.scrollWidth - 2) best = n - 1;
-        if (best === on) return;
-        on = best;
-        Array.prototype.forEach.call(dots.children, function(d, i) { d.classList.toggle('is-on', i === best); });
+      var kids = Array.prototype.slice.call(row.children);
+      if (kids.length < 2) return;
+      var run = [];
+      function flush() {
+        for (var i = 0; i < run.length; i += 2) {
+          var g = document.createElement('div');
+          g.className = 'pj-pair' + (run[i + 1] ? '' : ' is-solo');
+          row.insertBefore(g, run[i]);
+          g.appendChild(run[i]);
+          if (run[i + 1]) g.appendChild(run[i + 1]);
+        }
+        run = [];
       }
-      row.addEventListener('scroll', function() { if (!t) t = requestAnimationFrame(mark); }, { passive: true });
-      window.addEventListener('resize', function() { on = -1; mark(); });
-      mark();
+      kids.forEach(function(it) {
+        var r = parseFloat(it.style.getPropertyValue('--r')) || 1;
+        if (r >= 1.2) flush(); else run.push(it);
+      });
+      flush();
     });
     if (reduce || !('IntersectionObserver' in window)) {
       items.forEach(function(it) { it.classList.add('is-in'); });
