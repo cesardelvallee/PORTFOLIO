@@ -1,6 +1,12 @@
 /* ============================================================
-   MINIJUEGO — BREAK TIME (solo en la home)
-   Al estilo de BBTAN: apuntas, sueltas, y una ráfaga con todas tus bolas
+   ARCADE (solo en la home) — tres minijuegos en el mismo modal. Al abrir,
+   un menú para elegir: Break Time, Egg Ninja y Snake. Cada uno con su
+   inicio (tu nombre + su top 3), su partida y su fin (puntuación + top 3).
+   Comparten el modal, el sonido, los colores y el ranking (una colección
+   de Firestore por juego). Los motores de Egg Ninja y Snake están más
+   abajo (bloque «LOS OTROS DOS JUEGOS»); lo que sigue es Break Time.
+
+   BREAK TIME. Al estilo de BBTAN: apuntas, sueltas, y una ráfaga con todas tus bolas
    rebota por el tablero restando 1 a cada bloque que toca. Cuando vuelven,
    todo baja una fila y entra otra nueva cuyos bloques aguantan tantos
    golpes como la ronda (1, 2, 3…). Cada +1 que tocas es una bola más para
@@ -52,7 +58,39 @@
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* modo privado: sin memoria */ } },
   };
-  const KEY_LOCAL = 'cdv_bbtan_scores', KEY_BEST = 'cdv_bbtan_best';
+  /* los tres juegos: nombre, textos y dónde se guardan sus puntuaciones */
+  const GAMES = {
+    bbtan: {
+      name: 'Break Time', title: ['Break', 'Time'], label: 'Ronda', units: 'Rondas',
+      coll: 'scores', local: 'cdv_bbtan_scores', best: 'cdv_bbtan_best',
+      desc: 'Apunta, suelta la ráfaga y rompe los bloques antes de que lleguen abajo.',
+      how: FINE
+        ? 'Un respiro entre proyecto y proyecto. Apunta con el ratón y haz clic: sale una ráfaga con todas tus bolas. Cada golpe resta 1 al bloque y cada <b>+1</b> que tocas es una bola más. Si un bloque llega abajo, se acabó. Las <b>monedas</b> se guardan para la tienda.<span class="bk-keys">← → para afinar · Espacio lanza · P pausa</span>'
+        : 'Un respiro entre proyecto y proyecto. Arrastra el dedo <b>hacia abajo</b> para apuntar (como un tirachinas) y suelta. Cada golpe resta 1 al bloque y cada <b>+1</b> es una bola más. Si un bloque llega abajo, se acabó. Las <b>monedas</b> se guardan para la tienda.',
+      hint: FINE ? 'Apunta y haz clic' : 'Arrastra hacia abajo y suelta',
+      aria: 'Tablero: apunta y lanza las bolas contra los bloques',
+    },
+    egg: {
+      name: 'Egg Ninja', title: ['Egg', 'Ninja'], label: 'Puntos', units: 'Puntos',
+      coll: 'scores_egg', local: 'cdv_egg_scores', best: 'cdv_egg_best',
+      desc: 'Corta los huevos al vuelo. Ni se te ocurra tocar las bombas.',
+      how: FINE
+        ? 'Pasa el ratón <b>deprisa</b> por encima de los huevos para cortarlos (no hace falta hacer clic). Tres o más de un tajo, combo. Los <b>dorados</b> valen 5. Si se te escapan tres huevos, o cortas una <b>bomba</b>, se acabó.<span class="bk-keys">P pausa</span>'
+        : 'Desliza el dedo por los huevos para cortarlos. Tres o más de un tajo, combo. Los <b>dorados</b> valen 5. Si se te escapan tres huevos, o cortas una <b>bomba</b>, se acabó.',
+      hint: FINE ? 'Pasa el ratón deprisa para cortar' : 'Desliza para cortar',
+      aria: 'Tablero: corta los huevos que saltan sin tocar las bombas',
+    },
+    snake: {
+      name: 'Snake', title: ['Snake'], label: 'Puntos', units: 'Puntos',
+      coll: 'scores_snake', local: 'cdv_snake_scores', best: 'cdv_snake_best',
+      desc: 'El clásico: come café, crece y no te muerdas la cola.',
+      how: FINE
+        ? 'Muévete con las <b>flechas</b> (o WASD) y come granos de café para crecer. Cada vez vas más rápido. Las <b>estrellas</b> valen 5, pero se van. Si chocas con el borde o contigo mismo, se acabó.<span class="bk-keys">Flechas / WASD · P pausa</span>'
+        : 'Desliza el dedo hacia donde quieras ir y come granos de café para crecer. Cada vez vas más rápido. Las <b>estrellas</b> valen 5, pero se van. Si chocas con el borde o contigo mismo, se acabó.',
+      hint: FINE ? 'Pulsa una flecha para empezar' : 'Desliza para empezar',
+      aria: 'Tablero: guía a la serpiente hasta los granos de café',
+    },
+  };
 
 
   /* ---------- ranking: Firestore por REST, o local ---------- */
@@ -74,24 +112,24 @@
         clearTimeout(t);
         if (!r.ok) {
           // una vez, para depurar: 403 = reglas de Firestore; 404 = ID mal o base de datos sin crear
-          if (!warned) { warned = true; console.warn('[Break Time] Firestore respondió ' + r.status + ': se usa el ranking local.'); }
+          if (!warned) { warned = true; console.warn('[Arcade] Firestore respondió ' + r.status + ': se usa el ranking local.'); }
           throw new Error('HTTP ' + r.status);
         }
         return r.json();
       }, e => { clearTimeout(t); throw e; });
     }
-    const localAll = () => { try { return JSON.parse(store.get(KEY_LOCAL)) || []; } catch (e) { return []; } };
-    function localAdd(name, score) {
-      const l = localAll();
+    const localAll = (g) => { try { return JSON.parse(store.get(GAMES[g].local)) || []; } catch (e) { return []; } };
+    function localAdd(name, score, g) {
+      const l = localAll(g);
       l.push({ name, score });
       l.sort((a, b) => b.score - a.score);
-      store.set(KEY_LOCAL, JSON.stringify(l.slice(0, 50)));
+      store.set(GAMES[g].local, JSON.stringify(l.slice(0, 50)));
     }
-    async function top(n) {
+    async function top(n, g) {
       if (on) {
         try {
           const res = await post(':runQuery', { structuredQuery: {
-            from: [{ collectionId: 'scores' }],
+            from: [{ collectionId: GAMES[g].coll }],
             orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }],
             limit: n,
           } });
@@ -102,10 +140,10 @@
           return { scope: 'global', rows };
         } catch (e) { /* sin red o sin permiso: el local */ }
       }
-      return { scope: on ? 'offline' : 'local', rows: localAll().slice(0, n) };
+      return { scope: on ? 'offline' : 'local', rows: localAll(g).slice(0, n) };
     }
-    async function count(where) {
-      const q = { from: [{ collectionId: 'scores' }] };
+    async function count(where, g) {
+      const q = { from: [{ collectionId: GAMES[g].coll }] };
       if (where) q.where = where;
       const res = await post(':runAggregationQuery', {
         structuredAggregationQuery: { structuredQuery: q, aggregations: [{ alias: 'n', count: {} }] },
@@ -113,23 +151,23 @@
       const f = res && res[0] && res[0].result && res[0].result.aggregateFields;
       return f && f.n ? +f.n.integerValue : 0;
     }
-    async function submit(name, score) {
-      localAdd(name, score);
+    async function submit(name, score, g) {
+      localAdd(name, score, g);
       if (!on) return 'local';
       try {
-        await post('/scores', { fields: { name: { stringValue: name }, score: { integerValue: String(score) } } });
+        await post('/' + GAMES[g].coll, { fields: { name: { stringValue: name }, score: { integerValue: String(score) } } });
         return 'global';
       } catch (e) { return 'offline'; }
     }
-    async function rank(score, scope) {
+    async function rank(score, scope, g) {
       if (scope === 'global') {
         try {
           const gt = { fieldFilter: { field: { fieldPath: 'score' }, op: 'GREATER_THAN', value: { integerValue: String(score) } } };
-          const [above, total] = await Promise.all([count(gt), count(null)]);
+          const [above, total] = await Promise.all([count(gt, g), count(null, g)]);
           return { pos: above + 1, total: Math.max(total, above + 1) };
         } catch (e) { /* cae al local */ }
       }
-      const l = localAll();
+      const l = localAll(g);
       return { pos: l.filter(x => x.score > score).length + 1, total: Math.max(1, l.length) };
     }
     return { on, top, submit, rank };
@@ -202,6 +240,14 @@
       buy() { [0, 4, 7, 11, 14].forEach((q, i) => tone(659.25 * Math.pow(2, q / 12), 0.14, 'triangle', 0.32, i * 0.055)); },
       record() { [0, 4, 7, 12].forEach((s, i) => tone(523.25 * Math.pow(2, s / 12), 0.18, 'triangle', 0.35, i * 0.07)); },
       over() { tone(262, 0.25, 'triangle', 0.35); tone(196, 0.5, 'triangle', 0.35, 0.22); },
+      // Egg Ninja: el tajo (un silbido) y la nota del combo; el huevo que se escapa
+      slice(n) {
+        if (!free(lastBrk, 0.02)) return;
+        lastBrk = ac.currentTime;
+        tone(1100 + Math.random() * 200, 0.07, 'sawtooth', 0.045, 0, 300);
+        tone(note(Math.min(n - 1, 14)), 0.13, 'triangle', 0.32, 0.015);
+      },
+      miss() { tone(330, 0.24, 'square', 0.06, 0, 120); },
     };
   })();
 
@@ -282,7 +328,9 @@
   let playerName = cleanName(store.get('cdv_bk_name') || '');
   const keys = { l: 0, r: 0 };
   let COL = {}, LIGHT = [0, 0, 0], DARK = [0, 0, 0];
-  const PLAYING = { aim: 1, fly: 1, shift: 1 };
+  const PLAYING = { aim: 1, fly: 1, shift: 1, play: 1, ready: 1 };
+  // el juego elegido (null en el menú) y, si no es Break Time, su motor
+  let game = null, E = null, recToast = false;
 
 
   /* ---------- modal ---------- */
@@ -292,6 +340,21 @@
   const ICON_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v7M2 5.5l3 3 3-3"/></svg>';
   const ARROW = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5h7M5.5 2l3 3-3 3"/></svg>';
   const ICON_COIN = '<svg class="bk-coin-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/><circle class="bk-coin-in" cx="8" cy="8" r="4.3"/></svg>';
+  const ICON_BACK = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M8.5 5h-7M4.5 2l-3 3 3 3"/></svg>';
+  /* las tarjetas del menú, con un dibujo de cada juego */
+  const ART = {
+    bbtan: '<svg viewBox="0 0 64 64"><rect class="bk-art-high" x="6" y="6" width="15" height="15" rx="3.5"/><rect class="bk-art-low" x="24.5" y="6" width="15" height="15" rx="3.5"/><path class="bk-art-high" d="M43 6h11.5A3.5 3.5 0 0 1 58 9.5V21z"/><rect class="bk-art-low" x="43" y="24.5" width="15" height="15" rx="3.5"/><circle class="bk-art-ink" cx="17" cy="38" r="1.6"/><circle class="bk-art-ink" cx="14" cy="45" r="1.6"/><circle class="bk-art-ink" cx="11" cy="52" r="1.6"/><circle class="bk-art-ink" cx="21" cy="30.5" r="1.6"/><circle class="bk-art-gold" cx="8.5" cy="58" r="3.6"/></svg>',
+    egg: '<svg viewBox="0 0 64 64"><path class="bk-art-shell" d="M30 10c8.5 0 12.5 12.6 12.5 20.3C42.5 39.8 37 46 30 46s-12.5-6.2-12.5-15.7C17.5 22.6 21.5 10 30 10z" transform="rotate(-14 30 28)"/><ellipse class="bk-art-low" cx="44" cy="53" rx="11" ry="5.6"/><circle class="bk-art-gold" cx="44" cy="52.5" r="3.4"/><path class="bk-art-slash" d="M10 44L52 12"/><circle class="bk-art-gold" cx="54.5" cy="10.5" r="2"/></svg>',
+    snake: '<svg viewBox="0 0 64 64"><path class="bk-art-body" d="M8 50h14V32h16V18h8"/><circle class="bk-art-ink" cx="49" cy="18" r="7"/><circle class="bk-art-bg" cx="51" cy="16.5" r="1.8"/><circle class="bk-art-bg" cx="51" cy="21" r="1.4"/><ellipse class="bk-art-gold" cx="51" cy="44" rx="4.2" ry="5.4" transform="rotate(-28 51 44)"/></svg>',
+  };
+  function gameCard(g, i) {
+    return '<button type="button" class="bk-game" data-game="' + g + '" style="--i:' + i + '">'
+      + '<span class="bk-game-art" aria-hidden="true">' + ART[g] + '</span>'
+      + '<span class="bk-game-txt"><b>' + GAMES[g].name + '</b><span>' + GAMES[g].desc + '</span></span>'
+      + '<span class="bk-game-best"><small>Tu mejor</small><b>—</b></span>'
+      + '<span class="bk-game-go" aria-hidden="true">' + ARROW + '</span>'
+      + '</button>';
+  }
   const BOARD = '<div class="bk-board"><p class="bk-board-h"><span>Top 3</span><span class="bk-scope">Global</span></p><ol class="bk-list"></ol></div>';
 
   function build() {
@@ -300,16 +363,14 @@
     root.hidden = true;
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-modal', 'true');
-    root.setAttribute('aria-label', 'Minijuego: Break Time');
-    const how = FINE
-      ? 'Un respiro entre proyecto y proyecto. Apunta con el ratón y haz clic: sale una ráfaga con todas tus bolas. Cada golpe resta 1 al bloque y cada <b>+1</b> que tocas es una bola más. Si un bloque llega abajo, se acabó. Las <b>monedas</b> se guardan para la tienda.<span class="bk-keys">← → para afinar · Espacio lanza · P pausa</span>'
-      : 'Un respiro entre proyecto y proyecto. Arrastra el dedo <b>hacia abajo</b> para apuntar (como un tirachinas) y suelta. Cada golpe resta 1 al bloque y cada <b>+1</b> es una bola más. Si un bloque llega abajo, se acabó. Las <b>monedas</b> se guardan para la tienda.';
+    root.setAttribute('aria-label', 'Arcade: tres minijuegos');
     root.innerHTML = ''
       + '<div class="bk-backdrop"></div>'
       + '<div class="bk-panel" tabindex="-1">'
       +   '<header class="bk-hud">'
       +     '<div class="bk-hud-l">'
-      +       '<span class="bk-brand">Minijuego</span>'
+      +       '<span class="bk-brand">Arcade</span>'
+      +       '<button type="button" class="bk-tohub" aria-label="Volver a los juegos">' + ICON_BACK + 'Juegos</button>'
       +       '<span class="bk-scorebox" aria-hidden="true"><span class="bk-lbl">Ronda</span><b class="bk-score">1</b></span>'
       +     '</div>'
       +     '<div class="bk-hud-c"><span class="bk-best"></span></div>'
@@ -320,14 +381,20 @@
       +     '</div>'
       +   '</header>'
       +   '<div class="bk-stage">'
-      +     '<canvas class="bk-cv" role="img" aria-label="Tablero: apunta y lanza las bolas contra los bloques"></canvas>'
-      +     '<p class="bk-hint" aria-hidden="true">' + (FINE ? 'Apunta y haz clic' : 'Arrastra hacia abajo y suelta') + '</p>'
+      +     '<canvas class="bk-cv" role="img" aria-label="Tablero de juego"></canvas>'
+      +     '<p class="bk-hint" aria-hidden="true"></p>'
       +     '<span class="bk-speed" aria-hidden="true"></span>'
       +     '<button type="button" class="bk-recall">' + ICON_DOWN + 'Recoger</button>'
       +     '<div class="bk-toast" aria-hidden="true"><span></span><b></b></div>'
+      +     '<section class="bk-screen bk-s-hub" aria-label="Elige un juego">'
+      +       '<p class="bk-k">Elige un juego</p>'
+      +       '<h2 class="bk-title bk-title-hub">Arcade</h2>'
+      +       '<div class="bk-games">' + gameCard('bbtan', 0) + gameCard('egg', 1) + gameCard('snake', 2) + '</div>'
+      +       '<p class="bk-hub-note">Cada juego tiene su propio top 3.</p>'
+      +     '</section>'
       +     '<section class="bk-screen bk-s-start" aria-label="Inicio">'
-      +       '<h2 class="bk-title"><span>Break</span> <span>Time</span></h2>'
-      +       '<p class="bk-how">' + how + '</p>'
+      +       '<h2 class="bk-title bk-g-title"></h2>'
+      +       '<p class="bk-how"></p>'
       +       '<form class="bk-form" novalidate>'
       +         '<label class="bk-name"><span class="bk-sr">Tu nombre</span>'
       +           '<input type="text" name="name" maxlength="12" placeholder="Tu nombre" autocomplete="nickname" autocapitalize="characters" spellcheck="false" enterkeyhint="go"></label>'
@@ -338,7 +405,7 @@
       +     '</section>'
       +     '<section class="bk-screen bk-s-pause" aria-label="Pausa">'
       +       '<p class="bk-k">Pausa</p>'
-      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-resume">Continuar' + ARROW + '</button><button type="button" class="bk-btn bk-ghost bk-quit">Salir</button></div>'
+      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-resume">Continuar' + ARROW + '</button><button type="button" class="bk-btn bk-ghost bk-hub-b">Juegos</button></div>'
       +     '</section>'
       +     '<section class="bk-screen bk-s-over" aria-label="Fin de la partida">'
       +       '<p class="bk-k">Fin de la partida</p>'
@@ -348,7 +415,7 @@
       +       '<p class="bk-stats"></p>'
       +       BOARD
       +       '<p class="bk-rank"></p>'
-      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-again">Otra partida' + ARROW + '</button><button type="button" class="bk-btn bk-ghost bk-shop-b">Tienda</button><button type="button" class="bk-btn bk-ghost bk-quit">Salir</button></div>'
+      +       '<div class="bk-actions"><button type="button" class="bk-btn bk-again">Otra partida' + ARROW + '</button><button type="button" class="bk-btn bk-ghost bk-shop-b">Tienda</button><button type="button" class="bk-btn bk-ghost bk-hub-b">Juegos</button></div>'
       +     '</section>'
       +     '<section class="bk-screen bk-s-shop" aria-label="Tienda de bolas">'
       +       '<p class="bk-k">Tienda</p>'
@@ -378,16 +445,20 @@
       resume: $('.bk-resume'), again: $('.bk-again'),
       coins: $('.bk-coins'), coinsN: $('.bk-coins-n'), walletN: $('.bk-wallet-n'), skins: $('.bk-skins'),
       shopBtn: $('.bk-shop-b'), back: $('.bk-back'),
-      screens: { start: $('.bk-s-start'), pause: $('.bk-s-pause'), over: $('.bk-s-over'), shop: $('.bk-s-shop') },
+      games: $('.bk-games'), gTitle: $('.bk-g-title'), how: $('.bk-how'), lbl: $('.bk-lbl'), unit: $('.bk-unit'),
+      tohub: $('.bk-tohub'),
+      screens: { hub: $('.bk-s-hub'), start: $('.bk-s-start'), pause: $('.bk-s-pause'), over: $('.bk-s-over'), shop: $('.bk-s-shop') },
     });
     buildShop();
     ui.input.value = playerName;
     ui.mute.setAttribute('aria-pressed', Sfx.isMuted() ? 'true' : 'false');
 
     ui.x.addEventListener('click', close);
-    root.querySelectorAll('.bk-quit').forEach(b => b.addEventListener('click', close));
     ui.resume.addEventListener('click', resume);
-    ui.again.addEventListener('click', () => { Sfx.init(); newGame(); });
+    ui.again.addEventListener('click', startGame);
+    ui.tohub.addEventListener('click', showHub);
+    root.querySelectorAll('.bk-hub-b').forEach(b => b.addEventListener('click', showHub));
+    ui.games.querySelectorAll('.bk-game').forEach(b => b.addEventListener('click', () => { Sfx.init(); selectGame(b.dataset.game); }));
     ui.recall.addEventListener('click', recall);
     ui.coins.addEventListener('click', () => { if (!ui.coins.disabled) openShop(); });
     ui.shopBtn.addEventListener('click', openShop);
@@ -432,11 +503,21 @@
     });
     window.addEventListener('pointercancel', () => { aim.press = false; if (aim.kind === 'touch') aim.on = false; });
 
+    // Egg Ninja y Snake: cada uno decide qué hacer con el puntero (cortar, deslizar)
+    stage.addEventListener('pointerdown', e => {
+      if (!opened || !E || !PLAYING[state] || (e.button != null && e.button > 0) || e.target.closest('button')) return;
+      if (e.pointerType !== 'mouse') { try { stage.setPointerCapture(e.pointerId); } catch (_) { /* nada */ } }
+      E.down(local(e), e);
+    });
+    window.addEventListener('pointermove', e => { if (opened && E) E.move(local(e), e, inside(e)); }, { passive: true });
+    window.addEventListener('pointerup', () => { if (E) E.up(); });
+    window.addEventListener('pointercancel', () => { if (E) E.up(); });
+
     document.addEventListener('keydown', onKey);
     document.addEventListener('keyup', onKeyUp);
     window.addEventListener('resize', () => { if (opened) layout(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden && opened && PLAYING[state]) pause(); });
-    window.addEventListener('blur', () => { if (opened && state === 'fly') pause(); });
+    window.addEventListener('blur', () => { if (opened && (state === 'fly' || state === 'play')) pause(); });
     built = true;
   }
 
@@ -467,7 +548,10 @@
   function readColors() {
     const cs = getComputedStyle(root);
     const v = n => cs.getPropertyValue(n).trim();
-    COL = { bg: v('--bk-bg'), ink: v('--bk-ink'), line: v('--bk-line'), num: v('--bk-num'), fire: v('--bk-fire'), acc: v('--bk-acc') };
+    COL = {
+      bg: v('--bk-bg'), ink: v('--bk-ink'), line: v('--bk-line'), num: v('--bk-num'), fire: v('--bk-fire'), acc: v('--bk-acc'),
+      mute: v('--bk-mute'), shell: v('--bk-shell'), shellLine: v('--bk-shell-line'), bomb: v('--bk-bomb'), bombLine: v('--bk-bomb-line'),
+    };
     LIGHT = rgb(v('--bk-low'));
     DARK = rgb(v('--bk-high'));
   }
@@ -493,13 +577,10 @@
     root.hidden = false;
     document.body.classList.add('bk-open');
     if (window._holdModel) window._holdModel('game', true);   // el 3D de la home deja de girar mientras tanto
-    best = +store.get(KEY_BEST) || 0;
     cell = 0;
     layout();
-    attract();
     syncCoins();
-    setScreen('start');
-    loadTop(ui.startBoard);
+    showHub();
     void root.offsetWidth;
     // crece desde la pantallita de la consola (sin transición CSS que le pise)
     const sr = screenRect();
@@ -510,10 +591,11 @@
     last = performance.now();
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(loop);
-    // con ratón, directo al nombre; en táctil no (abriría el teclado de golpe)
+    // con ratón, el foco en el primer juego; en táctil, en el panel
     setTimeout(() => {
       if (!opened) return;
-      if (FINE) (ui.input.value ? ui.go : ui.input).focus({ preventScroll: true });
+      const first = ui.games.querySelector('.bk-game');
+      if (FINE && first) first.focus({ preventScroll: true });
       else panel.focus({ preventScroll: true });
     }, 60);
   }
@@ -733,7 +815,7 @@
     box.classList.add('is-loading');
     fillRows(box, [], true);
     const my = token;
-    Board.top(3).then(res => { if (my === token) fillBoard(box, res); });
+    Board.top(3, game).then(res => { if (my === token) fillBoard(box, res); });
   }
   function fillRows(box, rows, loading, me) {
     const list = box.querySelector('.bk-list');
@@ -772,8 +854,7 @@
     playerName = n;
     ui.input.value = n;
     store.set('cdv_bk_name', n);
-    Sfx.init();
-    newGame();
+    startGame();
   }
   function bad(msg) {
     ui.err.textContent = msg;
@@ -791,6 +872,7 @@
       if (screenNow === 'shop') closeShop();
       else if (state === 'pause') resume();
       else if (PLAYING[state]) pause();
+      else if (screenNow === 'start' || screenNow === 'over') showHub();
       else close();
       return;
     }
@@ -798,11 +880,13 @@
     const tag = e.target && e.target.tagName;
     if (tag === 'INPUT') return;
     if (tag === 'BUTTON' && (k === ' ' || k === 'Enter')) return;
+    if ((k === 'p' || k === 'P') && (PLAYING[state] || state === 'pause')) { if (state === 'pause') resume(); else pause(); return; }
+    if (!game) { if (state === 'hub' && hubKey(k)) e.preventDefault(); return; }
+    if (game !== 'bbtan') { if (E && PLAYING[state] && E.key(k)) e.preventDefault(); return; }
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.l = 1; e.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.r = 1; e.preventDefault(); }
     else if ((k === ' ' || k === 'Enter') && state === 'aim') { e.preventDefault(); shoot(aim.on ? aim.a : Math.PI / 2); }
     else if ((k === 'ArrowDown' || k === 's' || k === 'S') && state === 'fly') { e.preventDefault(); recall(); }
-    else if ((k === 'p' || k === 'P') && (PLAYING[state] || state === 'pause')) { if (state === 'pause') resume(); else pause(); }
   }
   function onKeyUp(e) {
     const k = e.key;
@@ -851,7 +935,8 @@
     } else if (!oc) {
       shooter.x = gx + COLS * cell / 2;
     }
-    if (state === 'attract' && root) root.style.setProperty('--bk-gb', Math.round(gy + DEMO.length * cell) + 'px');
+    if (game === 'bbtan' && state === 'attract' && root) root.style.setProperty('--bk-gb', Math.round(gy + DEMO.length * cell) + 'px');
+    if (E) E.size();
   }
   const cx = k => gx + k.c * cell + cell / 2;
   const cy = k => gy + k.r * cell + cell / 2;
@@ -1111,20 +1196,22 @@
     }
     items = [];
     rebuildAt();
+    const stats = fmt(broken) + (broken === 1 ? ' bloque' : ' bloques') + ' · ' + fmt(ballsN) + (ballsN === 1 ? ' bola' : ' bolas')
+      + (coinsGame ? ' · ' + fmt(coinsGame) + (coinsGame === 1 ? ' moneda' : ' monedas') : '');
     const my = ++token;
-    setTimeout(() => { if (my === token && opened) showOver(my); }, REDUCE ? 250 : 950);
+    setTimeout(() => { if (my === token && opened) showOver(my, round, stats); }, REDUCE ? 250 : 950);
   }
 
-  async function showOver(my) {
-    const score = round;
+  async function showOver(my, score, stats) {
+    const G = GAMES[game];
     root.classList.remove('is-game');
     setScreen('over');
-    const prev = +store.get(KEY_BEST) || 0;
+    const prev = +store.get(G.best) || 0;
     const record = score > prev;
-    if (record) { store.set(KEY_BEST, String(score)); best = score; }
+    if (record) { store.set(G.best, String(score)); best = score; }
     countUp(ui.final, score);
-    ui.stats.textContent = fmt(broken) + (broken === 1 ? ' bloque' : ' bloques') + ' · ' + fmt(ballsN) + (ballsN === 1 ? ' bola' : ' bolas')
-      + (coinsGame ? ' · ' + fmt(coinsGame) + (coinsGame === 1 ? ' moneda' : ' monedas') : '');
+    ui.unit.textContent = G.units;
+    ui.stats.textContent = stats;
     ui.coins.disabled = false;
     syncCoins();
     ui.badge.classList.remove('is-on');
@@ -1132,12 +1219,13 @@
     ui.rank.textContent = '';
     ui.overBoard.classList.add('is-loading');
     fillRows(ui.overBoard, [], true);
-    announce('Fin de la partida: ronda ' + score);
+    announce('Fin de la partida: ' + fmt(score) + ' ' + G.units.toLowerCase());
     setTimeout(() => { if (my === token && opened) ui.again.focus({ preventScroll: true }); }, 120);
 
-    const scope = await Board.submit(playerName, score);
+    // con 0 no se sube nada (las reglas de Firestore piden más de 0)
+    const scope = score > 0 ? await Board.submit(playerName, score, game) : 'local';
     if (my !== token) return;
-    const [top, rk] = await Promise.all([Board.top(3), Board.rank(score, scope)]);
+    const [top, rk] = await Promise.all([Board.top(3, game), score > 0 ? Board.rank(score, scope, game) : Promise.resolve(null)]);
     if (my !== token) return;
     fillBoard(ui.overBoard, top, { name: playerName, score });
     if (rk) ui.rank.textContent = 'Tu puesto: ' + fmt(rk.pos) + ' de ' + fmt(rk.total);
@@ -1145,7 +1233,7 @@
     if (inTop || record) {
       ui.badge.textContent = inTop ? '¡Estás en el top 3!' : 'Nuevo récord personal';
       ui.badge.classList.add('is-on');
-      if (inTop) confetti(W / 2, H * 0.3, 70);
+      if (inTop) { if (game === 'bbtan') confetti(W / 2, H * 0.3, 70); else if (E) E.confetti(); }
     }
   }
 
@@ -1167,6 +1255,7 @@
     state = 'pause';
     keys.l = keys.r = 0;
     aim.press = false;
+    if (E) E.pause();
     setScreen('pause');
     setTimeout(() => { if (state === 'pause') ui.resume.focus({ preventScroll: true }); }, 60);
   }
@@ -1762,20 +1851,29 @@
      tinta) y estampado en cada bola, girando. Un poco más grande que la
      bola de verdad para que se lea; la física no cambia. */
   let logoPath = null, sprite = null, spriteKey = '';
-  function logoSprite() {
-    const key = br + '|' + DPR + '|' + COL.ink;
-    if (sprite && spriteKey === key) return sprite;
+  // el logo de la cabecera como Path2D (cara, ojos y silueta), una sola vez
+  function ensureLogo() {
     if (logoPath === null) {
       logoPath = false;
       try {
         const fp = document.querySelector('.top-logo .tl-face'), ep = document.querySelector('.top-logo .tl-eyes');
         const svg = fp && fp.ownerSVGElement;
         if (svg && typeof Path2D === 'function') {
-          logoPath = { vb: svg.viewBox.baseVal, face: new Path2D(fp.getAttribute('d')), eyes: ep ? new Path2D(ep.getAttribute('d')) : null };
+          // el primer trazo de la cara es su silueta exterior (con ella se rellena la cabeza de la serpiente)
+          const d = fp.getAttribute('d'), cut = d.indexOf('M', 1);
+          logoPath = {
+            vb: svg.viewBox.baseVal, face: new Path2D(d), eyes: ep ? new Path2D(ep.getAttribute('d')) : null,
+            outer: new Path2D(cut > 0 ? d.slice(0, cut) : d),
+          };
         }
       } catch (e) { logoPath = false; }
     }
-    if (!logoPath) return null;
+    return logoPath;
+  }
+  function logoSprite() {
+    const key = br + '|' + DPR + '|' + COL.ink;
+    if (sprite && spriteKey === key) return sprite;
+    if (!ensureLogo()) return null;
     const vb = logoPath.vb, h = br * 2.6, w = h * vb.width / vb.height;
     const cvs = document.createElement('canvas');
     cvs.width = Math.ceil(w * DPR) + 2;
@@ -1819,13 +1917,1197 @@
     c.textBaseline = 'middle';
   }
 
+  /* ============================================================
+     EL MENÚ Y LOS OTROS DOS JUEGOS
+     Egg Ninja y Snake comparten con Break Time el modal, los colores, el
+     sonido y el ranking. Cada uno es un motor con la misma forma (attract,
+     start, update, render, down / move / up, key, size, pause, confetti)
+     y el bucle llama al del juego elegido.
+     ============================================================ */
+
+  /* ---------- el menú: elegir juego ---------- */
+  function showHub() {
+    const from = game;
+    token++;
+    game = null;
+    E = null;
+    state = 'hub';
+    keys.l = keys.r = 0;
+    aim.press = false;
+    root.classList.remove('is-game');
+    delete root.dataset.game;
+    root.setAttribute('aria-label', 'Arcade: tres minijuegos');
+    ui.hint.classList.remove('is-on');
+    ui.recall.classList.remove('is-on');
+    ui.speed.classList.remove('is-on');
+    ui.toast.classList.remove('is-on');
+    ui.coins.disabled = false;
+    ui.best.textContent = '';
+    // el récord de cada uno, en su tarjeta
+    ui.games.querySelectorAll('.bk-game').forEach(b => {
+      const v = +store.get(GAMES[b.dataset.game].best) || 0;
+      b.querySelector('.bk-game-best b').textContent = v ? fmt(v) : '—';
+    });
+    ui.screens.hub.scrollTop = 0;
+    setScreen('hub');
+    announce('Elige un juego');
+    // al volver de un juego, el foco en su tarjeta
+    if (from) {
+      setTimeout(() => {
+        if (state !== 'hub') return;
+        const b = ui.games.querySelector('[data-game="' + from + '"]');
+        if (FINE && b) b.focus({ preventScroll: true }); else panel.focus({ preventScroll: true });
+      }, 60);
+    }
+  }
+  // ↑ ↓ entre las tarjetas
+  function hubKey(k) {
+    if (k !== 'ArrowDown' && k !== 'ArrowUp') return false;
+    const list = Array.prototype.slice.call(ui.games.querySelectorAll('.bk-game'));
+    let i = list.indexOf(document.activeElement);
+    i = i < 0 ? 0 : (i + (k === 'ArrowDown' ? 1 : -1) + list.length) % list.length;
+    list[i].focus({ preventScroll: true });
+    return true;
+  }
+
+  function selectGame(g) {
+    const G = GAMES[g];
+    if (!G) return;
+    token++;
+    game = g;
+    E = g === 'bbtan' ? null : ENGINES[g];
+    root.dataset.game = g;
+    root.setAttribute('aria-label', 'Minijuego: ' + G.name);
+    ui.gTitle.innerHTML = G.title.map(w => '<span>' + w + '</span>').join(' ');
+    ui.how.innerHTML = G.how;
+    ui.hint.textContent = G.hint;
+    ui.lbl.textContent = G.label;
+    cv.setAttribute('aria-label', G.aria);
+    ui.hint.classList.remove('is-on');
+    ui.recall.classList.remove('is-on');
+    ui.speed.classList.remove('is-on');
+    ui.coins.disabled = false;
+    best = +store.get(G.best) || 0;
+    if (E) E.attract(); else attract();
+    setBest();
+    ui.screens.start.scrollTop = 0;
+    setScreen('start');
+    loadTop(ui.startBoard);
+    // con ratón, directo al nombre; en táctil no (abriría el teclado de golpe)
+    setTimeout(() => {
+      if (!opened || screenNow !== 'start') return;
+      if (FINE) (ui.input.value ? ui.go : ui.input).focus({ preventScroll: true });
+      else panel.focus({ preventScroll: true });
+    }, 60);
+  }
+
+  function startGame() {
+    Sfx.init();
+    if (game === 'bbtan') { newGame(); return; }
+    if (!E) return;
+    token++;
+    recToast = false;
+    ui.score.textContent = '0';
+    setBest();
+    root.classList.add('is-game');
+    setScreen(null);
+    E.start();
+    ui.hint.classList.add('is-on');
+    panel.focus({ preventScroll: true });
+    announce(GAMES[game].name + ': empieza la partida');
+  }
+  // los motores avisan de cada punto; el récord se celebra una vez por partida
+  function setScore(n) {
+    ui.score.textContent = fmt(n);
+    if (best > 0 && n > best && !recToast) {
+      recToast = true;
+      toast('Nuevo récord', fmt(n));
+      Sfx.record();
+    }
+  }
+  function finish(score, stats) {
+    state = 'over';
+    ui.hint.classList.remove('is-on');
+    const my = ++token;
+    setTimeout(() => { if (my === token && opened) showOver(my, score, stats); }, REDUCE ? 250 : 1100);
+  }
+
+  // en el inicio, si se hace scroll, la cabecera dibujada sube con el texto
+  const startScroll = () => (state === 'attract' && screenNow === 'start' ? ui.screens.start.scrollTop : 0);
+  const lerp = (a, b, k) => a + (b - a) * k;
+
+
+  /* ---------- efectos compartidos por los dos ---------- */
+  const fx = { parts: [], pops: [], shake: 0, flash: 0 };
+  function fxReset() { fx.parts.length = 0; fx.pops.length = 0; fx.shake = 0; fx.flash = 0; }
+  function fxBurst(x, y, col, n, sp, sz) {
+    if (REDUCE) n = Math.ceil(n / 3);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, v = (0.3 + Math.random() * 0.7) * (sp || 260);
+      fx.parts.push({
+        x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: (sz || 4) * (0.6 + Math.random() * 0.8),
+        r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, life: 1, col, dot: Math.random() < 0.5,
+      });
+    }
+    if (fx.parts.length > 400) fx.parts.splice(0, fx.parts.length - 400);
+  }
+  function fxPop(x, y, t, col, big) {
+    fx.pops.push({ x: clamp(x, 44, W - 44), y, t, col: col || COL.ink, big: !!big, life: 1 });
+  }
+  function fxConfetti() {
+    if (REDUCE) return;
+    const cs = [COL.acc, COL.ink, COL.fire, COL.shell];
+    for (let i = 0; i < 70; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2, v = 280 + Math.random() * 420;
+      fx.parts.push({ x: W / 2, y: H * 0.3, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: 3 + Math.random() * 4, r: Math.random() * 6, vr: (Math.random() - 0.5) * 16, life: 1.6, col: cs[i % cs.length] });
+    }
+  }
+  function fxStep(dt) {
+    for (let i = fx.parts.length - 1; i >= 0; i--) {
+      const p = fx.parts[i];
+      p.vy += 900 * dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.r += p.vr * dt;
+      p.life -= dt * 1.7;
+      if (p.life <= 0 || p.y > H + 40) fx.parts.splice(i, 1);
+    }
+    for (let i = fx.pops.length - 1; i >= 0; i--) {
+      fx.pops[i].life -= dt * (fx.pops[i].big ? 0.9 : 1.3);
+      if (fx.pops[i].life <= 0) fx.pops.splice(i, 1);
+    }
+    fx.shake = Math.max(0, fx.shake - dt * 30);
+    fx.flash = Math.max(0, fx.flash - dt * 2.4);
+  }
+  function fxDraw(c) {
+    for (const p of fx.parts) {
+      c.globalAlpha = Math.min(1, p.life);
+      c.fillStyle = p.col;
+      if (p.dot) {
+        c.beginPath();
+        c.arc(p.x, p.y, p.s / 2, 0, Math.PI * 2);
+        c.fill();
+      } else {
+        c.save();
+        c.translate(p.x, p.y);
+        c.rotate(p.r);
+        c.fillRect(-p.s / 2, -p.s / 2, p.s, p.s);
+        c.restore();
+      }
+    }
+    c.globalAlpha = 1;
+    if (!fx.pops.length) return;
+    const big = Math.round(clamp(W * 0.058, 20, 30)), small = Math.round(clamp(W * 0.034, 13, 16));
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    for (const p of fx.pops) {
+      const k = 1 - p.life;
+      // los grandes entran con un pequeño salto; todos suben y se desvanecen
+      const sc = p.big && !REDUCE ? 1 + 0.3 * (1 - easeOut(Math.min(1, k * 5))) : 1;
+      c.globalAlpha = clamp(p.life * 1.6, 0, 1);
+      c.fillStyle = p.col;
+      c.font = p.big ? '600 ' + big + 'px "Clash Display", Inter, sans-serif' : '700 ' + small + 'px Inter, sans-serif';
+      c.save();
+      c.translate(p.x, p.y - easeOut(k) * (p.big ? 22 : 30));
+      if (sc !== 1) c.scale(sc, sc);
+      c.fillText(p.t, 0, 0);
+      c.restore();
+    }
+    c.globalAlpha = 1;
+  }
+  function fxShake(c) {
+    if (fx.shake > 0.2) c.translate((Math.random() * 2 - 1) * fx.shake, (Math.random() * 2 - 1) * fx.shake);
+  }
+
+  // la retícula de puntos (como en Break Time), pintada una vez en un canvas aparte
+  let dotsCv = null, dotsKey = '';
+  function dots(c, x0, y0, nx, ny, step) {
+    const key = [W, H, DPR, COL.line, x0, y0, nx, ny, step].join('|');
+    if (dotsKey !== key) {
+      dotsCv = dotsCv || document.createElement('canvas');
+      dotsCv.width = Math.round(W * DPR);
+      dotsCv.height = Math.round(H * DPR);
+      const g = dotsCv.getContext('2d');
+      g.setTransform(DPR, 0, 0, DPR, 0, 0);
+      g.clearRect(0, 0, W, H);
+      g.fillStyle = COL.line;
+      for (let i = 0; i <= nx; i++) {
+        for (let j = 0; j <= ny; j++) {
+          g.beginPath();
+          g.arc(x0 + i * step, y0 + j * step, 1.1, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+      dotsKey = key;
+    }
+    c.drawImage(dotsCv, 0, 0, W, H);
+  }
+
+  // destello de cuatro puntas (la chispa de la mecha, el brillo del huevo dorado)
+  function sparkle(c, x, y, r) {
+    c.beginPath();
+    c.moveTo(x, y - r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.quadraticCurveTo(x, y, x, y + r);
+    c.quadraticCurveTo(x, y, x - r, y);
+    c.quadraticCurveTo(x, y, x, y - r);
+    c.fill();
+  }
+
+
+  /* ---------- EGG NINJA ----------
+     Los huevos saltan desde abajo en tandas; los cortas pasando el ratón
+     deprisa (o deslizando el dedo). Cada uno vale 1, los dorados 5, y tres
+     o más de un tajo suman el combo. Se te escapan tres, o cortas una
+     bomba, y se acabó. Las tandas crecen y se aceleran con los puntos, y
+     de vez en cuando llega una ráfaga de huevos a la vez. */
+  const Egg = (() => {
+    const TRAIL = 0.13;                    // lo que dura la estela del tajo (s)
+    let eggs = [], halves = [], splats = [], trail = [], queue = [];
+    let time = 0, score = 0, lives = 3, cut = 0, golds = 0, bestCombo = 0;
+    let combo = 0, comboT = 0, comboX = 0, comboY = 0, waveT = 0;
+    let er = 24, G = 900, band = 180, demoT = 0, auto = null;
+    let px = 0, py = 0, pt = 0, has = false, pressed = false, stroke = 0, inStroke = false;
+    const lost = [0, 0, 0];
+    let eggPath = null;
+
+    function size() {
+      er = clamp(Math.min(W, H) * 0.062, 19, 32);
+      G = H * 1.25;
+      band = Math.round(clamp(H * 0.26, 150, 210));
+      if (state === 'attract' && game === 'egg') root.style.setProperty('--bk-gb', band + 'px');
+    }
+    // el huevo, a tamaño 1 (medio ancho = 1): más estrecho arriba
+    function shape() {
+      if (eggPath) return eggPath;
+      const p = new Path2D();
+      p.moveTo(0, -1.32);
+      p.bezierCurveTo(0.6, -1.32, 1, -0.62, 1, 0.12);
+      p.bezierCurveTo(1, 0.68, 0.58, 1.02, 0, 1.02);
+      p.bezierCurveTo(-0.58, 1.02, -1, 0.68, -1, 0.12);
+      p.bezierCurveTo(-1, -0.62, -0.6, -1.32, 0, -1.32);
+      p.closePath();
+      eggPath = p;
+      return p;
+    }
+    const outlined = () => COL.shellLine && COL.shellLine !== 'transparent' && COL.shellLine !== 'rgba(0, 0, 0, 0)';
+
+    function reset() {
+      eggs = []; halves = []; splats = []; trail = []; queue = [];
+      combo = 0; auto = null; inStroke = false; has = false; pressed = false;
+      lost[0] = lost[1] = lost[2] = 0;
+      fxReset();
+    }
+
+    /* en el inicio: huevos, uno dorado y una bomba flotando en la cabecera;
+       cada poco, un tajo de muestra corta uno (y con el ratón puedes probar) */
+    function attract() {
+      state = 'attract';
+      reset();
+      size();
+      const kinds = narrow ? ['egg', 'bomb', 'gold', 'egg'] : ['egg', 'bomb', 'egg', 'gold', 'egg'];
+      kinds.forEach((k, i) => eggs.push({
+        kind: k, float: true, hx: (i + 0.5) / kinds.length, ph: i * 1.7, r0: (i % 2 ? 1 : -1) * 0.22,
+        x: 0, y: 0, vx: 0, vy: 0, rot: 0, vr: 0, born: time + 0.15 + i * 0.07, gone: 0,
+      }));
+      demoT = 1.4;
+    }
+
+    function start() {
+      reset();
+      state = 'play';
+      score = 0; lives = 3; cut = 0; golds = 0; bestCombo = 0;
+      waveT = 0.7;
+    }
+
+    // un huevo (o bomba) sale desde abajo: sube hasta una altura al azar y cae
+    function launch(kind, fan) {
+      const x0 = fan != null ? W * (0.2 + fan * 0.6) : W * (0.18 + Math.random() * 0.64);
+      const xt = clamp(x0 + (Math.random() - 0.5) * W * 0.6, W * 0.1, W * 0.9);
+      const apex = H * (0.1 + Math.random() * 0.3);
+      const y0 = H + er * 1.6;
+      const vy = -Math.sqrt(2 * G * (y0 - apex));
+      const tUp = -vy / G;
+      eggs.push({ kind, x: x0, y: y0, vx: (xt - x0) / (2 * tUp), vy, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 3.2, ph: Math.random() * 9 });
+    }
+    // una tanda: crece con los puntos; desde 5 puntos, alguna bomba (nunca solo bombas)
+    function wave() {
+      if (score >= 20 && Math.random() < 0.08) {
+        // ráfaga: un abanico de huevos a la vez, para hacer combo
+        const n = 5 + (Math.random() < 0.5 ? 1 : 0);
+        for (let i = 0; i < n; i++) queue.push({ kind: 'egg', at: time + i * 0.06, fan: i / (n - 1) });
+        return n;
+      }
+      let n = score < 3 ? 1 : 1 + Math.floor(Math.random() * Math.min(4, 1 + score / 10));
+      const pb = score < 5 ? 0 : Math.min(0.22, 0.07 + score * 0.003);
+      let good = 0;
+      for (let i = 0; i < n; i++) {
+        let kind = Math.random() < pb ? 'bomb' : 'egg';
+        if (kind === 'egg' && score >= 12 && Math.random() < 0.06) kind = 'gold';
+        if (i === n - 1 && !good) kind = 'egg';
+        if (kind !== 'bomb') good++;
+        queue.push({ kind, at: time + i * (0.16 + Math.random() * 0.2) });
+      }
+      return n;
+    }
+
+    function update(dt) {
+      time += dt;
+      if (state === 'attract') demo(dt);
+      if (state === 'play') {
+        waveT -= dt;
+        let flying = 0;
+        for (const e of eggs) if (!e.float) flying++;
+        if (waveT <= 0 && flying < 8) {
+          const n = wave();
+          waveT = Math.max(0.8, 1.6 - score * 0.011) + n * 0.1;
+        }
+        for (let i = queue.length - 1; i >= 0; i--) {
+          if (queue[i].at <= time) { launch(queue[i].kind, queue[i].fan); queue.splice(i, 1); }
+        }
+        if (combo && time - comboT > 0.3) endCombo();
+      }
+      for (let i = eggs.length - 1; i >= 0; i--) {
+        const e = eggs[i];
+        if (e.float) continue;
+        e.vy += G * dt;
+        e.x += e.vx * dt;
+        e.y += e.vy * dt;
+        e.rot += e.vr * dt;
+        if (e.vy > 0 && e.y > H + er * 2) {
+          eggs.splice(i, 1);
+          if (state === 'play' && e.kind !== 'bomb') miss(e);
+        }
+      }
+      for (let i = halves.length - 1; i >= 0; i--) {
+        const h = halves[i];
+        h.vy += G * dt;
+        h.x += h.vx * dt;
+        h.y += h.vy * dt;
+        h.rot += h.vr * dt;
+        if (h.y > H + er * 3) halves.splice(i, 1);
+      }
+      for (let i = splats.length - 1; i >= 0; i--) {
+        const s = splats[i];
+        s.life -= dt * 0.75;
+        s.y += 16 * dt;               // escurre un poco hacia abajo
+        if (s.life <= 0) splats.splice(i, 1);
+      }
+      while (trail.length && time - trail[0].t > TRAIL) trail.shift();
+      fxStep(dt);
+    }
+
+    function demo(dt) {
+      for (const e of eggs) {
+        if (!e.float) continue;
+        if (e.gone && time >= e.gone) { e.gone = 0; e.born = time; }
+        e.x = e.hx * W;
+        e.y = band * 0.5 + (REDUCE ? 0 : Math.sin(time * 1.5 + e.ph) * 6);
+        e.rot = e.r0 + (REDUCE ? 0 : Math.sin(time * 1.1 + e.ph) * 0.12);
+      }
+      if (REDUCE) return;
+      demoT -= dt;
+      if (demoT <= 0 && !auto) {
+        const pool = eggs.filter(e => e.float && e.kind !== 'bomb' && !e.gone && time - e.born > 0.4);
+        if (pool.length) {
+          const e = pool[Math.floor(Math.random() * pool.length)];
+          const a = -0.55 + (Math.random() - 0.5) * 0.7, L = er * 2.6;
+          auto = { x0: e.x - Math.cos(a) * L, y0: e.y - Math.sin(a) * L, x1: e.x + Math.cos(a) * L, y1: e.y + Math.sin(a) * L, k: 0 };
+          stroke++;
+          trail.push({ x: auto.x0, y: auto.y0, t: time, s: stroke });
+        }
+        demoT = 2.3 + Math.random() * 1.2;
+      }
+      if (auto) {
+        const k0 = auto.k;
+        auto.k = Math.min(1, auto.k + dt / 0.16);
+        const ax = lerp(auto.x0, auto.x1, k0), ay = lerp(auto.y0, auto.y1, k0);
+        const bx = lerp(auto.x0, auto.x1, auto.k), by = lerp(auto.y0, auto.y1, auto.k);
+        trail.push({ x: bx, y: by, t: time, s: stroke });
+        slash(ax, ay, bx, by);
+        if (auto.k >= 1) auto = null;
+      }
+    }
+
+    // distancia del punto al segmento
+    function segDist(x, y, x0, y0, x1, y1) {
+      const dx = x1 - x0, dy = y1 - y0, l = dx * dx + dy * dy;
+      const t = l ? clamp(((x - x0) * dx + (y - y0) * dy) / l, 0, 1) : 0;
+      return Math.hypot(x - (x0 + t * dx), y - (y0 + t * dy));
+    }
+    function slash(x0, y0, x1, y1) {
+      const a = Math.atan2(y1 - y0, x1 - x0);
+      for (let i = eggs.length - 1; i >= 0; i--) {
+        if (state !== 'play' && state !== 'attract') return;
+        const e = eggs[i];
+        if (e.gone || (e.float && time - e.born < 0.25)) continue;
+        if (segDist(e.x, e.y, x0, y0, x1, y1) > er * (e.kind === 'bomb' ? 0.85 : 1.12)) continue;
+        if (e.float) e.gone = time + 1.4; else eggs.splice(i, 1);
+        hit(e, a);
+      }
+    }
+
+    function hit(e, a) {
+      if (e.kind === 'bomb') {
+        if (state === 'attract') {
+          // en la muestra, la bomba solo hace «puf»
+          fxBurst(e.x, e.y, COL.fire, 12, 260, er * 0.16);
+          fx.flash = 0.35;
+          return;
+        }
+        boom(e);
+        return;
+      }
+      // dos mitades que se separan, perpendiculares al tajo
+      const nx = -Math.sin(a), ny = Math.cos(a), push = 70 + Math.random() * 50;
+      for (const s of [1, -1]) {
+        halves.push({
+          x: e.x, y: e.y, vx: e.vx + nx * push * s + Math.cos(a) * 50, vy: Math.min(e.vy, 0) * 0.35 + ny * push * s - 70,
+          rot: e.rot, vr: e.vr + s * (1.6 + Math.random()), cut: a - e.rot, side: s, gold: e.kind === 'gold',
+        });
+      }
+      // la mancha de huevo frito que se queda detrás
+      const blobs = [{ x: 0, y: 0, r: er * 0.72 }];
+      for (let q = 0; q < 5; q++) {
+        const an = q * 1.257 + Math.random() * 0.8, d = er * (0.42 + Math.random() * 0.3);
+        blobs.push({ x: Math.cos(an) * d, y: Math.sin(an) * d, r: er * (0.24 + Math.random() * 0.2) });
+      }
+      splats.push({ x: e.x, y: e.y, blobs, yx: (Math.random() - 0.5) * er * 0.3, yy: (Math.random() - 0.5) * er * 0.3, life: 1, gold: e.kind === 'gold' });
+      fxBurst(e.x, e.y, COL.fire, 7, 230, er * 0.16);
+      fxBurst(e.x, e.y, COL.shell, 6, 260, er * 0.14);
+      if (state !== 'play') return;
+      const pts = e.kind === 'gold' ? 5 : 1;
+      if (e.kind === 'gold') golds++;
+      score += pts;
+      cut++;
+      combo++;
+      comboT = time;
+      comboX = e.x;
+      comboY = e.y;
+      Sfx.slice(combo);
+      fxPop(e.x, e.y - er * 1.3, '+' + pts, e.kind === 'gold' ? COL.fire : COL.ink);
+      setScore(score);
+      if (cut === 1) ui.hint.classList.remove('is-on');
+    }
+    function endCombo() {
+      if (combo >= 3) {
+        score += combo;
+        bestCombo = Math.max(bestCombo, combo);
+        fxPop(comboX, Math.max(er * 3, comboY - er * 2.4), 'Combo ×' + combo, COL.fire, true);
+        Sfx.plus();
+        setScore(score);
+        announce('Combo de ' + combo);
+      }
+      combo = 0;
+    }
+    function miss(e) {
+      lives = Math.max(0, lives - 1);
+      lost[lives] = time;
+      Sfx.miss();
+      fxPop(e.x, H - 30, '×', COL.acc, true);
+      announce(lives ? (lives === 1 ? 'Queda un huevo' : 'Quedan ' + lives + ' huevos') : 'Sin huevos');
+      if (!lives) over();
+    }
+    // la bomba: fogonazo, temblor y se acabó
+    function boom(e) {
+      fx.flash = 1;
+      fx.shake = REDUCE ? 0 : 12;
+      fxBurst(e.x, e.y, COL.fire, 26, 460, er * 0.2);
+      fxBurst(e.x, e.y, COL.ink, 12, 320, er * 0.14);
+      Sfx.bomb();
+      over(true);
+    }
+    function over(bomb) {
+      if (combo) endCombo();
+      queue = [];
+      trail = [];
+      if (!bomb) Sfx.over();
+      const stats = fmt(cut) + (cut === 1 ? ' huevo' : ' huevos')
+        + (bestCombo >= 3 ? ' · combo ×' + bestCombo : '')
+        + (golds ? ' · ' + golds + (golds === 1 ? ' dorado' : ' dorados') : '');
+      finish(score, stats);
+    }
+
+    /* puntero: corta si se mueve deprisa. Con ratón basta con pasar por
+       encima (sin clic); con el dedo, deslizando */
+    function down(p) {
+      if (state !== 'play') return;
+      pressed = true;
+      px = p.x; py = p.y; pt = performance.now(); has = true;
+      inStroke = false;
+    }
+    function move(p, e) {
+      if (state !== 'play' && state !== 'attract') return;
+      const mouse = e.pointerType === 'mouse';
+      if (state === 'attract') {
+        if (!mouse || screenNow !== 'start') return;
+        p.y += startScroll();
+        if (p.y > band) { has = false; return; }
+      } else if (!mouse && !pressed) return;
+      const now = performance.now();
+      if (!has || now - pt > 90) { px = p.x; py = p.y; pt = now; has = true; inStroke = false; return; }
+      const dx = p.x - px, dy = p.y - py, d = Math.hypot(dx, dy);
+      const fast = d / Math.max(1, now - pt) > (mouse && !pressed ? 0.5 : 0.22);
+      if (fast && d > 1) {
+        if (!inStroke) { stroke++; trail.push({ x: px, y: py, t: time, s: stroke }); inStroke = true; }
+        trail.push({ x: p.x, y: p.y, t: time, s: stroke });
+        slash(px, py, p.x, p.y);
+      } else inStroke = false;
+      px = p.x; py = p.y; pt = now;
+    }
+    function up() { pressed = false; inStroke = false; }
+    function pause() { pressed = false; inStroke = false; has = false; trail = []; }
+
+    /* ---- dibujo ---- */
+    function drawEgg(c, e, s) {
+      const gold = e.kind === 'gold';
+      c.save();
+      c.translate(e.x, e.y);
+      c.rotate(e.rot);
+      c.scale(er * s, er * s);
+      const p = shape();
+      c.fillStyle = gold ? COL.fire : COL.shell;
+      c.fill(p);
+      if (!gold && outlined()) { c.lineWidth = 1.5 / (er * s); c.strokeStyle = COL.shellLine; c.stroke(p); }
+      // un brillo plano arriba a la izquierda
+      c.globalAlpha = gold ? 0.45 : 0.6;
+      c.fillStyle = '#fff';
+      c.beginPath();
+      c.ellipse(-0.42, -0.48, 0.13, 0.28, 0.4, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 1;
+      c.restore();
+      if (gold && !REDUCE) {
+        const tw = Math.max(0, Math.sin(time * 4 + e.ph));
+        if (tw > 0.05) { c.fillStyle = COL.fire; sparkle(c, e.x + er * 0.9 * s, e.y - er * 1.1 * s, er * 0.32 * s * tw); }
+      }
+    }
+    function drawBomb(c, e, s) {
+      const r = er * 0.92 * s;
+      c.save();
+      c.translate(e.x, e.y);
+      c.rotate(e.rot * 0.5);
+      // la mecha y su chispa
+      c.strokeStyle = COL.mute;
+      c.lineWidth = Math.max(1.5, er * 0.09);
+      c.lineCap = 'round';
+      c.beginPath();
+      c.moveTo(0, -r * 0.95);
+      c.quadraticCurveTo(r * 0.12, -r * 1.5, r * 0.62, -r * 1.42);
+      c.stroke();
+      c.fillStyle = COL.bomb;
+      c.beginPath();
+      c.arc(0, 0, r, 0, Math.PI * 2);
+      c.fill();
+      const line = COL.bombLine && COL.bombLine !== 'transparent' && COL.bombLine !== 'rgba(0, 0, 0, 0)';
+      if (line) { c.lineWidth = Math.max(1.5, er * 0.075); c.strokeStyle = COL.bombLine; c.stroke(); }
+      rr(c, -r * 0.3, -r * 1.12, r * 0.6, r * 0.34, r * 0.08);
+      c.fill();
+      if (line) c.stroke();
+      c.globalAlpha = 0.3;
+      c.fillStyle = '#fff';
+      c.beginPath();
+      c.ellipse(-r * 0.4, -r * 0.36, r * 0.14, r * 0.26, 0.7, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 1;
+      const fl = REDUCE ? 1 : 0.65 + 0.35 * Math.sin(time * 38 + (e.ph || 0));
+      c.fillStyle = COL.fire;
+      sparkle(c, r * 0.62, -r * 1.42, er * 0.34 * fl);
+      c.restore();
+    }
+    // media cáscara: el huevo recortado por la línea del tajo, con la yema a la vista
+    function drawHalf(c, h) {
+      c.save();
+      c.translate(h.x, h.y);
+      c.rotate(h.rot);
+      c.scale(er, er);
+      c.rotate(h.cut);
+      c.beginPath();
+      c.rect(-3, h.side > 0 ? 0 : -3, 6, 3);
+      c.clip();
+      c.rotate(-h.cut);
+      const p = shape();
+      c.fillStyle = h.gold ? COL.fire : COL.shell;
+      c.fill(p);
+      if (!h.gold && outlined()) { c.lineWidth = 1.5 / er; c.strokeStyle = COL.shellLine; c.stroke(p); }
+      c.fillStyle = h.gold ? COL.shell : COL.fire;
+      c.beginPath();
+      c.arc(0, 0.1, 0.46, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    }
+    function drawSplat(c, s) {
+      c.globalAlpha = Math.min(1, s.life * 1.6) * 0.85;
+      c.fillStyle = COL.shell;
+      c.beginPath();
+      for (const b of s.blobs) { c.moveTo(s.x + b.x + b.r, s.y + b.y); c.arc(s.x + b.x, s.y + b.y, b.r, 0, Math.PI * 2); }
+      c.fill();
+      c.fillStyle = s.gold ? COL.acc : COL.fire;
+      c.beginPath();
+      c.arc(s.x + s.yx, s.y + s.yy, er * 0.36, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 1;
+    }
+    function drawTrail(c) {
+      c.lineCap = 'round';
+      c.strokeStyle = COL.ink;
+      for (let i = 1; i < trail.length; i++) {
+        const a = trail[i - 1], b = trail[i];
+        if (a.s !== b.s) continue;
+        const k = 1 - (time - b.t) / TRAIL;
+        if (k <= 0) continue;
+        c.globalAlpha = k;
+        c.lineWidth = Math.max(1, er * 0.2 * k);
+        c.beginPath();
+        c.moveTo(a.x, a.y);
+        c.lineTo(b.x, b.y);
+        c.stroke();
+      }
+      c.globalAlpha = 1;
+    }
+    // las vidas: tres huevos arriba a la derecha; el que se pierde se queda rajado
+    function drawLives(c) {
+      const s = clamp(er * 0.36, 7, 11);
+      for (let i = 0; i < 3; i++) {
+        const x = W - 18 - s - i * (s * 2 + 9), y = 16 + s * 1.32;
+        const alive = i < lives;
+        const k = !alive && lost[i] ? clamp((time - lost[i]) / 0.4, 0, 1) : 1;
+        c.save();
+        c.translate(x, y);
+        const sc = s * (REDUCE ? 1 : 1 + 0.45 * (1 - easeOut(k)));
+        c.scale(sc, sc);
+        if (alive) {
+          c.fillStyle = COL.shell;
+          c.fill(shape());
+          if (outlined()) { c.lineWidth = 1.4 / sc; c.strokeStyle = COL.shellLine; c.stroke(shape()); }
+        } else {
+          c.lineWidth = 1.4 / sc;
+          c.strokeStyle = k < 1 ? COL.acc : COL.mute;
+          c.stroke(shape());
+          c.beginPath();
+          c.moveTo(-0.95, -0.12); c.lineTo(-0.4, 0.2); c.lineTo(0, -0.2); c.lineTo(0.45, 0.16); c.lineTo(0.95, -0.06);
+          c.stroke();
+        }
+        c.restore();
+      }
+    }
+
+    function render() {
+      const c = ctx;
+      c.setTransform(DPR, 0, 0, DPR, 0, 0);
+      c.clearRect(0, 0, W, H);
+      const demoOn = state === 'attract';
+      if (fx.flash > 0) {
+        c.globalAlpha = fx.flash * 0.45;
+        c.fillStyle = COL.fire;
+        c.fillRect(0, 0, W, H);
+        c.globalAlpha = 1;
+      }
+      fxShake(c);
+      if (demoOn) {
+        c.translate(0, -startScroll());
+        c.save();
+        c.beginPath();
+        c.rect(0, 0, W, band);
+        c.clip();
+      } else {
+        const step = Math.round(clamp(W / 11, 34, 48));
+        const nx = Math.floor((W - 24) / step), ny = Math.floor((H - 24) / step);
+        dots(c, Math.round((W - nx * step) / 2), Math.round((H - ny * step) / 2), nx, ny, step);
+      }
+      for (const s of splats) drawSplat(c, s);
+      for (const h of halves) drawHalf(c, h);
+      for (const e of eggs) {
+        if (e.gone) continue;
+        let s = 1;
+        if (e.float && e.born) {
+          const k = clamp((time - e.born) / 0.35, 0, 1);
+          s = REDUCE ? (k > 0 ? 1 : 0) : easeOut(k);
+          if (s < 0.02) continue;
+        }
+        if (e.kind === 'bomb') drawBomb(c, e, s); else drawEgg(c, e, s);
+      }
+      drawTrail(c);
+      fxDraw(c);
+      if (demoOn) c.restore();
+      else drawLives(c);
+    }
+
+    return {
+      attract, start, update, render, down, move, up, pause, size,
+      key: () => false,
+      confetti: fxConfetti,
+    };
+  })();
+
+
+  /* ---------- SNAKE ----------
+     El de siempre, con la cara del logo de cabeza (sus ojos miran hacia
+     donde va). Come granos de café para crecer (+1) y cada vez va más
+     rápido; de vez en cuando sale una estrella (+5) que se va si tardas.
+     Si chocas con el borde o contigo mismo, se acabó. Flechas / WASD, o
+     deslizando el dedo.
+     · Se mueve suave entre casilla y casilla, con la cabeza por delante:
+       lo que ves es dónde está (come el grano justo al llegar a él).
+     · Las flechas responden en el mismo fotograma: si la cabeza está en
+       la primera mitad del paso, gira ya desde la casilla que acaba de
+       dejar (como si hubieras pulsado en el centro); si está en la
+       segunda, termina el paso ya y gira. El pequeño salto que eso
+       supone se suaviza en unos pocos fotogramas.
+     · Si el siguiente paso es contra el borde o contra sí misma, la
+       cabeza se queda pegada un instante (un paso) antes de chocar: da
+       tiempo a esquivar en el último momento. */
+  const Snake = (() => {
+    const STAR_LIFE = 6;
+    const EARLY = 0.42, LATE = 0.42;   // antes: gira desde la casilla que deja; después: completa el paso y gira
+    let cols = 17, rows = 24, cs = 24, ox = 0, oy = 0;
+    // dir: hacia dónde va el paso en curso; moved: el último paso hecho
+    let body = [], dir = { x: 1, y: 0 }, moved = { x: 1, y: 0 }, facing = 1, queue = [], acc = 0, ivl = 130, grow = 0, blocked = false;
+    let food = null, star = null, eaten = 0, score = 0, stars = 0, chomp = 0, dead = 0, crumbled = 0;
+    let time = 0, band = 170, sw = null, kx = 0, ky = 0;
+    const demo = { lap: -1, beans: [], chomp: 0 };
+
+    function grid(fresh) {
+      const pad = narrow ? 12 : 20;
+      if (fresh) {
+        cols = narrow ? 15 : 17;
+        const c0 = Math.max(12, Math.floor((W - pad * 2) / cols));
+        rows = clamp(Math.floor((H - pad - 38) / c0), 12, Math.round(cols * 1.55));
+      }
+      // en mitad de una partida el tablero no cambia de casillas: solo de tamaño
+      cs = Math.max(8, Math.floor(Math.min((W - pad * 2) / cols, (H - pad - 38) / rows)));
+      ox = Math.round((W - cols * cs) / 2);
+      oy = Math.round(Math.max(pad, (H - 26 - rows * cs) / 2));
+    }
+    function size() {
+      grid(state === 'attract' || state === 'hub' || state === 'idle');
+      band = Math.round(clamp(H * 0.22, 130, 190));
+      if (state === 'attract' && game === 'snake') root.style.setProperty('--bk-gb', band + 'px');
+    }
+    const cxs = x => ox + x * cs + cs / 2;
+    const cys = y => oy + y * cs + cs / 2;
+
+    function attract() {
+      state = 'attract';
+      fxReset();
+      demo.lap = -1;
+      size();
+    }
+
+    function start() {
+      fxReset();
+      grid(true);
+      const y = Math.floor(rows / 2), x = Math.floor(cols / 2) - 1;
+      body = [{ x, y }, { x: x - 1, y }, { x: x - 2, y }, { x: x - 3, y }];
+      dir = { x: 1, y: 0 };
+      moved = { x: 1, y: 0 };
+      facing = 1;
+      queue = [];
+      acc = 0;
+      grow = 0;
+      blocked = false;
+      kx = ky = 0;
+      eaten = 0; score = 0; stars = 0; chomp = 0; dead = 0; crumbled = 0;
+      ivl = 130;
+      star = null;
+      food = null;
+      placeFood();
+      state = 'ready';            // quieta hasta la primera flecha
+    }
+
+    function free(x, y) {
+      for (const s of body) if (s.x === x && s.y === y) return false;
+      if (food && food.x === x && food.y === y) return false;
+      if (star && star.x === x && star.y === y) return false;
+      return true;
+    }
+    function spot() {
+      const h = body[0];
+      for (let n = 0; n < 300; n++) {
+        const x = Math.floor(Math.random() * cols), y = Math.floor(Math.random() * rows);
+        if (free(x, y) && Math.abs(x - h.x) + Math.abs(y - h.y) > 2) return { x, y };
+      }
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) if (free(x, y)) return { x, y };
+      return null;
+    }
+    function placeFood() { food = spot(); if (food) food.born = time; }
+    function placeStar() { star = spot(); if (star) { star.born = time; star.life = STAR_LIFE; } }
+
+    // ¿la casilla a la que va la cabeza la mata? (la cola deja la suya en ese paso, salvo si crece)
+    function deadly(d) {
+      const nx = body[0].x + d.x, ny = body[0].y + d.y;
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) return true;
+      const upto = body.length - (grow > 0 ? 0 : 1);
+      for (let i = 1; i < upto; i++) if (body[i].x === nx && body[i].y === ny) return true;
+      return false;
+    }
+    // lo que ha avanzado el paso en curso (contra un obstáculo, apenas se asoma)
+    function prog() {
+      const live = state === 'play' || (state === 'pause' && prevState === 'play');
+      if (!live) return state === 'over' ? 0.15 : 0;
+      const p = clamp(acc / ivl, 0, 1);
+      return blocked ? Math.min(p, 0.15) : p;
+    }
+    function headAt(p) {
+      const h = body[0];
+      return { x: cxs(h.x) + dir.x * cs * p, y: cys(h.y) + dir.y * cs * p };
+    }
+    // el salto de la cabeza al girar antes de tiempo se reparte en unos fotogramas
+    function smooth(before) {
+      const a = headAt(prog());
+      kx += before.x - a.x;
+      ky += before.y - a.y;
+    }
+    function setDir(d) {
+      dir = d;
+      if (d.x) facing = d.x;
+      blocked = deadly(d);
+    }
+
+    // cambio de dirección: se aplica ya si se puede; si no, a la cola (como mucho tres)
+    function turn(dx, dy) {
+      const d = { x: dx, y: dy };
+      if (state === 'ready') {
+        if (dx === -moved.x && dy === -moved.y) {
+          // de salida sí puede dar la vuelta: la cola pasa a ser la cabeza
+          body.reverse();
+          moved = { x: body[0].x - body[1].x, y: body[0].y - body[1].y };
+        }
+        queue = [];
+        acc = 0;
+        setDir(d);
+        state = 'play';
+        ui.hint.classList.remove('is-on');
+        return;
+      }
+      if (state !== 'play') return;
+      // pegada a un obstáculo: el giro de última hora manda sobre lo que hubiera en cola
+      if (blocked && !(dx === -moved.x && dy === -moved.y) && !(dx === dir.x && dy === dir.y)) {
+        const before = headAt(prog());
+        queue = [];
+        setDir(d);
+        smooth(before);
+        return;
+      }
+      if (queue.length) {
+        const last = queue[queue.length - 1];
+        if ((dx === last.x && dy === last.y) || (dx === -last.x && dy === -last.y)) return;
+        if (queue.length < 3) queue.push(d);
+        return;
+      }
+      if (dx === dir.x && dy === dir.y) return;
+      const p = acc / ivl, before = headAt(prog());
+      // recién salida de la casilla (o pegada a un obstáculo): gira ya, desde el centro
+      if ((p < EARLY || blocked) && !(dx === -moved.x && dy === -moved.y)) {
+        setDir(d);
+        smooth(before);
+        return;
+      }
+      if (dx === -dir.x && dy === -dir.y) return;
+      queue.push(d);
+      // casi en la siguiente: termina el paso ya y gira
+      if (p > LATE) {
+        acc = 0;
+        advance();
+        if (state === 'play') smooth(before);
+      }
+    }
+
+    // un paso: la cabeza entra en la casilla a la que iba
+    function advance() {
+      if (deadly(dir)) { die(); return; }
+      const h = body[0], nx = h.x + dir.x, ny = h.y + dir.y;
+      body.unshift({ x: nx, y: ny });
+      if (grow > 0) grow--; else body.pop();
+      moved = dir;
+      if (food && nx === food.x && ny === food.y) eat();
+      if (star && nx === star.x && ny === star.y) eatStar();
+      // el siguiente paso: el giro que esperaba, si es válido
+      let next = dir;
+      while (queue.length) {
+        const q = queue.shift();
+        if (!(q.x === -moved.x && q.y === -moved.y)) { next = q; break; }
+      }
+      setDir(next);
+    }
+    function eat() {
+      eaten++;
+      score++;
+      grow++;
+      chomp = 1;
+      ivl = Math.max(68, 130 - eaten * 1.8);
+      fxBurst(cxs(food.x), cys(food.y), COL.fire, 8, 160, cs * 0.14);
+      fxPop(cxs(food.x), cys(food.y) - cs * 0.7, '+1', COL.ink);
+      Sfx.brk(1 + ((eaten - 1) % 10));
+      setScore(score);
+      placeFood();
+      if (eaten % 6 === 0 && !star) placeStar();
+    }
+    function eatStar() {
+      score += 5;
+      stars++;
+      chomp = 1;
+      fxBurst(cxs(star.x), cys(star.y), COL.fire, 14, 240, cs * 0.16);
+      fxPop(cxs(star.x), cys(star.y) - cs * 0.8, '+5', COL.fire, true);
+      Sfx.coin();
+      star = null;
+      setScore(score);
+    }
+    function die() {
+      state = 'over';
+      dead = 0;
+      crumbled = 0;
+      fx.shake = REDUCE ? 0 : 7;
+      Sfx.over();
+      const stats = fmt(eaten) + (eaten === 1 ? ' grano' : ' granos')
+        + (stars ? ' · ' + stars + (stars === 1 ? ' estrella' : ' estrellas') : '')
+        + ' · ' + body.length + ' de largo';
+      finish(score, stats);
+    }
+
+    function update(dt) {
+      time += dt;
+      if (state === 'attract') { demoStep(dt); fxStep(dt); return; }
+      if (state === 'play') {
+        acc += dt * 1000;
+        while (acc >= ivl && state === 'play') { acc -= ivl; advance(); }
+      }
+      const k = Math.exp(-dt * 30);
+      kx *= k;
+      ky *= k;
+      if (star && (state === 'play' || state === 'ready')) {
+        star.life -= dt;
+        if (star.life <= 0) { fxBurst(cxs(star.x), cys(star.y), COL.mute, 6, 90, cs * 0.1); star = null; }
+      }
+      // al chocar, se deshace de la cabeza a la cola
+      if (state === 'over' && crumbled < body.length) {
+        dead += dt;
+        const per = Math.min(0.045, 0.75 / body.length);
+        while (crumbled < body.length && dead >= crumbled * per) {
+          const s = body[crumbled];
+          fxBurst(cxs(s.x), cys(s.y), crumbled ? COL.acc : COL.ink, crumbled ? 4 : 10, crumbled ? 120 : 220, cs * 0.16);
+          crumbled++;
+        }
+      }
+      chomp = Math.max(0, chomp - dt * 6);
+      fxStep(dt);
+    }
+
+    /* la cabeza: el logo de la cabecera (su silueta rellena con el fondo,
+       para que el cuerpo no se vea por dentro) mirando hacia donde va */
+    function head(c, x, y, h, face, tilt, lx, ly) {
+      const L = ensureLogo();
+      c.save();
+      c.translate(x, y);
+      c.scale(face, 1);
+      c.rotate(tilt);
+      if (!L) {
+        c.fillStyle = COL.ink;
+        c.beginPath();
+        c.arc(0, 0, h * 0.42, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = COL.bg;
+        c.beginPath();
+        c.arc(h * 0.12 + lx * 0.01 * h, -h * 0.08 + ly * 0.01 * h, h * 0.08, 0, Math.PI * 2);
+        c.arc(h * 0.28 + lx * 0.01 * h, -h * 0.08 + ly * 0.01 * h, h * 0.08, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+        return;
+      }
+      const vb = L.vb, k = h / vb.height;
+      c.scale(k, k);
+      c.translate(-(vb.x + vb.width / 2), -(vb.y + vb.height / 2));
+      c.fillStyle = COL.bg;
+      c.fill(L.outer);
+      c.fillStyle = COL.ink;
+      c.fill(L.face);
+      if (L.eyes) { c.translate(lx, ly); c.fill(L.eyes); }
+      c.restore();
+    }
+    function bean(c, x, y, r, born) {
+      const k = born != null ? easeOut(clamp((time - born) / 0.3, 0, 1)) : 1;
+      const R = r * k * (REDUCE ? 1 : 1 + 0.06 * Math.sin(time * 5));
+      if (R < 0.3) return;
+      c.save();
+      c.translate(x, y);
+      c.rotate(-0.55);
+      c.fillStyle = COL.fire;
+      c.beginPath();
+      c.ellipse(0, 0, R * 0.78, R, 0, 0, Math.PI * 2);
+      c.fill();
+      c.strokeStyle = COL.bg;
+      c.globalAlpha = 0.55;
+      c.lineWidth = Math.max(1, R * 0.16);
+      c.lineCap = 'round';
+      c.beginPath();
+      c.moveTo(0, -R * 0.7);
+      c.bezierCurveTo(R * 0.34, -R * 0.24, -R * 0.34, R * 0.24, 0, R * 0.7);
+      c.stroke();
+      c.restore();
+    }
+    function starShape(c, x, y, R, rot) {
+      c.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const a = rot - Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? R * 0.45 : R;
+        if (i) c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); else c.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      }
+      c.closePath();
+      c.fill();
+    }
+    // el cuerpo, una línea gruesa redondeada por los centros de las casillas
+    function line(c, pts, w) {
+      if (pts.length < 2) return;
+      c.strokeStyle = COL.acc;
+      c.lineWidth = w;
+      c.lineCap = 'round';
+      c.lineJoin = 'round';
+      c.beginPath();
+      c.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+      c.stroke();
+    }
+
+    // la de muestra: ondula por la cabecera de izquierda a derecha comiéndose los granos
+    const dS = () => clamp(W / 17, 18, 28);
+    const dY = x => band * 0.52 + Math.sin(x * 0.028 + 0.8) * band * 0.16;
+    const dX = () => {
+      const s = dS(), span = W + s * 12;
+      return REDUCE ? W * 0.62 : (time * 105) % span - s * 3;
+    };
+    function demoStep(dt) {
+      const s = dS(), span = W + s * 12;
+      const lap = REDUCE ? 0 : Math.floor((time * 105) / span);
+      if (lap !== demo.lap) {
+        demo.lap = lap;
+        demo.beans = [0.36, 0.74].map(f => ({ x: W * f + (Math.random() - 0.5) * W * 0.08, eaten: false, born: time }));
+      }
+      const hx = dX();
+      for (const b of demo.beans) {
+        if (!b.eaten && !REDUCE && hx >= b.x) {
+          b.eaten = true;
+          demo.chomp = 1;
+          fxBurst(b.x, dY(b.x), COL.fire, 7, 150, s * 0.14);
+        }
+      }
+      demo.chomp = Math.max(0, demo.chomp - dt * 6);
+    }
+    function demoDraw(c) {
+      const s = dS(), hx = dX(), L = s * 7;
+      c.save();
+      c.beginPath();
+      c.rect(0, 0, W, band);
+      c.clip();
+      for (const b of demo.beans) if (!b.eaten) bean(c, b.x, dY(b.x), s * 0.3, b.born);
+      const pts = [];
+      for (let x = hx; x >= hx - L; x -= 5) pts.push([x, dY(x)]);
+      line(c, pts, s * 0.64);
+      const slope = Math.cos(hx * 0.028 + 0.8) * 0.028 * band * 0.16;
+      head(c, hx, dY(hx), s * 1.6 * (1 + 0.16 * demo.chomp), 1, Math.atan(slope) * 0.8, 12, slope * 10);
+      fxDraw(c);
+      c.restore();
+    }
+
+    function render() {
+      const c = ctx;
+      c.setTransform(DPR, 0, 0, DPR, 0, 0);
+      c.clearRect(0, 0, W, H);
+      if (state === 'attract') {
+        c.translate(0, -startScroll());
+        demoDraw(c);
+        return;
+      }
+      fxShake(c);
+      // el tablero: puntos en las esquinas de las casillas y un borde
+      dots(c, ox + cs, oy + cs, cols - 2, rows - 2, cs);
+      c.strokeStyle = COL.line;
+      c.lineWidth = 1;
+      rr(c, ox - 0.5, oy - 0.5, cols * cs + 1, rows * cs + 1, Math.min(12, cs * 0.4));
+      c.stroke();
+      if (food) bean(c, cxs(food.x), cys(food.y), cs * 0.3, food.born);
+      if (star) {
+        const x = cxs(star.x), y = cys(star.y);
+        const k = easeOut(clamp((time - star.born) / 0.3, 0, 1));
+        c.globalAlpha = 0.45;
+        c.strokeStyle = COL.fire;
+        c.lineWidth = 2;
+        c.beginPath();
+        c.arc(x, y, cs * 0.62, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (star.life / STAR_LIFE));
+        c.stroke();
+        c.globalAlpha = star.life < 1.5 && !REDUCE ? 0.35 + 0.65 * Math.abs(Math.sin(time * 9)) : 1;
+        c.fillStyle = COL.fire;
+        starShape(c, x, y, cs * 0.44 * k, REDUCE ? 0 : time * 0.8);
+        c.globalAlpha = 1;
+      }
+      // la serpiente: la cabeza avanza hacia su siguiente casilla y la cola deja la suya
+      const n = body.length;
+      if (n) {
+        const p = prog(), from = crumbled;
+        const tail = grow <= 0 && state !== 'over' && n > 1;
+        const pts = [];
+        if (from === 0) { const h = headAt(p); pts.push([h.x + kx, h.y + ky]); }
+        for (let i = from; i < (tail ? n - 1 : n); i++) pts.push([cxs(body[i].x), cys(body[i].y)]);
+        if (tail && from < n) pts.push([lerp(cxs(body[n - 1].x), cxs(body[n - 2].x), p), lerp(cys(body[n - 1].y), cys(body[n - 2].y), p)]);
+        if (pts.length === 1) pts.push(pts[0]);
+        line(c, pts, cs * 0.64);
+        if (from === 0) {
+          // los ojos miran ya hacia el giro que has pedido, aunque aún no lo haya dado
+          const look = queue[0] || dir;
+          const lx = look.x ? 14 * look.x * facing : 5, ly = look.y < 0 ? -11 : look.y > 0 ? 15 : 0;
+          head(c, pts[0][0], pts[0][1], cs * 1.62 * (1 + 0.16 * chomp), facing, dir.y * 0.22, lx, ly);
+        }
+      }
+      fxDraw(c);
+    }
+
+    // dedo (o arrastrando el ratón): cada 18 px de deslizamiento, un giro
+    function down(p) { sw = { x: p.x, y: p.y }; }
+    function move(p) {
+      if (!sw || (state !== 'play' && state !== 'ready')) return;
+      const dx = p.x - sw.x, dy = p.y - sw.y;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+      if (Math.abs(dx) > Math.abs(dy)) turn(dx > 0 ? 1 : -1, 0); else turn(0, dy > 0 ? 1 : -1);
+      sw = { x: p.x, y: p.y };
+    }
+    function up() { sw = null; }
+    const KEYS = {
+      ArrowUp: [0, -1], w: [0, -1], W: [0, -1],
+      ArrowDown: [0, 1], s: [0, 1], S: [0, 1],
+      ArrowLeft: [-1, 0], a: [-1, 0], A: [-1, 0],
+      ArrowRight: [1, 0], d: [1, 0], D: [1, 0],
+    };
+    function key(k) {
+      const v = KEYS[k];
+      if (!v) return false;
+      turn(v[0], v[1]);
+      return true;
+    }
+
+    return {
+      attract, start, update, render, down, move, up, key, size,
+      pause() { sw = null; },
+      confetti: fxConfetti,
+    };
+  })();
+
+  const ENGINES = { egg: Egg, snake: Snake };
+
   function loop(now) {
     if (!opened) return;
     raf = requestAnimationFrame(loop);
     const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
     last = now;
-    if (state !== 'pause') update(dt);
-    render(now);
+    if (!game) {                       // en el menú, el lienzo vacío
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      return;
+    }
+    if (game === 'bbtan') {
+      if (state !== 'pause') update(dt);
+      render(now);
+    } else {
+      if (state !== 'pause') E.update(dt);
+      E.render(now);
+    }
   }
 
 

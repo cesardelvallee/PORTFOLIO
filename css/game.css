@@ -204,6 +204,11 @@ body.theme-light .gb {
   --bk-acc: #c7b299;
   --bk-fire: #d4a947;
   --bk-well: rgba(243, 237, 225, 0.04);
+  /* Egg Ninja: la cáscara y la bomba */
+  --bk-shell: #efe6d3;
+  --bk-shell-line: transparent;
+  --bk-bomb: #050504;
+  --bk-bomb-line: rgba(243, 237, 225, 0.85);
   position: fixed;
   inset: 0;
   z-index: 8600;              /* sobre la home y el botón del menú; bajo la cortina y el cursor */
@@ -226,6 +231,10 @@ body.theme-light .gb {
   --bk-acc: #8a6f4a;
   --bk-fire: #b8862b;
   --bk-well: rgba(42, 38, 32, 0.05);
+  --bk-shell: #fffdf8;
+  --bk-shell-line: rgba(42, 38, 32, 0.42);
+  --bk-bomb: #2a2620;
+  --bk-bomb-line: transparent;
 }
 .bk *, .bk *::before, .bk *::after { box-sizing: border-box; }
 /* reseteo sin especificidad: los márgenes de cada pieza mandan */
@@ -323,7 +332,46 @@ body.theme-light .gb {
 .bk-hud-c { text-align: center; }
 .bk-best { opacity: 0; transition: opacity 0.25s var(--e); white-space: nowrap; }
 .bk-hud-r { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-.bk.is-game .bk-brand { opacity: 0; transform: translateY(-30%); }
+.bk.is-game .bk-brand,
+.bk[data-game] .bk-brand { opacity: 0; transform: translateY(-30%); }
+/* «← Juegos»: vuelve al menú desde el inicio o el final de cada juego */
+.bk-tohub {
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--bk-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-30%);
+  transition: opacity 0.25s var(--e), transform 0.35s var(--e), visibility 0s linear 0.25s, background-color 0.2s var(--e);
+}
+.bk-tohub svg { width: 10px; height: 10px; display: block; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s var(--e); }
+.bk[data-game]:not(.is-game) .bk-tohub { opacity: 1; visibility: visible; transform: translateY(-50%); transition-delay: 0s; }
+.bk[data-game]:not(.is-game) .bk-tohub:active { transform: translateY(-50%) scale(0.96); transition-duration: 0.16s; }
+.bk-tohub:focus-visible { outline: 1px solid var(--bk-ink); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .bk-tohub:hover { background: var(--bk-line); }
+  .bk-tohub:hover svg { transform: translateX(-2px); }
+}
+/* las monedas y la tienda son cosa de Break Time */
+.bk:not([data-game="bbtan"]) .bk-coins,
+.bk:not([data-game="bbtan"]) .bk-shop-b { display: none; }
 .bk.is-game .bk-scorebox { opacity: 1; transform: translateY(-50%); }
 .bk.is-game .bk-best { opacity: 1; }
 
@@ -580,6 +628,106 @@ body.theme-light .gb {
   .bk-btn.bk-ghost:hover { background: var(--bk-line); border-color: var(--bk-line); color: var(--bk-ink); }
 }
 .bk-err { min-height: 1.2em; margin-top: 10px; font-size: 0.72rem; color: var(--bk-acc); }
+
+/* ---- menú: elige un juego ---- */
+.bk-s-hub { background: var(--bk-bg); justify-content: center; justify-content: safe center; }
+.bk-title-hub { margin-top: 10px; }
+/* las tarjetas entran una a una (el contenedor no se mueve) */
+.bk-screen > .bk-games { transform: none; }
+.bk-games {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(410px, 100%);
+  margin-top: 28px;
+}
+.bk-game {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 12px 14px 12px 12px;
+  border: 1px solid var(--bk-line);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--bk-ink);
+  font: inherit;
+  text-align: left;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 0.3s var(--e), translate 0.5s var(--e), scale 0.16s var(--e), background-color 0.2s var(--e), border-color 0.2s var(--e);
+}
+.bk-s-hub.is-on .bk-game {
+  opacity: 1;
+  translate: none;
+  transition-delay: calc(60ms + var(--i) * 60ms), calc(60ms + var(--i) * 60ms), 0s, 0s, 0s;
+}
+.bk-game:active { scale: 0.98; }
+.bk-game:focus-visible { outline: 1px solid var(--bk-ink); outline-offset: 3px; }
+.bk-game-art {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 13px;
+  background: var(--bk-well);
+}
+.bk-game-art svg { display: block; width: 42px; height: 42px; overflow: visible; transition: transform 0.45s var(--e); }
+.bk-game-txt { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.bk-game-txt b {
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.bk-game-txt span { font-size: 0.72rem; line-height: 1.42; color: var(--bk-mute); }
+.bk-game-best { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.bk-game-best small {
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--bk-mute);
+}
+.bk-game-best b {
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.bk-game-go {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--bk-line);
+  transition: background-color 0.2s var(--e), border-color 0.2s var(--e), color 0.2s var(--e);
+}
+.bk-game-go svg { width: 10px; height: 10px; display: block; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s var(--e); }
+@media (hover: hover) and (pointer: fine) {
+  .bk-game:hover { background: var(--bk-well); border-color: var(--bk-mute); }
+  .bk-game:hover .bk-game-art svg { transform: translateY(-3px) rotate(-6deg); }
+  .bk-game:hover .bk-game-go { background: var(--bk-ink); border-color: var(--bk-ink); color: var(--bk-bg); }
+  .bk-game:hover .bk-game-go svg { transform: translateX(2px); }
+}
+.bk-hub-note { margin-top: 18px; font-size: 0.72rem; color: var(--bk-mute); }
+/* los dibujos de cada juego, con los colores del modal */
+.bk-art-high { fill: var(--bk-high); }
+.bk-art-low { fill: var(--bk-low); }
+.bk-art-ink { fill: var(--bk-ink); }
+.bk-art-bg { fill: var(--bk-bg); }
+.bk-art-gold { fill: var(--bk-fire); }
+.bk-art-shell { fill: var(--bk-shell); stroke: var(--bk-shell-line); stroke-width: 1.4; }
+.bk-art-slash { fill: none; stroke: var(--bk-ink); stroke-width: 2.4; stroke-linecap: round; }
+.bk-art-body { fill: none; stroke: var(--bk-acc); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---- top 3 ---- */
 .bk-board { width: min(340px, 100%); margin-top: 14px; text-align: left; }
@@ -857,6 +1005,14 @@ body.bk-open .bg-blob { animation-play-state: paused; }
   .bk-form { flex-direction: column; align-items: stretch; width: 100%; max-width: 320px; margin-top: 18px; }
   .bk-name input { width: 100%; font-size: 1.4rem; cursor: text; }
   .bk-btn { cursor: pointer; }
+  .bk-tohub { height: 40px; cursor: pointer; }
+  .bk-games { margin-top: 22px; }
+  .bk-game { grid-template-columns: auto minmax(0, 1fr) auto; gap: 13px; padding: 11px 14px 11px 11px; cursor: pointer; }
+  .bk-game-go { display: none; }
+  .bk-game-art { width: 54px; height: 54px; border-radius: 12px; }
+  .bk-game-art svg { width: 38px; height: 38px; }
+  .bk-game-txt b { font-size: 1.15rem; }
+  .bk-game-txt span { font-size: 0.7rem; }
   .bk-board { margin-top: 10px; }
   .bk-list li { padding: 9px 2px; }
   .bk-recall { height: 40px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); cursor: pointer; }
@@ -879,6 +1035,7 @@ body.bk-open .bg-blob { animation-play-state: paused; }
   .bk-toast.is-on { animation-name: bk-toast-fade; }
   .bk-form.is-bad { animation: none; }
   .bk-hint.is-on { animation: none; }
+  .bk-game, .bk-s-hub.is-on .bk-game { translate: none; }
 }
 @keyframes bk-toast-fade {
   0%, 100% { opacity: 0; transform: translate(-50%, -50%); }
