@@ -3077,7 +3077,7 @@ html.lightbox-open { overflow: hidden; }
 
 /* ================================================
    ABOUT v3 — el muñeco + el documento
-   Héroe: César en su propio blíster (como un Grmp), girable.
+   Héroe: César y su acreditación, colgada de su cinta.
    Debajo, un documento con índice fijo que sigue la lectura:
    perfil, trayectoria, herramientas, especialidades y contacto.
    ================================================ */
@@ -3138,49 +3138,255 @@ body.about-page [data-reveal] { filter: none; }
   animation: ab-rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 0.6s forwards;
 }
 
-/* la caja: escena 3D (about-box.js). Aquí solo el escenario, el aviso de
-   carga y la pista; el diseño de la caja se pinta en sus caras. */
+/* la acreditación: una tarjeta de evento colgada de su cinta, que baja
+   desde arriba del todo. script.js la deja caer al entrar, la mece al
+   arrastrarla (péndulo doble con muelles) y le da la vuelta al tocarla.
+   Sin JS, se ve quieta. Todo se mide con --cw (el ancho de la tarjeta) y,
+   dentro de la tarjeta, en cqw: escala entera sin descolocarse. */
 .ab-box {
+  --cw: clamp(240px, min(23vw, calc((100svh - 300px) * 0.62)), 330px);
+  --ink: #1a1714;
+  --card: #ece6da;
+  --card-mute: rgba(26, 23, 20, 0.52);
+  --card-line: rgba(26, 23, 20, 0.14);
   position: relative;
+  width: var(--cw);
   margin: 0;
-  /* también depende del alto, para que quepa en el primer viewport */
-  width: clamp(300px, min(33vw, calc((100svh - 175px) * 0.68)), 500px);
   opacity: 0;
   animation: ab-rise 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.35s forwards;
 }
-.ab-stage {
+/* con JS, la tarjeta entra cayendo (no hace falta el fundido) y la pista
+   aparece cuando ya cuelga */
+.ab-box.is-js { opacity: 1; animation: none; }
+.ab-box.is-js .ab-box-cap { opacity: 0; animation: ab-rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 1.5s forwards; }
+.ab-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* el conjunto que se mece: cinta + mosquetón + tarjeta (script.js lo gira
+   desde el borde de arriba del héroe, de donde "cuelga" la cinta) */
+.ab-rig {
   position: relative;
-  aspect-ratio: 0.68;
-  /* en táctil el dedo gira la caja en horizontal y deja hacer scroll en vertical */
-  touch-action: pan-y;
+  perspective: 1100px;
+  perspective-origin: 50% 0;
+  will-change: transform;
 }
-.ab-canvas {
+/* la cinta: dos tiras que suben hasta arriba del todo (el héroe las
+   recorta) y se juntan en el mosquetón; impresas con el nombre */
+.ab-lanyard {
+  --sw: calc(var(--cw) * 0.062);
+  position: absolute;
+  left: 50%;
+  top: calc(var(--cw) * 0.024);
+  width: 0;
+  height: 0;
+}
+.ab-strap {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--sw) / -2);
+  width: var(--sw);
+  height: var(--sh, 120vh);
+  overflow: hidden;
+  background: #c7b299;
+  box-shadow: inset 1.5px 0 0 rgba(16, 15, 13, 0.14), inset -1.5px 0 0 rgba(16, 15, 13, 0.14);
+  transform-origin: 50% 100%;
+}
+.ab-strap-l { transform: rotate(calc(var(--a, 5deg) * -1)); }
+.ab-strap-r { transform: rotate(var(--a, 5deg)); }
+.ab-strap > span {
+  display: block;
+  width: var(--sw);
+  writing-mode: vertical-rl;
+  font-size: calc(var(--sw) * 0.42);
+  font-weight: 700;
+  line-height: var(--sw);
+  letter-spacing: 0.32em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(16, 15, 13, 0.72);
+}
+/* el mosquetón: casquillo, anilla y pinza, en gris plano */
+.ab-clip {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: calc(var(--cw) * 0.13);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+.ab-clip-a { fill: #a39d92; }
+.ab-clip-l { fill: none; stroke: rgba(16, 15, 13, 0.22); stroke-width: 1; }
+.ab-clip-b { fill: #8a857b; }
+.ab-clip-r { fill: none; stroke: #bdb7ac; stroke-width: 3.2; }
+.ab-clip-c { fill: #cfc9be; }
+.ab-clip-s { fill: rgba(16, 15, 13, 0.16); }
+.ab-clip-r2 { fill: #b3ada2; }
+
+/* la tarjeta cuelga de la pinza (script.js la mece y la inclina hacia el
+   cursor) y se da la vuelta (CSS) */
+.ab-hang {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(var(--cw) * -0.05);
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+}
+.ab-card {
+  position: relative;
+  display: block;
+  width: var(--cw);
+  aspect-ratio: 0.62;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+  cursor: none;
+  container-type: inline-size;
+  touch-action: pan-y;          /* el dedo la mece de lado y el scroll sigue */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transform-style: preserve-3d;
+  transition: transform 0.85s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.ab-card.is-flipped { transform: rotateY(180deg); }
+.ab-card:focus { outline: none; }
+.ab-card:focus-visible .ab-face { outline: 2px solid #c7b299; outline-offset: 4px; }
+.ab-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 4.6cqw;
+  background: var(--card);
+  box-shadow: 0 2.6cqw 7cqw rgba(0, 0, 0, 0.38);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.ab-back { transform: rotateY(180deg); }
+/* el brillo de la funda de plástico, solo con el cursor encima */
+.ab-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.34) 50%, transparent 60%);
+  background-size: 260% 100%;
+  background-position: var(--gx, 100%) 0;
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.ab-card.is-hover .ab-face::after { opacity: 1; }
+/* el troquel de la pinza */
+.ab-slot {
+  position: absolute;
+  left: 50%;
+  top: 2.6cqw;
+  width: 15cqw;
+  height: 2.6cqw;
+  margin-left: -7.5cqw;
+  border-radius: 2cqw;
+  background: #100f0d;
+}
+
+/* cara: cabecera, foto, nombre, datos y banda */
+.ab-front { padding: 8.4cqw 5.4cqw 0; }
+.ab-c-head { display: flex; align-items: center; gap: 2.4cqw; }
+.ab-c-logo { flex: none; width: 7.4cqw; height: auto; overflow: visible; }
+.ab-c-org {
+  display: flex;
+  flex-direction: column;
+  font-size: 2.7cqw;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.ab-c-org em { font-style: normal; font-weight: 500; letter-spacing: 0.14em; color: var(--card-mute); }
+.ab-c-no {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  font-size: 2.5cqw;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--card-mute);
+}
+.ab-c-no b { font-size: 4.6cqw; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ab-c-photo {
+  display: block;
+  margin-top: 4cqw;
+  aspect-ratio: 0.95;
+  overflow: hidden;
+  border-radius: 2.2cqw;
+  background: #dcdcdb;
+}
+.ab-c-photo img {
   display: block;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-.ab-stage.is-loaded .ab-canvas { opacity: 1; }
-.ab-ph {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(236, 230, 218, 0.4);
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 16%;
+  will-change: auto;
+  /* sin el arrastre nativo de la imagen (cancelaba el gesto de mecerla) */
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  -webkit-user-drag: none;
 }
-.ab-stage.is-loaded .ab-ph { opacity: 0; }
-.ab-ph > span { grid-area: 1 / 1; transition: opacity 0.2s cubic-bezier(0.22, 0.61, 0.36, 1); }
-.ab-ph-b { opacity: 0; }
-.ab-stage.is-failed .ab-ph-a { opacity: 0; }
-.ab-stage.is-failed .ab-ph-b { opacity: 1; }
-.ab-box-cap { display: grid; justify-items: center; margin-top: -6px; }
+.ab-c-name {
+  display: block;
+  margin-top: 4.4cqw;
+  font-size: 9.4cqw;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+.ab-c-name i { font-style: normal; font-weight: 200; color: #8a6f4a; }
+.ab-c-role { display: block; margin-top: 1.6cqw; font-size: 3.5cqw; font-weight: 400; color: rgba(26, 23, 20, 0.64); }
+.ab-c-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 4cqw;
+  padding-top: 3cqw;
+  border-top: 1px solid var(--card-line);
+}
+.ab-c-fields > span { display: flex; flex-direction: column; gap: 0.8cqw; font-size: 3.7cqw; font-weight: 600; line-height: 1.15; }
+.ab-c-fields small { font-size: 2.4cqw; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--card-mute); }
+.ab-c-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 9.4cqw;
+  margin: auto -5.4cqw 0;
+  background: var(--ink);
+  color: #c7b299;
+  font-size: 2.6cqw;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* dorso: logo, lema, letra pequeña y código de barras */
+.ab-back { align-items: center; padding: 14cqw 8cqw 7cqw; text-align: center; }
+.ab-b-logo { display: block; width: 30cqw; height: auto; overflow: visible; }
+.ab-b-tag { margin-top: 7cqw; font-size: 8.4cqw; font-weight: 800; line-height: 0.98; letter-spacing: -0.04em; }
+.ab-b-rule { display: block; width: 10cqw; height: 2px; margin: 6cqw 0; background: #c7b299; }
+.ab-b-terms { max-width: 72cqw; font-size: 3.2cqw; line-height: 1.5; color: var(--card-mute); }
+.ab-b-lost { display: flex; flex-direction: column; gap: 1.2cqw; margin-top: 6cqw; font-size: 3.4cqw; font-weight: 600; }
+.ab-b-lost small { font-size: 2.4cqw; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--card-mute); }
+.ab-b-code { display: flex; flex-direction: column; align-items: center; gap: 1.6cqw; width: 70cqw; margin-top: auto; }
+.ab-b-code svg { display: block; width: 100%; height: 10cqw; fill: var(--ink); }
+.ab-b-code > span { font-size: 2.4cqw; font-weight: 500; letter-spacing: 0.3em; color: var(--card-mute); font-variant-numeric: tabular-nums; }
+
+.ab-box-cap { display: grid; justify-items: center; margin-top: 22px; }
 .ab-sr {
   position: absolute;
   width: 1px;
@@ -3642,7 +3848,9 @@ body.about-page.ab-past-hero .top-bar::before { opacity: 1; }
 @media (max-width: 860px) {
   .ab-hero { min-height: auto; padding-top: 104px; padding-bottom: 72px; }
   .ab-hero-inner { grid-template-columns: 1fr; gap: 40px; padding-right: 0; }
-  .ab-box { justify-self: center; width: min(390px, 94vw); }
+  /* en móvil la acreditación va arriba, colgando desde el borde de la
+     pantalla, y el nombre debajo */
+  .ab-box { order: -1; justify-self: center; --cw: min(250px, 64vw); }
   .ab-doc { grid-template-columns: 1fr; }
   .ab-index { display: none; }
   .ab-part { padding: 56px 0; }
@@ -3667,12 +3875,17 @@ body.about-page.ab-past-hero .top-bar::before { opacity: 1; }
 @keyframes ab-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .ab-role, .ab-box { animation: ab-fade 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.2s both !important; }
-  .ab3 .ab-canvas,
-  .ab3 .ab-ph > span,
   .ab3 .ab-copy > span,
   .ab3 .ab-hint > span { transition-duration: 0.2s !important; }
   .ab-meter-fill { transform: scaleX(calc(var(--v) / 100)) !important; }
   .ab-meter-dot, .ab-cta-arrow { transform: none !important; }
+  /* la acreditación no se mueve; la vuelta es un fundido */
+  .ab-card { transition: none; }
+  .ab-card.is-flipped { transform: none; }
+  .ab-face { transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1); }
+  .ab-back { transform: none; opacity: 0; }
+  .ab-card.is-flipped .ab-back { opacity: 1; }
+  .ab-card.is-flipped .ab-front { opacity: 0; }
 }
 
 

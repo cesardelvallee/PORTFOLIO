@@ -161,7 +161,28 @@ document.addEventListener('DOMContentLoaded', () => {
      línea base, del centro hacia fuera (nace del muñeco), estirada; al
      llegar se asienta con un pequeño aplastamiento. Después el subtítulo
      sube igual, más rápido, y entran el botón, las cards y el punto.
-     Con movimiento reducido: solo fundidos. */
+     Con movimiento reducido: solo fundidos.
+     Las letras van con Web Animations (corren en el compositor), no con
+     GSAP: justo al entrar en la home el hilo principal está ocupado
+     (el 3D, las imágenes, el resto de la página) y con GSAP los primeros
+     fotogramas llegaban a tardar 130-180 ms: la palabra se trababa al
+     arrancar. Las curvas son las mismas de antes (power4.out para subir,
+     back.out(2.4) para asentarse), muestreadas en fotogramas clave. */
+  const p4Out = (x) => 1 - Math.pow(1 - x, 4);
+  const backOut = (k) => (x) => { const p = x - 1; return p * p * ((k + 1) * p + k) + 1; };
+  const back24 = backOut(2.4);
+  // y (en % de la letra) y scaleY de una letra a los ms dados de su entrada
+  function letterFrames(dur, y0, s0, sAt, sDur, steps) {
+    const fr = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = (dur * i) / steps;
+      const y = y0 * (1 - p4Out(Math.min(1, t / dur)));
+      const sy = s0 === 1 || t <= sAt ? s0 : s0 + (1 - s0) * back24(Math.min(1, (t - sAt) / sDur));
+      fr.push({ offset: i / steps, transform: 'translateY(' + y.toFixed(3) + '%) scaleY(' + sy.toFixed(4) + ')' });
+    }
+    fr[fr.length - 1].transform = 'none';
+    return fr;
+  }
   function playHeroTitleAnimation() {
     const title = document.querySelector('.hero-title');
     const btn = document.querySelector('.hero-btn');
@@ -185,24 +206,36 @@ document.addEventListener('DOMContentLoaded', () => {
       // muelles del cursor esperan a que se borre la bandera)
       title.dataset.entering = '1';
       gsap.killTweensOf([...letters, ...subLetters]);
+      gsap.set([...letters, ...subLetters], {clearProps: 'transform'});
       title.classList.add('is-masking');
       if (subtitle) subtitle.classList.add('is-masking');
       gsap.set([title, subtitle], {opacity: 1, visibility: 'visible', y: 0, scale: 1, filter: 'blur(0px)', pointerEvents: 'none'});
-      gsap.set(letters, {yPercent: 112, scaleY: 1.45, opacity: 1});
-      gsap.set(subLetters, {yPercent: 120, opacity: 1});
-      const from = {each: 0.07, from: 'center'};
-      tl.to(letters, {yPercent: 0, duration: 1.3, ease: EASE_IN, stagger: from}, 0)
-        .to(letters, {scaleY: 1, duration: 0.95, ease: 'back.out(2.4)', stagger: from}, 0.16)
-        .to(subLetters, {yPercent: 0, duration: 0.85, ease: EASE_IN, stagger: 0.016}, 0.62)
-        .add(() => {
-          delete title.dataset.entering;
-          gsap.set([...letters, ...subLetters], {clearProps: 'transform'});
-          title.classList.remove('is-masking');
-          if (subtitle) subtitle.classList.remove('is-masking');
-          title.style.pointerEvents = 'auto';
-          if (subtitle) subtitle.style.pointerEvents = 'auto';
-          if (window.heroRemeasure) window.heroRemeasure();
-        });
+      // del centro hacia fuera, 70 ms por letra (antes: stagger "center")
+      const mid = (letters.length - 1) / 2;
+      const titleFr = letterFrames(1300, 112, 1.45, 160, 950, 40);
+      const subFr = letterFrames(850, 120, 1, 0, 1, 24);
+      const anims = [];
+      letters.forEach((l, i) => {
+        if (l._enter) l._enter.cancel();
+        l.style.opacity = '1';
+        l._enter = l.animate(titleFr, { duration: 1300, delay: Math.abs(i - mid) * 70, fill: 'backwards', easing: 'linear' });
+        anims.push(l._enter);
+      });
+      Array.prototype.forEach.call(subLetters, (l, i) => {
+        if (l._enter) l._enter.cancel();
+        l.style.opacity = '1';
+        l._enter = l.animate(subFr, { duration: 850, delay: 620 + i * 16, fill: 'backwards', easing: 'linear' });
+        anims.push(l._enter);
+      });
+      Promise.all(anims.map((a) => a.finished)).then(() => {
+        delete title.dataset.entering;
+        anims.forEach((a) => a.cancel());
+        title.classList.remove('is-masking');
+        if (subtitle) subtitle.classList.remove('is-masking');
+        title.style.pointerEvents = 'auto';
+        if (subtitle) subtitle.style.pointerEvents = 'auto';
+        if (window.heroRemeasure) window.heroRemeasure();
+      }).catch(() => {});   // si se relanza a mitad (doble clic), la nueva se encarga
     }
 
     tl.to(btn, {opacity: 1, y: 0, scale: 1.08, filter: 'blur(0px)', duration: 0.14, ease: 'back.out(2)',
@@ -679,7 +712,15 @@ window.addEventListener('DOMContentLoaded', function() {
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) { try { loadingScreen.remove(); } catch (e) { loadingScreen.style.display = 'none'; } }
     revealMain();
-    triggerStartAnimations();
+    // la entrada espera a que esté la fuente de PORTFOLIO (Clash Display):
+    // si llega a mitad, las letras cambian de forma y saltan. Como mucho
+    // 0.7 s (la cortina de la página tarda eso en subir)
+    let go = false;
+    const start = () => { if (go) return; go = true; requestAnimationFrame(() => requestAnimationFrame(triggerStartAnimations)); };
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('600 1em "Clash Display"').then(start, start);
+      setTimeout(start, 700);
+    } else start();
   }
 
   function runLoader() {
@@ -2102,7 +2143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!inner) return;
 
     // en el about el héroe desaparece del todo antes de llegar a la barra
-    // superior (si no, el blíster se ve a medias detrás de ATRÁS/CONTACT ME)
+    // superior (si no, la acreditación se ve a medias detrás de ATRÁS/CONTACT ME)
     var fade = hero.classList.contains('abx-hero') ? 1.06 : 0.55;
     var h = 1, cur = 0, raf = 0;
     function measure() { h = Math.max(1, hero.offsetHeight); }
@@ -2129,7 +2170,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 /* ============================================================
-   ABOUT — el muñeco en su blíster + el documento (perfil,
+   ABOUT — la acreditación colgada de su cinta + el documento (perfil,
    trayectoria, herramientas, especialidades, contacto) con un
    índice fijo que sigue la lectura. Solo transform/opacity; en
    táctil y con reduced-motion todo sigue funcionando.
@@ -2152,12 +2193,133 @@ document.addEventListener('DOMContentLoaded', function() {
       io.observe(el);
     }
 
-    /* ---- la caja 3D vive en about-box.js (módulo). Si no llega a cargar
-       (sin red, sin WebGL), se dice en vez de quedarse "cargando". ---- */
-    (function boxFallback() {
-      var stage = page.querySelector('.ab-stage');
-      if (!stage) return;
-      setTimeout(function() { if (!stage.classList.contains('is-loaded')) stage.classList.add('is-failed'); }, 15000);
+    /* ---- la acreditación: una tarjeta colgada de su cinta, que baja desde
+       el borde de arriba del héroe. Al entrar cae y se balancea; arrastrada
+       de lado se mece (péndulo doble con muelles: la cinta, lenta, gira
+       desde arriba; la tarjeta, colgada de la pinza, más rápida y a
+       contrapié) y al soltarla se calma. En reposo se mece muy poco; con el
+       cursor encima se inclina hacia él. Al tocarla (o con Intro / espacio)
+       se da la vuelta. Solo transform, y el bucle se para cuando el héroe
+       no se ve. Con reduced-motion: quieta, y la vuelta es un fundido. ---- */
+    (function badge() {
+      var box = page.querySelector('.ab-box');
+      var rig = box && box.querySelector('.ab-rig');
+      var hang = box && box.querySelector('.ab-hang');
+      var card = box && box.querySelector('.ab-card');
+      var hero = page.querySelector('.ab-hero');
+      if (!rig || !hang || !card || !hero) return;
+      var hint = box.querySelector('.ab-hint');
+      var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      var D2R = Math.PI / 180;
+      var flips = 0, suppress = false;
+      var a1 = 7, v1 = 0, a2 = -12, v2 = 0, dy = 0, vy = 0;
+      var tx = 0, ty = 0, ttx = 0, tty = 0;
+      var drag = null, t = 0, last = 0, raf = 0, live = true, startAt = 0;
+      var Lr = 300, ch = 500;
+
+      card.addEventListener('click', function(e) {
+        if (suppress) { suppress = false; e.preventDefault(); return; }
+        var on = !card.classList.contains('is-flipped');
+        card.classList.toggle('is-flipped', on);
+        card.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (++flips >= 4 && hint) hint.classList.add('is-egg');
+        if (!reduce) { v2 += on ? 38 : -38; kick(); }   // al girarla se mece un poco
+      });
+      if (reduce) return;
+      box.classList.add('is-js');
+
+      // dónde cuelga: del borde de arriba del héroe (offsetTop no ve transforms)
+      function topIn(el, anc) { var y = 0; while (el && el !== anc) { y += el.offsetTop; el = el.offsetParent; } return y; }
+      function measure() {
+        var anc = hero.offsetParent;
+        Lr = Math.max(80, topIn(rig, anc) - topIn(hero, anc));
+        ch = rig.offsetHeight;
+        var cw = card.offsetWidth, lt = cw * 0.024;
+        var a = Math.min(9, Math.atan((cw * 0.15) / (Lr + lt)) / D2R);   // la V de la cinta
+        rig.style.setProperty('--a', a.toFixed(2) + 'deg');
+        rig.style.setProperty('--sh', Math.round((Lr + lt) / Math.cos(a * D2R) + window.innerHeight * 0.7) + 'px');
+        rig.style.transformOrigin = '50% ' + (-Lr).toFixed(0) + 'px';
+      }
+      function write() {
+        rig.style.transform = 'translate3d(0,' + dy.toFixed(1) + 'px,0) rotate(' + a1.toFixed(3) + 'deg)';
+        hang.style.transform = 'rotate(' + a2.toFixed(3) + 'deg) rotateX(' + tx.toFixed(2) + 'deg) rotateY(' + ty.toFixed(2) + 'deg)';
+      }
+      function step(now) {
+        raf = 0;
+        var dt = last ? Math.min(0.034, (now - last) / 1000) : 0.016;
+        last = now;
+        if (now >= startAt) {
+          t += dt;
+          // la caída: un muelle con un pequeño rebote al llegar
+          vy += (-70 * dy - 11 * vy) * dt; dy += vy * dt;
+          var pv = v1;
+          if (drag && drag.moved) {
+            var na = a1 + (drag.target - a1) * Math.min(1, dt * 14);
+            v1 = (na - a1) / dt; a1 = na;
+          } else {
+            var rest = Math.sin(t * 1.1) * 0.6;
+            v1 += (-12 * (a1 - rest) - 0.8 * v1) * dt; a1 += v1 * dt;
+          }
+          // la tarjeta va a contrapié de la cinta (inercia) y vuelve a su sitio
+          var acc1 = Math.max(-1500, Math.min(1500, (v1 - pv) / dt));
+          v2 += (-65 * a2 - 2.6 * v2 - acc1 * 0.8) * dt; a2 += v2 * dt;
+          a2 = Math.max(-28, Math.min(28, a2));
+        }
+        var k = Math.min(1, dt * 9);
+        tx += (ttx - tx) * k; ty += (tty - ty) * k;
+        write();
+        if (live) raf = requestAnimationFrame(step);
+      }
+      function kick() { if (!raf && live) { last = 0; raf = requestAnimationFrame(step); } }
+
+      measure();
+      dy = -(Lr + ch + 60);          // empieza fuera, por encima del héroe
+      write();
+      startAt = performance.now() + 380;   // tras la cortina de la página
+      kick();
+      window.addEventListener('resize', measure);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function(es) { live = es[0].isIntersecting && !document.hidden; kick(); }).observe(hero);
+      }
+      document.addEventListener('visibilitychange', function() { live = !document.hidden; kick(); });
+
+      // arrastrarla de lado: la cinta sigue al dedo / cursor desde arriba
+      card.addEventListener('pointerdown', function(e) {
+        if (e.button > 0) return;
+        suppress = false;
+        drag = { id: e.pointerId, x0: e.clientX, a0: a1, target: a1, moved: false };
+      });
+      window.addEventListener('pointermove', function(e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var dx = e.clientX - drag.x0;
+        if (!drag.moved && Math.abs(dx) > 6) {
+          drag.moved = true;
+          ttx = tty = 0;
+          card.classList.remove('is-hover');
+          try { card.setPointerCapture(e.pointerId); } catch (_) { /* nada */ }
+        }
+        if (drag.moved) drag.target = Math.max(-13, Math.min(13, drag.a0 + Math.atan(dx / (Lr + ch * 0.7)) / D2R));
+      }, { passive: true });
+      window.addEventListener('pointerup', function(e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        if (drag.moved) suppress = true;   // soltar tras arrastrar no le da la vuelta
+        drag = null;
+      });
+      window.addEventListener('pointercancel', function(e) { if (drag && e.pointerId === drag.id) drag = null; });
+
+      // con el cursor encima se inclina hacia él y brilla la funda
+      if (fine) {
+        card.addEventListener('pointermove', function(e) {
+          if (e.pointerType !== 'mouse' || (drag && drag.moved)) return;
+          var r = card.getBoundingClientRect();
+          var px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+          ttx = -py * 9; tty = px * 12;
+          card.style.setProperty('--gx', (100 - (px + 0.5) * 100).toFixed(1) + '%');
+          card.classList.add('is-hover');
+        });
+        card.addEventListener('pointerleave', function() { ttx = tty = 0; card.classList.remove('is-hover'); });
+      }
     })();
 
     /* ---- índice + barra superior: marca la sección que se está leyendo y,
@@ -3043,6 +3205,67 @@ try {
     window.initWhatsitIn = function() { place(); ws.classList.add('is-in'); };
     // sin GSAP o sin entrada del título (otras rutas): aparece igualmente
     setTimeout(window.initWhatsitIn, 6000);
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   LOGO DE LA CABECERA (home) — los ojos siguen al cursor, como la cara
+   de la 404 (es el mismo dibujo: mismos topes, en unidades del logo; a la
+   derecha y hacia arriba se mueven menos, que ahí acaba la cara y empieza
+   el flequillo). Solo se mueve el grupo de los ojos (.tl-look, se crea
+   aquí), así el parpadeo del hover sigue escalando .tl-eyes por dentro.
+   En táctil miran al dedo mientras toca o arrastra y después vuelven al
+   centro. El bucle solo corre mientras los ojos se mueven. Con movimiento
+   reducido, quietos.
+   ============================================================ */
+(function() {
+  function init() {
+    if (!document.body.classList.contains('home-page')) return;
+    var svg = document.querySelector('.top-logo svg');
+    var eyes = svg && svg.querySelector('.tl-eyes');
+    if (!eyes || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    var look = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    look.setAttribute('class', 'tl-look');
+    eyes.parentNode.insertBefore(look, eyes);
+    look.appendChild(eyes);
+
+    var MX_L = 22, MX_R = 13, MY_UP = 10, MY_DN = 16;
+    var tx = 0, ty = 0, x = 0, y = 0, raf = 0, back = 0;
+    function aim(cx, cy) {
+      var r = svg.getBoundingClientRect();
+      if (!r.width) return;
+      var dx = cx - (r.left + r.width * 0.66), dy = cy - (r.top + r.height * 0.58);
+      var d = Math.sqrt(dx * dx + dy * dy) || 1, k = Math.min(1, d / 280);
+      tx = dx / d * k * (dx < 0 ? MX_L : MX_R);
+      ty = dy / d * k * (dy < 0 ? MY_UP : MY_DN);
+      kick();
+    }
+    function rest() { tx = 0; ty = 0; kick(); }
+    function loop() {
+      raf = 0;
+      x += (tx - x) * 0.18;
+      y += (ty - y) * 0.18;
+      if (Math.abs(tx - x) < 0.05 && Math.abs(ty - y) < 0.05) { x = tx; y = ty; }
+      look.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ')');
+      if (x !== tx || y !== ty) raf = requestAnimationFrame(loop);
+    }
+    function kick() { if (!raf) raf = requestAnimationFrame(loop); }
+
+    document.addEventListener('pointermove', function(e) {
+      clearTimeout(back);
+      aim(e.clientX, e.clientY);
+      if (e.pointerType && e.pointerType !== 'mouse') back = setTimeout(rest, 1600);
+    }, { passive: true });
+    document.addEventListener('pointerdown', function(e) {
+      if (!e.pointerType || e.pointerType === 'mouse') return;
+      clearTimeout(back);
+      aim(e.clientX, e.clientY);
+      back = setTimeout(rest, 1600);
+    }, { passive: true });
+    // el cursor sale de la ventana: vuelven a mirar al frente
+    document.documentElement.addEventListener('mouseleave', rest);
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
