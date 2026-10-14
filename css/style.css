@@ -4707,6 +4707,9 @@ body.menu-open .sm-word {
   }
   /* con el botón a la izquierda (home) el pie se alinea a la derecha */
   #site-menu.sm-btn-left .sm-foot { align-items: flex-end; text-align: right; }
+  /* la fila de enlaces no llega al botón de cerrar: «Dossier» y «CV», sin «PDF» */
+  .sm-social { gap: 16px; }
+  .sm-pdf { display: none; }
 }
 
 /* ---- accesibilidad: sin desplazamientos, solo fundido ---- */

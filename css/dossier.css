@@ -1,0 +1,373 @@
+/* ============================================================
+   DOSSIER (dossier.html) — el portfolio en hojas A4 apaisadas:
+   portada con el índice, una hoja por proyecto y contraportada.
+
+   · En pantalla se ven como un documento sobre el fondo de la web,
+     bajo una cabecera como la de los proyectos (título, nota a mano
+     y el botón «Descargar PDF»).
+   · Al imprimir (o «Guardar como PDF») sale solo el documento: cada
+     hoja ocupa una página A4 apaisada.
+   · Todo lo de dentro de una hoja se mide en cqw (1 cqw = 1 % de su
+     ancho), así que se ve igual a cualquier tamaño y en el papel.
+   · Papel crema y la tinta y los colores del tema claro de la web; cada
+     proyecto pone su acento (--acc, el --pj-accent-l de su página).
+   El contenido es el de img1–img6 (lo copia el generador).
+   ============================================================ */
+
+.ds { position: relative; z-index: 1; }
+.ds *, .ds *::before, .ds *::after { box-sizing: border-box; }
+/* las reglas globales limitan las imágenes a 800px y las preparan para transform */
+.ds img { display: block; max-width: none; will-change: auto; }
+
+/* ---- cabecera de la página ---- */
+.ds-bar {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin: var(--pj-cg) var(--pj-gut) 0;
+  padding-top: clamp(18px, 2.4vh, 24px);
+  border-top: 1px solid var(--pj-line);
+  animation: pj-rise 0.9s var(--pj-ease) 0.6s both;
+}
+.ds-lead {
+  max-width: 40ch;
+  margin: 0;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--pj-soft);
+  text-wrap: pretty;
+}
+.ds-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: none; }
+.ds-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  padding: 0 26px 0 22px;
+  border-radius: 999px;
+  border: 1px solid var(--pj-ink);
+  background: var(--pj-ink);
+  color: var(--pj-bar);
+  font: 600 0.68rem/1 'Inter', sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s var(--pj-ease), background-color 0.25s var(--pj-ease), border-color 0.25s var(--pj-ease), opacity 0.2s var(--pj-ease);
+}
+.ds-print svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.35s var(--pj-ease); }
+.ds-print:active { transform: scale(0.97); }
+.ds-print:focus-visible { outline: 1px solid var(--pj-ink); outline-offset: 4px; }
+/* al pulsar: la flecha cae dentro de la bandeja y vuelve (la descarga ya va) */
+.ds-print { text-decoration: none; }
+.ds-print.is-going svg { animation: ds-drop 0.55s var(--pj-ease); }
+@keyframes ds-drop {
+  0% { transform: none; }
+  45% { transform: translateY(4px) scaleY(0.82); }
+  100% { transform: none; }
+}
+.ds-how { margin: 0; font-size: 0.72rem; color: var(--pj-mute); }
+.ds-how b { font-weight: 600; color: var(--pj-soft); }
+@media (hover: hover) and (pointer: fine) {
+  .ds-print:hover { background: var(--pj-acc); border-color: var(--pj-acc); }
+  .ds-print:hover svg { transform: translateY(2px); }
+}
+
+/* ---- las hojas ---- */
+.ds-sheets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(36px, 6vh, 64px);
+  /* abajo, aire antes del pie de la página */
+  padding: clamp(56px, 9vh, 96px) var(--pj-gut) clamp(96px, 16vh, 180px);
+}
+.sheet {
+  --ink: #2a2620;
+  --soft: rgba(42, 38, 32, 0.8);
+  --mute: rgba(42, 38, 32, 0.52);
+  --line: rgba(42, 38, 32, 0.16);
+  --title: #6b5d47;
+  --acc: #8a6f4a;
+  position: relative;
+  width: min(1180px, 100%);
+  aspect-ratio: 297 / 210;
+  container-type: inline-size;
+  overflow: hidden;
+  background: #f8f4ec;
+  color: var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.6);
+  font-family: 'Inter', sans-serif;
+}
+/* sobre el fondo crema del tema claro, el papel se separa con un filo */
+body.theme-light .sheet { box-shadow: 0 30px 60px -36px rgba(60, 50, 38, 0.45), 0 0 0 1px rgba(42, 38, 32, 0.08); }
+/* reseteo sin especificidad: los márgenes de cada pieza mandan */
+:where(.sheet) :where(p, h2, dl, ol, ul) { margin: 0; }
+
+/* folio de arriba y pie, con su línea fina (como las secciones de la web) */
+.sh-run,
+.sh-foot {
+  position: absolute;
+  left: 4.4cqw;
+  right: 4.4cqw;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78cqw;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.sh-run { top: 3cqw; padding-bottom: 1cqw; border-bottom: 1px solid var(--line); }
+.sh-foot { bottom: 2.6cqw; padding-top: 1cqw; border-top: 1px solid var(--line); letter-spacing: 0.06em; text-transform: none; font-weight: 500; }
+
+/* lo escrito a mano (la letra de las notas de la web) */
+.sh-note {
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--acc);
+}
+.sh-note > span { display: inline-block; transform: rotate(-4deg); transform-origin: 0 50%; }
+.sh-arrow { display: block; height: auto; fill: none; stroke: currentColor; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
+.sh-logo { display: block; width: auto; }
+.sh-logo path { fill: var(--title); }
+
+/* ---- hoja de proyecto: el texto a la izquierda y las imágenes a la derecha ---- */
+.sh-body {
+  position: absolute;
+  left: 4.4cqw;
+  right: 4.4cqw;
+  top: 7.9cqw;
+  bottom: 7.2cqw;
+  display: flex;
+  align-items: flex-start;
+  gap: 4cqw;
+}
+.sh-text { flex: none; width: 26.8cqw; }
+.sh-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.9cqw;
+  margin-bottom: 1.4cqw;
+  font-size: 0.8cqw;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.sh-kicker b { font-weight: 600; color: var(--acc); }
+.sh-kicker i { width: 1.4cqw; height: 1px; background: currentColor; opacity: 0.7; }
+.sh-title {
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 4.6cqw;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--title);
+  text-wrap: balance;
+}
+.sh-pj .sh-note { margin-top: 1.2cqw; font-size: 2cqw; }
+.sh-lead {
+  margin-top: 2.2cqw;
+  font-size: 1.12cqw;
+  line-height: 1.56;
+  color: var(--soft);
+  text-wrap: pretty;
+}
+.sh-lead strong { font-weight: 600; color: var(--ink); }
+.sh-lead em { font-style: italic; }
+.sh-facts { margin-top: 2.2cqw; }
+.sh-facts > div,
+.sh-web {
+  display: grid;
+  grid-template-columns: 8.2cqw minmax(0, 1fr);
+  gap: 1cqw;
+  padding: 0.72cqw 0;
+  border-top: 1px solid var(--line);
+}
+.sh-facts > div:last-child { border-bottom: 1px solid var(--line); }
+.sh-facts dt,
+.sh-web span {
+  padding-top: 0.15cqw;
+  font-size: 0.68cqw;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.sh-facts dd { margin: 0; font-size: 0.94cqw; font-weight: 500; line-height: 1.4; color: var(--ink); }
+.sh-web { margin-top: 1.4cqw; border-bottom: 1px solid var(--line); font-size: 0.94cqw; }
+.sh-web a { color: var(--acc); font-weight: 600; text-decoration: none; }
+
+/* las imágenes: filas que comparten altura, sin recortes (cada pieza crece
+   según su proporción, --r). El ancho del mosaico (--w, en cqw) lo calcula
+   el generador para que quepa justo en el alto de la hoja */
+.sh-mosaic { flex: none; width: calc(var(--w) * 1cqw); margin-left: auto; display: flex; flex-direction: column; gap: 1cqw; }
+.sh-row { display: flex; gap: 1cqw; }
+.sh-row figure {
+  flex: var(--r) 1 0;
+  min-width: 0;
+  margin: 0;
+  aspect-ratio: var(--r);
+  overflow: hidden;
+  border-radius: 0.45cqw;
+  background: var(--bg, transparent);
+}
+.sh-row img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- portada ---- */
+.sh-cover-top {
+  position: absolute;
+  left: 4.4cqw;
+  right: 4.4cqw;
+  top: 8.2cqw;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.sh-cover .sh-logo { height: 6.4cqw; }
+.sh-role {
+  text-align: right;
+  font-size: 0.86cqw;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 1.8;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.sh-big {
+  position: absolute;
+  left: 3.9cqw;
+  top: 16cqw;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 15cqw;
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--title);
+}
+.sh-name {
+  position: absolute;
+  left: 4.4cqw;
+  top: 30.4cqw;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-size: 2.4cqw;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.sh-note-cover {
+  position: absolute;
+  right: 7cqw;
+  top: 29.6cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 2.1cqw;
+  color: var(--title);
+}
+.sh-note-cover .sh-arrow { width: 3.6cqw; margin: 0.4cqw 4cqw 0 0; transform: scaleX(-1) rotate(-6deg); }
+.sh-index {
+  position: absolute;
+  left: 4.4cqw;
+  right: 4.4cqw;
+  bottom: 6.2cqw;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1.2cqw;
+  padding: 0;
+  list-style: none;
+}
+.sh-index li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 0.7cqw; row-gap: 0.9cqw; align-items: baseline; }
+.sh-index img { grid-column: 1 / -1; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 0.45cqw; }
+.sh-ix-n { font-family: 'Clash Display', 'Inter', sans-serif; font-size: 1.15cqw; font-weight: 600; color: var(--acc); }
+.sh-ix-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.86cqw; font-weight: 600; color: var(--ink); }
+.sh-ix-p { font-size: 0.72cqw; font-weight: 600; letter-spacing: 0.1em; color: var(--mute); }
+
+/* ---- contraportada ---- */
+.sh-talk { top: 13.6cqw; }
+.sh-mail {
+  position: absolute;
+  left: 4.4cqw;
+  top: 30cqw;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-size: 3.2cqw;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.sh-links { position: absolute; left: 4.4cqw; top: 37.6cqw; width: 50cqw; padding: 0; list-style: none; }
+.sh-links li {
+  display: grid;
+  grid-template-columns: 8.2cqw minmax(0, 1fr);
+  gap: 1cqw;
+  padding: 0.85cqw 0;
+  border-top: 1px solid var(--line);
+  font-size: 1.02cqw;
+}
+.sh-links li:last-child { border-bottom: 1px solid var(--line); }
+.sh-links span { padding-top: 0.2cqw; font-size: 0.68cqw; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); }
+.sh-links a { color: var(--ink); font-weight: 500; text-decoration: none; }
+.sh-thanks { position: absolute; right: 7cqw; top: 31cqw; font-size: 2.8cqw; color: var(--title); }
+.sh-thanks > span { transform: rotate(-6deg); }
+.sh-back .sh-logo { position: absolute; right: 4.4cqw; bottom: 6.4cqw; height: 9cqw; }
+.sh-copy { position: absolute; left: 4.4cqw; bottom: 3cqw; font-size: 0.76cqw; font-weight: 500; letter-spacing: 0.06em; color: var(--mute); }
+
+/* entrada de cada hoja al verse (script.js pone .is-in) */
+.ds-js .sheet {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s var(--pj-ease), transform 1.1s var(--pj-ease);
+}
+.ds-js .sheet.is-in { opacity: 1; transform: none; }
+
+/* ---- móvil ---- */
+@media (max-width: 768px) {
+  .ds-bar { flex-direction: column; align-items: stretch; gap: 22px; }
+  .ds-lead { font-size: 16px; }
+  .ds-actions { align-items: stretch; }
+  .ds-print { justify-content: center; height: 54px; font-size: 11px; cursor: pointer; }
+  .ds-how { font-size: 12px; text-align: center; }
+  .ds-sheets { gap: 18px; padding-top: 44px; padding-bottom: 72px; }
+  .sheet { border-radius: 3px; box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-bar { animation: pj-fade 0.5s ease 0.4s both; }
+  .ds-js .sheet { transform: none; transition: opacity 0.5s ease; }
+  .ds-print.is-going svg { animation: none; }
+}
+
+/* ---- al imprimir: solo las hojas, una por página A4 apaisada ---- */
+@page { size: A4 landscape; margin: 0; }
+@media print {
+  html, body, body.pj-page, body.theme-light.pj-page { background: #fff !important; }
+  body > *:not(.ds) { display: none !important; }
+  /* el grano de película de la web (body::after) se rasterizaría en cada hoja */
+  body::before, body::after { display: none !important; }
+  .ds-hero { display: none !important; }
+  .ds-sheets { display: block; padding: 0; }
+  .sheet {
+    width: 297mm;
+    height: 210mm;
+    aspect-ratio: auto;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    break-after: page;
+    page-break-after: always;
+    break-inside: avoid;
+  }
+  .sheet:last-child { break-after: auto; page-break-after: auto; }
+  .ds, .ds * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

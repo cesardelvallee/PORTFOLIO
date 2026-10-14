@@ -182,6 +182,41 @@
 .cx-copy.is-copied .cx-copy-b { opacity: 1; }
 .cx-copy:active { transform: scale(0.96); }
 @media (pointer: coarse) { .cx-copy { height: 44px; } }
+/* «Copiar email» y, a su lado, el dossier: más callado (texto, sin borde),
+   el subrayado aparece al pasar el cursor como en el email */
+.cx-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 18px; }
+.cx-acts .cx-copy { margin-top: 0; }
+.cx-dossier {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  font: 600 var(--label)/1 'Inter', sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-decoration: none;
+  cursor: none;
+  transition: color 0.2s var(--ease), transform 0.16s var(--ease);
+}
+.cx-dossier .cx-arr { width: 11px; height: 11px; }
+.cx-dossier::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 19px;
+  bottom: 10px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease);
+}
+.cx-dossier:active { transform: scale(0.97); }
+.cx-dossier:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; border-radius: 4px; }
+.cx-dossier:focus-visible::after { transform: scaleX(1); }
+@media (pointer: coarse) { .cx-dossier { height: 44px; cursor: pointer; } .cx-dossier::after { bottom: 13px; } }
 
 .cx-social {
   display: grid;
@@ -234,6 +269,9 @@
 @media (hover: hover) and (pointer: fine) {
   .cx-mail:hover::after { transform: scaleX(1); }
   .cx-copy:hover { background: var(--ink); color: var(--paper); }
+  .cx-dossier:hover { color: var(--ink); }
+  .cx-dossier:hover::after { transform: scaleX(1); }
+  .cx-dossier:hover .cx-arr { transform: translate(2px, -2px); }
   .cx-social:hover .cx-roll { transform: none; }
   .cx-social:hover .cx-roll { color: transparent; }
   .cx-social:hover .cx-roll::after { transform: translateY(-100%); }
@@ -279,7 +317,9 @@
   .cx-star { width: min(9vw, 4.5svh); height: min(9vw, 4.5svh); }
   .cx-lab { margin-bottom: 0.8svh; }
   .cx-mail { font-size: min(6vw, 3.2svh); }
-  .cx-copy { margin-top: 1.4svh; }
+  .cx-acts { margin-top: 1.4svh; column-gap: 18px; }
+  /* los tres en la misma línea: «Dossier» y «CV», sin «PDF» (como en el menú) */
+  .cx-pdf { display: none; }
   /* redes en dos columnas */
   .cx-br { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
   .cx-br .cx-lab { grid-column: 1 / -1; }
@@ -296,5 +336,6 @@
   .contact-page .cx-in { animation: cx-fade 0.4s var(--ease) both !important; animation-delay: var(--d, 0ms) !important; }
   .contact-page .cx-marquee { animation: cx-fade 0.4s var(--ease) both !important; }
   .cx-roll, .cx-roll::after, .cx-arr { transform: none !important; }
+  .cx-dossier::after { transition: none; }
   .cx-social:hover .cx-roll { color: var(--accent) !important; }
 }

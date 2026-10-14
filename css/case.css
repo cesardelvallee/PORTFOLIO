@@ -1,28 +1,37 @@
 /* ============================================================
    CASO DE ESTUDIO — sistema común de las páginas de proyecto
-   (img1–img6). Mismo layout para todas:
+   (img1–img6). Mismo layout para todas, sobre una retícula sencilla:
+   un margen estrecho a la izquierda (--pj-rail) y el contenido. Todo
+   arranca en esas dos verticales y cada sección abre con una línea fina.
 
-   1. Cabecera: número y disciplina, y el nombre del proyecto en la
-      tipografía de PORTFOLIO (Clash Display), al mismo tamaño en las
-      seis: el del título más largo, justo de margen a margen.
-   2. Portada: la imagen o vídeo principal. Empieza dentro de los
-      márgenes y, al bajar, crece hasta ocupar toda la pantalla.
-   3. Cuerpo: a la izquierda una columna fija con el texto y la ficha
-      (y, debajo, qué lámina estás viendo); a la derecha pasan las
-      láminas de la galería. Las piezas de cada fila comparten altura
-      sin recortarse (cada una crece según su proporción, --r).
-   4. Siguiente proyecto en grande y un pie mínimo.
+   1. Cabecera: número y disciplina, el nombre del proyecto en la
+      tipografía de PORTFOLIO (Clash Display, mismo tamaño en las seis)
+      y, a la derecha, una nota escrita a mano con su flecha hacia la
+      portada: la letra y la flecha del «Don't click!» de la home.
+   2. Portada: la imagen o vídeo principal, de margen a margen.
+   3. Sobre el proyecto: la etiqueta en el margen, el texto donde
+      empiezan las imágenes y la ficha a la derecha.
+   4. Láminas: en el margen, su número y su título (se quedan fijos
+      mientras pasa la lámina, como el folio de un libro); a la derecha,
+      sus piezas, que comparten altura sin recortarse (cada una crece
+      según su proporción, --r).
+   5. Siguiente proyecto en grande y un pie mínimo.
 
    Fondo y colores: los de la home (#vanta-bg con sus manchas y el
    tema día / noche que se elija allí). Cada proyecto solo aporta un
-   acento (--pj-accent, y --pj-accent-l para el tema claro).
+   acento (--pj-accent, y --pj-accent-l para el tema claro), que es el
+   color de su nota a mano.
    El movimiento lo pone script.js (bloque "CASO DE ESTUDIO"); aquí
    solo transform / opacity.
    ============================================================ */
 
 body.pj-page {
   --pj-gut: 50px;
-  --pj-gap: clamp(10px, 1.05vw, 16px);
+  --pj-rail: clamp(150px, 14vw, 220px);   /* el margen de los números */
+  --pj-col: clamp(28px, 3.4vw, 56px);     /* del margen al contenido */
+  --pj-gap: clamp(10px, 1.05vw, 16px);    /* entre piezas */
+  --pj-sec: clamp(84px, 14vh, 160px);     /* entre secciones */
+  --pj-cg: clamp(26px, 4vh, 44px);        /* del título a la portada */
   --pj-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --pj-ink: #ece6da;
   --pj-soft: rgba(236, 230, 218, 0.74);
@@ -33,8 +42,9 @@ body.pj-page {
   --pj-bar: #0e0d0b;
   --pj-acc: var(--pj-accent, #c7b299);
   /* el título más largo ("Ottolinger × Mykita") mide 8.66em de tinta en
-     Clash 600 con -0.03em: con este tamaño cabe justo de margen a margen */
-  --pj-tfs: min(calc((100vw - 2 * var(--pj-gut)) / 8.7), 24svh);
+     Clash 600 con -0.03em: con este tamaño ocupa tres cuartos del ancho
+     y el último cuarto queda para la nota a mano */
+  --pj-tfs: min(calc((100vw - 2 * var(--pj-gut)) * 0.75 / 8.7), 21svh);
   margin: 0;
   background: #0e0d0b;
   color: var(--pj-ink);
@@ -95,18 +105,46 @@ body.pj-page .top-logo svg { height: 42px; }
   animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
+/* la línea fina con la que abre cada sección (se traza al llegar a ella) */
+.pj-intro::before,
+.pj-plate::before,
+.pj-next::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--pj-line);
+  transform-origin: 0 50%;
+}
+.pj-js .pj-intro::before,
+.pj-js .pj-plate::before {
+  transform: scaleX(0);
+  transition: transform 1.2s var(--pj-ease);
+}
+.pj-js .pj-intro.is-in::before,
+.pj-js .pj-plate.is-in::before { transform: none; }
+
+/* etiquetas pequeñas en mayúsculas (todas iguales) */
+.pj-kicker,
+.pj-label,
+.pj-cap-t,
+.pj-next-k {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
 /* ---- 1. cabecera ---- */
-.pj-hero { padding-top: clamp(100px, 14.5vh, 136px); }
-.pj-head { padding: 0 var(--pj-gut); }
+.pj-hero { padding-top: clamp(104px, 15vh, 140px); }
+.pj-head { position: relative; padding: 0 var(--pj-gut); }
 .pj-kicker {
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 0 0 clamp(14px, 2.2vh, 22px);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
   color: var(--pj-mute);
 }
 .pj-kicker b { font-weight: 600; color: var(--pj-acc); font-variant-numeric: tabular-nums; }
@@ -126,22 +164,57 @@ body.pj-page .top-logo svg { height: 42px; }
 .pj-line { display: block; overflow: hidden; padding: 0.05em 0 0.16em; margin: -0.05em 0 -0.16em; }
 .pj-line > span { display: block; }
 
+/* la nota a mano: en el cuarto libre a la derecha del título, con la
+   flecha bajando hasta la portada (la punta la toca) */
+.pj-note {
+  position: absolute;
+  right: calc(var(--pj-gut) + 1.5vw);
+  bottom: calc(-1 * var(--pj-cg) - 10px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  pointer-events: none;
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: clamp(1.45rem, 2.05vw, 2.15rem);
+  font-weight: 500;
+  line-height: 0.95;
+  color: var(--pj-acc);
+}
+.pj-note > span {
+  display: block;
+  max-width: 8.5em;
+  text-align: center;
+  text-wrap: balance;
+  transform: rotate(-7deg);
+}
+.pj-arrow {
+  display: block;
+  width: clamp(48px, 4.2vw, 68px);
+  height: auto;
+  margin: 4px 2.4em 0 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: scaleX(-1) rotate(-8deg);
+  transition: transform 0.6s var(--pj-ease);
+}
+
 /* ---- 2. portada ---- */
 .pj-cover {
   position: relative;
-  height: 100vh;
-  height: 100svh;
-  margin: clamp(22px, 3.4vh, 36px) 0 0;
+  height: min(80svh, 56vw);
+  margin: var(--pj-cg) var(--pj-gut) 0;
 }
-/* a sangre de verdad: script.js la encoge hasta los márgenes y la deja
-   crecer con el scroll (transform: scale desde arriba) */
 .pj-cover-in {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  border-radius: 6px;
   background: var(--bg, var(--pj-panel));
-  transform-origin: 50% 0;
-  transform: scale(0.93);
 }
 .pj-cover-px { position: absolute; inset: -5% 0; }
 /* --inset: aire alrededor de un producto recortado (sin panel detrás) */
@@ -155,50 +228,47 @@ body.pj-page .top-logo svg { height: 42px; }
   object-position: var(--pos, 50% 50%);
 }
 
-/* ---- 3. cuerpo: ficha fija + láminas ---- */
-.pj-body {
+/* ---- 3. sobre el proyecto ---- */
+.pj-intro {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-  column-gap: clamp(32px, 4.4vw, 80px);
-  padding: clamp(80px, 13vh, 150px) var(--pj-gut) 0;
-}
-.pj-info {
-  position: sticky;
-  top: clamp(96px, 13vh, 120px);
-  align-self: start;
+  grid-template-columns: var(--pj-rail) minmax(0, 1fr) minmax(250px, 0.55fr);
+  column-gap: var(--pj-col);
+  align-items: start;
+  margin: var(--pj-sec) var(--pj-gut) 0;
+  padding-top: clamp(18px, 2.4vh, 24px);
 }
 .pj-label {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 0 0 18px;
-  font-size: 0.64rem;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  margin: 0;
+  padding-top: 0.6em;
   color: var(--pj-mute);
 }
 .pj-label i { width: 18px; height: 1px; background: var(--pj-acc); }
 .pj-lead {
   margin: 0;
-  max-width: 36ch;
-  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  max-width: 34ch;
+  font-size: clamp(1.15rem, 1.55vw, 1.55rem);
   font-weight: 300;
-  line-height: 1.62;
+  line-height: 1.48;
+  letter-spacing: -0.005em;
   color: var(--pj-soft);
   text-wrap: pretty;
 }
 .pj-lead strong { font-weight: 500; color: var(--pj-ink); }
 .pj-lead em { font-style: italic; }
-.pj-facts { margin: clamp(26px, 4vh, 40px) 0 0; max-width: 42ch; }
+.pj-spec { padding-top: 0.35em; }
+.pj-facts { margin: 0; }
 .pj-facts > div {
   display: grid;
-  grid-template-columns: 8.6em minmax(0, 1fr);
+  grid-template-columns: 8.4em minmax(0, 1fr);
   gap: 12px;
   padding: 11px 0;
-  border-top: 1px solid var(--pj-line);
+  border-bottom: 1px solid var(--pj-line);
 }
-.pj-facts > div:last-child { border-bottom: 1px solid var(--pj-line); }
+.pj-facts > div:first-child { padding-top: 0; }
 .pj-facts dt {
   padding-top: 0.25em;
   font-size: 0.6rem;
@@ -247,39 +317,50 @@ body.pj-page .top-logo svg { height: 42px; }
 }
 .pj-ext .pj-ico svg + svg { transform: translate(-110%, 110%); }
 
-/* qué lámina estás viendo (lo actualiza script.js) */
-.pj-now {
+/* ---- 4. láminas ---- */
+.pj-gallery {
   display: flex;
-  align-items: baseline;
-  gap: 14px;
-  margin-top: clamp(28px, 5vh, 56px);
-  color: var(--pj-mute);
+  flex-direction: column;
+  gap: var(--pj-sec);
+  margin: var(--pj-sec) var(--pj-gut) 0;
 }
-.pj-now-n {
-  display: block;
-  overflow: hidden;
-  font-size: clamp(1.6rem, 2.2vw, 2.1rem);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  color: var(--pj-ink);
+.pj-plate {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--pj-rail) minmax(0, 1fr);
+  column-gap: var(--pj-col);
+  margin: 0;
+  padding-top: clamp(18px, 2.4vh, 24px);
+}
+/* el folio: número y título, fijos mientras pasa su lámina */
+.pj-cap {
+  position: sticky;
+  top: clamp(96px, 12.5vh, 116px);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+}
+.pj-cap-n { display: flex; align-items: baseline; gap: 8px; }
+.pj-cap-n b {
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: clamp(2.2rem, 3.3vw, 3.3rem);
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  color: var(--pj-title);
   font-variant-numeric: tabular-nums;
 }
-.pj-now-n > span, .pj-now-t > span { display: block; }
-.pj-now-of { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; }
-.pj-now-t {
-  display: block;
-  overflow: hidden;
-  font-size: 0.64rem;
+.pj-cap-n i {
+  font-style: normal;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--pj-soft);
+  letter-spacing: 0.18em;
+  color: var(--pj-mute);
 }
+.pj-cap-t { line-height: 1.7; color: var(--pj-soft); text-wrap: balance; }
 
-/* las láminas */
-.pj-gallery { display: flex; flex-direction: column; gap: var(--pj-gap); }
-.pj-plate { margin: 0; }
 .pj-row { display: flex; gap: var(--pj-gap); align-items: flex-start; }
 /* cada pieza crece según su proporción: misma altura en la fila, sin recortes */
 .pj-item { flex: var(--r) 1 0; min-width: 0; }
@@ -309,18 +390,21 @@ body.pj-page .top-logo svg { height: 42px; }
 .pj-keyed.is-plain > canvas { display: none; }
 body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 
-/* el pie se lee en la ficha fija; en móvil va debajo de cada lámina */
-.pj-cap {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
+/* entrada de cada lámina (script.js pone .is-in): se traza su línea, el
+   folio aparece y las piezas suben mientras la imagen se asienta */
+.pj-js .pj-cap,
+.pj-js .pj-intro > :not(.pj-spec),
+.pj-js .pj-spec > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s var(--pj-ease), transform 1s var(--pj-ease);
 }
-
-/* entrada de cada lámina: sube y la imagen se asienta (script.js pone .is-in) */
+.pj-js .pj-plate.is-in .pj-cap,
+.pj-js .pj-intro.is-in > *,
+.pj-js .pj-intro.is-in .pj-spec > * { opacity: 1; transform: none; }
+.pj-js .pj-intro.is-in > .pj-lead { transition-delay: 0.08s; }
+.pj-js .pj-intro.is-in .pj-spec > * { transition-delay: 0.16s; }
+.pj-js .pj-intro.is-in .pj-spec > .pj-ext { transition-delay: 0.24s; }
 .pj-js .pj-item {
   opacity: 0;
   transform: translateY(44px);
@@ -370,7 +454,9 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 .pj-sound.is-on i b:nth-child(3) { animation-delay: -0.6s; }
 @keyframes pj-eq { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
 
-/* figura 3D (The Grmps) */
+/* figura 3D (The Grmps): sin la barra de progreso de model-viewer (por
+   si acaso, también aquí); mientras carga se ve el panel de su color y,
+   al terminar, la figura se funde (script.js quita .is-loading) */
 .pj-media > model-viewer {
   position: absolute;
   inset: 0;
@@ -379,6 +465,9 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   --poster-color: transparent;
   background: transparent;
 }
+.pj-media > model-viewer::part(default-progress-bar) { display: none; }
+.pj-media > model-viewer.is-loading { opacity: 0; }
+.pj-js .pj-media > model-viewer { transition-property: transform, opacity; transition-duration: 1.5s, 0.7s; }
 .pj-hint {
   position: absolute;
   left: 16px;
@@ -411,15 +500,14 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 }
 .gr-dizzy.on { opacity: 1; transform: translate(-50%, 0); }
 
-/* ---- 4. siguiente proyecto + pie ---- */
+/* ---- 5. siguiente proyecto + pie ---- */
 .pj-next {
   position: relative;
-  margin-top: clamp(110px, 18vh, 200px);
-  border-top: 1px solid var(--pj-line);
+  margin: calc(var(--pj-sec) * 1.25) var(--pj-gut) 0;
 }
 .pj-next-link {
   display: block;
-  padding: clamp(24px, 3.6vh, 36px) var(--pj-gut) clamp(46px, 8vh, 80px);
+  padding: clamp(18px, 2.4vh, 24px) 0 clamp(46px, 8vh, 80px);
   color: inherit;
   text-decoration: none;
   cursor: none;
@@ -428,10 +516,6 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   display: flex;
   justify-content: space-between;
   margin-bottom: clamp(16px, 2.6vh, 26px);
-  font-size: 0.64rem;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
   color: var(--pj-mute);
 }
 .pj-next-k b { font-weight: 600; color: var(--pj-acc); font-variant-numeric: tabular-nums; }
@@ -441,8 +525,7 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   gap: 0.16em;
   font-family: 'Clash Display', 'Inter', sans-serif;
   font-weight: 600;
-  /* un poco menor que la cabecera para que quepa también la flecha */
-  font-size: calc(var(--pj-tfs) * 0.92);
+  font-size: var(--pj-tfs);
   line-height: 0.86;
   letter-spacing: -0.03em;
   color: var(--pj-title);
@@ -495,7 +578,8 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
   justify-content: space-between;
   gap: 12px 28px;
   /* abajo deja sitio a los botones fijos (atrás y menú) */
-  padding: 22px var(--pj-gut) calc(96px + env(safe-area-inset-bottom, 0px));
+  margin: 0 var(--pj-gut);
+  padding: 22px 0 calc(96px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--pj-line);
   font-size: 0.62rem;
   font-weight: 600;
@@ -508,6 +592,8 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 .pj-foot .pj-mail { text-transform: none; letter-spacing: 0.02em; font-size: 0.86rem; font-weight: 500; color: var(--pj-ink); }
 
 @media (hover: hover) and (pointer: fine) {
+  /* con el cursor en la portada, la flecha se acerca a ella */
+  .pj-hero:has(.pj-cover:hover) .pj-arrow { transform: scaleX(-1) rotate(-8deg) translate(-4px, 6px); }
   .pj-ext:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.34); }
   .pj-ext:hover .pj-ico svg:first-child { transform: translate(110%, -110%); }
   .pj-ext:hover .pj-ico svg + svg { transform: none; }
@@ -522,63 +608,67 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 .pj-line > span { animation: pj-up 1.15s var(--pj-ease) 0.36s both; }
 .pj-cover-in { animation: pj-fade 1s var(--pj-ease) 0.5s both; }
 .pj-cover-px > * { animation: pj-settle 1.8s var(--pj-ease) 0.5s both; }
+/* la nota llega cuando el título ya está: primero la letra, luego la
+   flecha (backwards: al acabar, mandan sus estilos y la flecha puede
+   seguir reaccionando al cursor) */
+.pj-note > span { opacity: 0.95; animation: pj-note 0.9s var(--pj-ease) 1s backwards; }
+.pj-arrow { opacity: 0.9; animation: pj-arrow 0.8s var(--pj-ease) 1.2s backwards; }
 @keyframes pj-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes pj-up { from { transform: translateY(108%); } to { transform: none; } }
 @keyframes pj-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pj-settle { from { transform: scale(1.14); } to { transform: none; } }
+@keyframes pj-note { from { opacity: 0; transform: rotate(-11deg) translateY(10px); } to { opacity: 0.95; transform: rotate(-7deg); } }
+@keyframes pj-arrow { from { opacity: 0; transform: scaleX(-1) rotate(-8deg) translate(8px, -10px); } to { opacity: 0.9; transform: scaleX(-1) rotate(-8deg); } }
 
-/* ---- tablet ---- */
+/* ---- tablet: el margen se estrecha y la ficha baja bajo el texto ---- */
 @media (max-width: 1024px) {
-  body.pj-page { --pj-gut: 20px; }
-  .pj-body { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+  body.pj-page { --pj-gut: 20px; --pj-rail: 116px; --pj-col: 24px; }
+  .pj-intro { grid-template-columns: var(--pj-rail) minmax(0, 1fr); row-gap: 30px; }
+  .pj-spec { grid-column: 2; max-width: 520px; }
+  .pj-cap-n b { font-size: 2rem; }
 }
 
 /* ---- móvil: todo en una columna y todo con scroll vertical (nada se
-   desliza de lado). En cada fila, las piezas apaisadas van a todo el
-   ancho, una debajo de otra; las verticales o cuadradas, de dos en dos y
-   a la misma altura (script.js las agrupa en .pj-pair), y si queda una
-   sola, centrada a media anchura. Cada lámina lleva su pie debajo ---- */
+   desliza de lado). El folio de cada lámina va en una línea encima de
+   ella. En cada fila, las piezas apaisadas van a todo el ancho, una
+   debajo de otra; las verticales o cuadradas, de dos en dos y a la misma
+   altura (script.js las agrupa en .pj-pair), y si queda una sola,
+   centrada a media anchura ---- */
 @media (max-width: 768px) {
-  body.pj-page { --pj-gut: 16px; --pj-tfs: 13.4vw; }
+  body.pj-page { --pj-gut: 16px; --pj-tfs: 13.4vw; --pj-sec: 64px; --pj-cg: 18px; }
   body.pj-page .top-logo svg { height: 34px; }
   .pj-hero { padding-top: calc(env(safe-area-inset-top, 0px) + 84px); }
   .pj-title { white-space: normal; text-wrap: balance; }
+  /* la nota, debajo del título y a la derecha, con la flecha hacia la portada */
+  .pj-note {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    align-items: flex-end;
+    margin: 6px 6px -14px 0;
+    font-size: 1.4rem;
+  }
+  .pj-note > span { max-width: none; text-align: right; }
+  .pj-arrow { width: 40px; margin: 2px 3.2em 0 0; }
   /* --cover-mh: alto propio en móvil (p. ej. un producto recortado y
      apaisado no necesita una portada vertical) */
-  .pj-cover { height: var(--cover-mh, min(100svh, 125vw)); margin-top: 20px; }
+  .pj-cover { height: var(--cover-mh, min(100svh, 125vw)); }
   .pj-cover-px > img, .pj-cover-px > video { padding: 0; }
-  .pj-next-t { font-size: var(--pj-tfs); }
-  .pj-body { grid-template-columns: minmax(0, 1fr); row-gap: 44px; padding-top: 64px; }
-  .pj-info { position: static; }
-  .pj-now { display: none; }
-  .pj-gallery { gap: 28px; }
+  .pj-intro { grid-template-columns: minmax(0, 1fr); row-gap: 18px; padding-top: 16px; }
+  .pj-spec { grid-column: auto; max-width: none; padding-top: 10px; }
+  .pj-label { padding-top: 0; }
+  .pj-plate { grid-template-columns: minmax(0, 1fr); row-gap: 14px; padding-top: 14px; }
+  .pj-cap { position: static; flex-direction: row; align-items: baseline; gap: 14px; }
+  .pj-cap-n b { font-size: 1.7rem; }
   .pj-row { flex-direction: column; align-items: stretch; gap: 10px; }
   .pj-row > .pj-item { flex: none; width: 100%; }
   .pj-pair { display: flex; gap: 10px; align-items: flex-start; }
   .pj-pair > .pj-item { flex: var(--r) 1 0; min-width: 0; }
   .pj-pair.is-solo { justify-content: center; }
   .pj-pair.is-solo > .pj-item { flex: 0 0 calc(50% - 5px); }
-  .pj-cap {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip: auto;
-    clip-path: none;
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--pj-mute);
-  }
-  .pj-cap b { font-weight: 600; color: var(--pj-acc); }
   /* en móvil el título puede partirse; la flecha va pegada a la última palabra */
   .pj-next-t { display: block; white-space: normal; }
   .pj-next-media { display: none; }
-  .pj-foot { justify-content: flex-start; padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* parejas de piezas verticales (móvil, ver arriba); en ordenador, como si
@@ -589,32 +679,29 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 
 /* ---- móvil: pulido de lectura y de tacto ----
    En móvil la letra base de la web es de 14px y las etiquetas en 0.6rem
-   se quedaban en 8px: aquí suben a 10.5-11px, el texto a 16px y la ficha
-   a 14px. Los enlaces pequeños ganan zona de toque, sobra menos aire
-   muerto y la imagen del siguiente proyecto se ve fija (en táctil no hay cursor al que
-   seguir). Los botones fijos de abajo se apartan mientras lees hacia abajo
+   se quedaban en 8px: aquí suben a 10.5-11px, el texto a 17px y la ficha
+   a 14px. Los enlaces pequeños ganan zona de toque y la imagen del
+   siguiente proyecto se ve fija (en táctil no hay cursor al que seguir).
+   Los botones fijos de abajo se apartan mientras lees hacia abajo
    (script.js pone .pj-calm) y vuelven al subir o al llegar al final. */
 @media (max-width: 768px) {
-  .pj-kicker { gap: 10px; font-size: 11px; letter-spacing: 0.2em; }
-  .pj-label { margin-bottom: 14px; font-size: 11px; letter-spacing: 0.2em; }
-  .pj-lead { max-width: none; font-size: 16px; line-height: 1.6; }
-  .pj-facts { max-width: none; margin-top: 28px; }
+  .pj-kicker, .pj-label, .pj-cap-t, .pj-next-k { font-size: 10.5px; letter-spacing: 0.18em; }
+  .pj-kicker { gap: 10px; }
+  .pj-lead { max-width: none; font-size: 17px; line-height: 1.55; }
   .pj-facts > div { grid-template-columns: 112px minmax(0, 1fr); padding: 13px 0; }
   .pj-facts dt { padding-top: 0.2em; font-size: 10.5px; letter-spacing: 0.16em; }
   .pj-facts dd { font-size: 14px; }
+  .pj-cap-n i { font-size: 10px; }
   .pj-ext { height: 48px; padding: 0 22px 0 18px; font-size: 11px; }
-  .pj-body { row-gap: 40px; padding-top: 52px; }
-  .pj-gallery { gap: 36px; }
-  .pj-cap { align-items: center; margin-top: 14px; font-size: 10.5px; letter-spacing: 0.16em; white-space: normal; }
   .pj-sound { left: 12px; bottom: 12px; height: 38px; font-size: 10px; }
-  /* la pista de la figura 3D va en el pie de su lámina (script.js la mueve):
-     encima de la figura no le queda hueco y pisaba la gorra o los pies */
+  /* la pista de la figura 3D va en el folio de su lámina (script.js la
+     mueve): encima de la figura no le queda hueco y pisaba la gorra o los pies */
   .pj-cap .pj-hint { position: static; flex: none; margin-left: auto; font-size: 10px; letter-spacing: 0.16em; color: var(--pj-mute); }
   .gr-dizzy { font-size: 11.5px; }
 
   .pj-next { margin-top: 84px; }
-  .pj-next-link { padding: 22px var(--pj-gut) 24px; }
-  .pj-next-k { margin-bottom: 16px; font-size: 10.5px; letter-spacing: 0.2em; }
+  .pj-next-link { padding: 16px 0 24px; }
+  .pj-next-k { margin-bottom: 16px; }
   .pj-next-media {
     display: block;
     position: relative;
@@ -623,13 +710,13 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
     z-index: auto;
     width: auto;
     aspect-ratio: 16 / 10;
-    margin: 0 var(--pj-gut) 52px;
+    margin: 0 0 52px;
     pointer-events: auto;
     cursor: pointer;
   }
   .pj-next-media > div { opacity: 1; transform: none; }
 
-  .pj-foot { flex-direction: column; align-items: flex-start; gap: 2px; padding-top: 16px; font-size: 11px; letter-spacing: 0.16em; }
+  .pj-foot { flex-direction: column; align-items: flex-start; gap: 2px; padding: 16px 0 calc(90px + env(safe-area-inset-bottom, 0px)); font-size: 11px; letter-spacing: 0.16em; }
   .pj-foot a { display: inline-block; padding: 12px 0; }
   .pj-foot .pj-mail { padding: 10px 0; font-size: 16px; }
   .pj-foot nav { gap: 28px; }
@@ -659,8 +746,13 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
 @media (prefers-reduced-motion: reduce) {
   .pj-kicker, .pj-cover-in { animation: pj-fade 0.5s ease 0.3s both; }
   .pj-line > span, .pj-cover-px > * { animation: none; }
+  .pj-note > span { animation: pj-fade 0.5s ease 0.6s backwards; }
+  .pj-arrow { animation: pj-fade 0.5s ease 0.7s backwards; }
+  .pj-js .pj-intro::before, .pj-js .pj-plate::before { transform: none; transition: none; }
+  .pj-js .pj-cap, .pj-js .pj-intro > :not(.pj-spec), .pj-js .pj-spec > * { transform: none; transition: opacity 0.5s ease; }
   .pj-js .pj-item { transform: none; transition: opacity 0.5s ease; }
   .pj-js .pj-media > img, .pj-js .pj-media > video, .pj-js .pj-media > model-viewer { transform: none; transition: none; }
+  .pj-js .pj-media > model-viewer { transition: opacity 0.5s ease; }
   .pj-sound.is-on i b { animation: none; transform: scaleY(0.8); }
-  .pj-next-t > span, .pj-next-t svg, .pj-ext .pj-ico svg { transition: none; }
+  .pj-next-t > span, .pj-next-t svg, .pj-ext .pj-ico svg, .pj-arrow { transition: none; }
 }

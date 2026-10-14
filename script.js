@@ -13,6 +13,8 @@
     'index.html':   { label: 'CÉSAR DEL VALLE' },
     'about.html':   { label: 'SOBRE MÍ' },
     'contact.html': { label: 'CONTACTO' },
+    'dossier.html': { label: 'DOSSIER' },
+    'cv.html':      { label: 'CURRÍCULUM' },
     '404.html':     { label: 'CÉSAR DEL VALLE' },
     'img1.html':    { label: 'COFFEE RITUALS' },
     'img2.html':    { label: 'OTTOLINGER × MYKITA' },
@@ -1963,6 +1965,8 @@ document.addEventListener('DOMContentLoaded', function() {
       +   '<div class="sm-social">'
       +     '<a href="https://linkedin.com/in/cesar-del-valle-fuentes-518834275" target="_blank" rel="noopener">LinkedIn</a>'
       +     '<a href="https://www.instagram.com/cesardelvalle.jpg/" target="_blank" rel="noopener">Instagram</a>'
+      +     '<a href="dossier.html">Dossier<span class="sm-pdf"> PDF</span></a>'
+      +     '<a href="cv.html">CV<span class="sm-pdf"> PDF</span></a>'
       +   '</div>'
       + '</footer>'
       + '</div>';
@@ -2966,6 +2970,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (model) {
       if (reduce) model.removeAttribute('auto-rotate');
 
+      /* sin barra de carga: la figura aparece fundiéndose cuando ya está
+         (si el visor no llegara a cargar, a los 10 s se deja ver igual) */
+      if (!model.loaded) {
+        model.classList.add('is-loading');
+        var shown = function() { model.classList.remove('is-loading'); };
+        model.addEventListener('load', shown, { once: true });
+        model.addEventListener('error', shown, { once: true });
+        setTimeout(shown, 10000);
+      }
+
       /* huevo de pascua: tres vueltas seguidas del usuario y el GRMP se marea */
       var dizzy = document.querySelector('.gr-dizzy');
       var spun = 0, lastTheta = null, dizzyTimer = null;
@@ -3211,8 +3225,8 @@ try {
 })();
 
 /* ============================================================
-   LOGO DE LA CABECERA (home) — los ojos siguen al cursor, como la cara
-   de la 404 (es el mismo dibujo: mismos topes, en unidades del logo; a la
+   LOGO DE LA CABECERA (home y proyectos) — los ojos siguen al cursor,
+   como la cara de la 404 (es el mismo dibujo: mismos topes, en unidades del logo; a la
    derecha y hacia arriba se mueven menos, que ahí acaba la cara y empieza
    el flequillo). Solo se mueve el grupo de los ojos (.tl-look, se crea
    aquí), así el parpadeo del hover sigue escalando .tl-eyes por dentro.
@@ -3222,7 +3236,8 @@ try {
    ============================================================ */
 (function() {
   function init() {
-    if (!document.body.classList.contains('home-page')) return;
+    var b = document.body.classList;
+    if (!b.contains('home-page') && !b.contains('pj-page')) return;
     var svg = document.querySelector('.top-logo svg');
     var eyes = svg && svg.querySelector('.tl-eyes');
     if (!eyes || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
@@ -3329,10 +3344,10 @@ try {
 
 /* ============================================================
    CASO DE ESTUDIO (img1–img6, css/case.css)
-   · Portada: empieza dentro de los márgenes y crece hasta llenar la
-     pantalla al bajar (scale desde arriba), con parallax dentro.
-   · Láminas: entran al verse (sube la pieza, la imagen se asienta).
-   · La ficha fija dice qué lámina estás viendo.
+   · Portada: un parallax suave dentro; la barra de arriba gana fondo
+     cuando la portada pasa por debajo.
+   · Secciones (sobre el proyecto y cada lámina): al verse se traza su
+     línea, aparece el folio y suben las piezas (la imagen se asienta).
    · Vídeos: solo se reproducen mientras se ven; botón de sonido en los
      que tienen audio (suena uno a la vez).
    · Siguiente proyecto: su imagen sigue al cursor (en táctil va fija bajo
@@ -3350,68 +3365,30 @@ try {
     var body = document.body;
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    var EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
-    function pad(n) { return (n < 10 ? '0' : '') + n; }
     page.classList.add('pj-js');
 
     /* --- portada --- */
     var cover = page.querySelector('.pj-cover');
-    var frame = cover && cover.querySelector('.pj-cover-in');
     var px = cover && cover.querySelector('.pj-cover-px');
-    var top0 = 1, H = 1, s0 = 1, vh = window.innerHeight;
+    var top0 = 1, H = 1, vh = window.innerHeight;
     function measure() {
       vh = window.innerHeight;
       if (!cover) return;
-      var gut = parseFloat(getComputedStyle(body).getPropertyValue('--pj-gut')) || 0;
-      var vw = document.documentElement.clientWidth;
-      s0 = (vw - 2 * gut) / vw;
       top0 = Math.max(1, cover.getBoundingClientRect().top + window.scrollY);
       H = cover.offsetHeight;
-    }
-
-    /* --- qué lámina estás viendo --- */
-    var plates = Array.prototype.slice.call(page.querySelectorAll('.pj-plate'));
-    var now = page.querySelector('.pj-now');
-    var nowN = now && now.querySelector('.pj-now-n > span');
-    var nowT = now && now.querySelector('.pj-now-t > span');
-    var cur = 0;
-    function nowUpdate() {
-      if (!nowN || !plates.length) return;
-      var mid = vh * 0.5, best = 0, bd = 1e9;
-      plates.forEach(function(pl, i) {
-        var r = pl.getBoundingClientRect();
-        var d = r.top > mid ? r.top - mid : (r.bottom < mid ? mid - r.bottom : 0);
-        if (d < bd) { bd = d; best = i; }
-      });
-      if (best === cur) return;
-      var dir = best > cur ? 1 : -1;
-      cur = best;
-      nowN.textContent = pad(best + 1);
-      nowT.textContent = plates[best].getAttribute('data-cap') || '';
-      if (!reduce && nowN.animate) {
-        [nowN, nowT].forEach(function(el) {
-          el.animate([{ transform: 'translateY(' + (dir * 105) + '%)' }, { transform: 'none' }], { duration: 450, easing: EASE });
-        });
-      }
     }
 
     var ticking = false;
     function update() {
       ticking = false;
       var y = window.scrollY;
-      if (frame) {
-        var p = reduce ? 0 : Math.min(1, Math.max(0, y / top0));
-        var e = p * p * (3 - 2 * p);                    // suave al empezar y al llegar
-        frame.style.transform = 'scale(' + (s0 + (1 - s0) * e).toFixed(4) + ')';
-        if (px && !reduce) {
-          var rel = (y + vh - top0) / (vh + H);         // 0 → 1 mientras se ve
-          if (rel > -0.1 && rel < 1.1) px.style.transform = 'translate3d(0,' + ((rel - 0.5) * 7).toFixed(2) + '%,0)';
-        }
+      if (px && !reduce) {
+        var rel = (y + vh - top0) / (vh + H);           // 0 → 1 mientras se ve
+        if (rel > -0.1 && rel < 1.1) px.style.transform = 'translate3d(0,' + ((rel - 0.5) * 7).toFixed(2) + '%,0)';
       }
       // la barra superior gana fondo cuando la portada llega a ella
       body.classList.toggle('pj-past', y > top0 - 72);
       calmUpdate(y);
-      nowUpdate();
     }
     // los botones fijos de abajo (atrás y menú) se apartan al bajar leyendo
     // y vuelven al subir; arriba del todo y al final de la página, siempre
@@ -3436,8 +3413,8 @@ try {
       Array.prototype.forEach.call(row.children, function(it, i) { it.style.setProperty('--i', i); });
     });
 
-    /* --- móvil: la pista de la figura 3D («arrastra para girar») va en el pie
-       de su lámina; encima de la figura no le queda hueco y la pisaba --- */
+    /* --- móvil: la pista de la figura 3D («arrastra para girar») va en el
+       folio de su lámina; encima de la figura no le queda hueco y la pisaba --- */
     var hint = page.querySelector('.pj-hint');
     var hcap = hint && hint.closest('.pj-plate') && hint.closest('.pj-plate').querySelector('.pj-cap');
     if (hint && hcap && window.matchMedia) {
@@ -3473,15 +3450,23 @@ try {
       });
       flush();
     });
+    // las secciones (su línea, su folio) y cada pieza entran por separado
+    var reveal = Array.prototype.slice.call(items).concat(Array.prototype.slice.call(page.querySelectorAll('.pj-intro, .pj-plate')));
     if (reduce || !('IntersectionObserver' in window)) {
-      items.forEach(function(it) { it.classList.add('is-in'); });
+      reveal.forEach(function(it) { it.classList.add('is-in'); });
     } else {
       var io = new IntersectionObserver(function(es) {
         es.forEach(function(en) {
           if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
         });
       }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-      items.forEach(function(it) { io.observe(it); });
+      // una sección muy alta nunca llega al 12 % visible: para ellas basta con asomar
+      var ioTall = new IntersectionObserver(function(es) {
+        es.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.add('is-in'); ioTall.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -12% 0px', threshold: 0 });
+      reveal.forEach(function(it) { (it.classList.contains('pj-item') ? io : ioTall).observe(it); });
     }
 
     /* --- vídeos: solo mientras se ven --- */
@@ -3626,6 +3611,67 @@ try {
 
     measure();
     update();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   DOSSIER (dossier.html, css/dossier.css) — el portfolio en hojas A4.
+   · «Descargar PDF» es un enlace al PDF ya hecho (assets/, se genera
+     desde esta misma página): se descarga directamente. Al pulsarlo, la
+     flecha cae una vez.
+   · Por si alguien imprime la página (Ctrl+P): poco después de cargar,
+     las imágenes que faltan se piden igualmente.
+   · Las hojas entran al verse y la barra de arriba gana fondo al bajar.
+   ============================================================ */
+(function() {
+  function init() {
+    var ds = document.querySelector('.ds');
+    if (!ds) return;
+    var body = document.body;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var imgs = Array.prototype.slice.call(ds.querySelectorAll('.sheet img'));
+
+    function loadAll() {
+      return Promise.all(imgs.map(function(im) {
+        if (im.loading === 'lazy') im.loading = 'eager';
+        if (im.complete && im.naturalWidth) return Promise.resolve();
+        return new Promise(function(res) {
+          im.addEventListener('load', res, { once: true });
+          im.addEventListener('error', res, { once: true });
+        });
+      }));
+    }
+    if (document.readyState === 'complete') setTimeout(loadAll, 1200);
+    else window.addEventListener('load', function() { setTimeout(loadAll, 1200); });
+
+    var btn = ds.querySelector('.ds-print');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        btn.classList.remove('is-going');
+        void btn.offsetWidth;                      // la caída, siempre desde el principio
+        btn.classList.add('is-going');
+      });
+      btn.addEventListener('animationend', function() { btn.classList.remove('is-going'); });
+    }
+
+    // cada hoja entra al verse
+    var sheets = Array.prototype.slice.call(ds.querySelectorAll('.sheet'));
+    if (!reduce && 'IntersectionObserver' in window) {
+      ds.classList.add('ds-js');
+      var io = new IntersectionObserver(function(es) {
+        es.forEach(function(en) {
+          if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+      sheets.forEach(function(sh) { io.observe(sh); });
+    }
+
+    // la barra de arriba gana fondo en cuanto el contenido pasa por debajo
+    var past = function() { body.classList.toggle('pj-past', window.scrollY > 40); };
+    window.addEventListener('scroll', past, { passive: true });
+    past();
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,182 @@
+/* ============================================================
+   CURRÍCULUM (cv.html) — una hoja A4 vertical. Se apoya en el
+   sistema del dossier (css/dossier.css: la cabecera de la página, el
+   botón de descarga y la hoja de papel) y aquí solo cambia lo suyo.
+
+   · Pensado para que lo lea una persona en seis segundos y un filtro
+     automático (ATS) sin tropezar: texto real, apartados con nombres
+     estándar, una sola columna de lectura (la etiqueta de cada
+     apartado va a su izquierda, en su misma fila) y los datos de
+     contacto arriba, con los enlaces vivos.
+   · La retícula de la web: un margen para las etiquetas y el
+     contenido, y una línea fina que abre cada apartado.
+   · Todo en cqw (1 cqw = 1 % del ancho de la hoja = 2,1 mm en papel),
+     así que se ve igual en pantalla y en el PDF.
+   ============================================================ */
+
+/* en papel: A4 vertical (manda sobre el apaisado del dossier, que va antes) */
+@page { size: A4 portrait; margin: 0; }
+
+.sheet.cv-sheet {
+  --lab: 22cqw;                 /* el margen de las etiquetas */
+  width: min(860px, 100%);
+  aspect-ratio: 210 / 297;
+  background: #fff;
+}
+/* el contenido, dentro de la hoja (las cqw se miden contra ella: el
+   margen no puede ir en la propia hoja) */
+.cv-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 7.4cqw 7.6cqw 5.6cqw;
+}
+.ds-lead a { color: var(--pj-ink); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+/* ---- cabecera: quién, qué y cómo contactar; la foto a la derecha ---- */
+.cv-head { display: flex; align-items: flex-start; gap: 4.4cqw; }
+.cv-id { flex: 1; min-width: 0; }
+.cv-role {
+  font-size: 1.22cqw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acc);
+}
+.cv-name {
+  margin-top: 1.2cqw;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 6.6cqw;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  /* el titular va apretado: un poco más de aire entre palabras para que, al
+     leer el PDF, «César del Valle» no salga junto */
+  word-spacing: 0.1em;
+  color: var(--ink);
+}
+.cv-spec { margin-top: 1.5cqw; font-size: 1.62cqw; font-weight: 500; color: var(--soft); }
+/* cada dato en una línea (una URL partida ya no se reconoce) */
+.cv-contact {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  gap: 0 5cqw;
+  margin-top: 2.8cqw;
+  padding: 0;
+  list-style: none;
+}
+.cv-contact li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4cqw;
+  padding: 0.95cqw 0;
+  border-top: 1px solid var(--line);
+  font-size: 1.36cqw;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.cv-contact span,
+.cv-tools span {
+  font-size: 1.02cqw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.cv-contact a { color: inherit; text-decoration: none; }
+.cv-photo {
+  flex: none;
+  width: 17cqw;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 0.8cqw;
+  background: #eee;
+}
+
+/* ---- apartados: la etiqueta en el margen, el contenido a su lado ---- */
+.cv-sec {
+  display: grid;
+  grid-template-columns: var(--lab) minmax(0, 1fr);
+  margin-top: 2.2cqw;
+  padding-top: 1.4cqw;
+  border-top: 1px solid var(--line);
+}
+.cv-head + .cv-sec { margin-top: 3.2cqw; border-top-color: var(--ink); }
+.cv-lab {
+  margin: 0;
+  padding-top: 0.35cqw;
+  font-size: 1.2cqw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acc);
+}
+.cv-body { min-width: 0; }
+.cv-lead,
+.cv-text,
+.cv-list li {
+  font-size: 1.5cqw;
+  line-height: 1.52;
+  color: var(--soft);
+  text-wrap: pretty;
+}
+.cv-lead strong { font-weight: 600; color: var(--ink); }
+.cv-lead em, .cv-text em, .cv-list em { font-style: italic; }
+
+/* experiencia y formación */
+.cv-item + .cv-item { margin-top: 2.2cqw; }
+.cv-item-h { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw; }
+.cv-item-h b { font-size: 1.86cqw; font-weight: 600; letter-spacing: -0.005em; color: var(--ink); }
+.cv-date { flex: none; font-size: 1.3cqw; font-weight: 600; letter-spacing: 0.02em; color: var(--acc); font-variant-numeric: tabular-nums; }
+.cv-item-r { margin-top: 0.45cqw; font-size: 1.4cqw; font-weight: 500; color: var(--mute); }
+.cv-text { margin-top: 0.9cqw; }
+.cv-list { margin-top: 0.9cqw; padding: 0; list-style: none; }
+/* la viñeta, un guion corto en el color de la casa. Va de fondo y no
+   posicionada: lo posicionado se pinta aparte y el PDF lo escribiría
+   al final, desordenando lo que lee un filtro automático */
+.cv-list li {
+  padding-left: 2.2cqw;
+  background: linear-gradient(var(--acc), var(--acc)) no-repeat 0 0.8em / 1cqw 1px;
+}
+.cv-list li + li { margin-top: 0.4cqw; }
+
+/* competencias: etiquetas con filo, como las del menú */
+.cv-tags { display: flex; flex-wrap: wrap; gap: 0.9cqw; padding: 0; list-style: none; }
+.cv-tags li {
+  padding: 0.62cqw 1.45cqw;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 1.36cqw;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+/* herramientas: dos grupos */
+.cv-tools p { display: grid; grid-template-columns: 13cqw minmax(0, 1fr); align-items: baseline; font-size: 1.5cqw; font-weight: 500; color: var(--ink); }
+.cv-tools p + p { margin-top: 0.9cqw; }
+/* idiomas: los dos en la misma línea */
+.cv-langs { display: flex; gap: 6cqw; }
+.cv-langs p { grid-template-columns: auto auto; column-gap: 1.6cqw; }
+.cv-langs p + p { margin-top: 0; }
+
+/* ---- pie: el logo pequeño y dónde ver el trabajo ---- */
+.cv-foot {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  margin-top: auto;
+  padding-top: 1.6cqw;
+  border-top: 1px solid var(--line);
+}
+.cv-logo { display: block; width: auto; height: 3.6cqw; }
+.cv-logo path { fill: var(--title); }
+.cv-foot p { font-size: 1.22cqw; color: var(--mute); }
+.cv-foot a { color: var(--ink); font-weight: 600; text-decoration: none; }
+
+/* ---- al imprimir: la hoja, del tamaño de un A4 vertical ---- */
+@media print {
+  .sheet.cv-sheet { width: 210mm; height: 296.5mm; aspect-ratio: auto; break-inside: auto; }
+}
