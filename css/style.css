@@ -4799,7 +4799,7 @@ body.menu-open .sm-word {
 
 /* ============================================================
    HERO v2 (home) — tipografía gigante con profundidad
-   Tres planos: PORTFOLIO enorme de lado a lado al fondo, el muñeco 3D
+   Tres planos: CÉSAR DEL VALLE enorme de lado a lado al fondo, el muñeco 3D
    de pie delante de las letras y las cards arrastrables delante, en el
    centro (su tamaño y sitio de siempre). El parallax de
    script.js mueve los planos; aquí solo se colocan. Gana a las reglas
@@ -4807,10 +4807,14 @@ body.menu-open .sm-word {
    ============================================================ */
 body.home-page {
   --hx-gut: 50px;
-  /* tamaño del título (ver abajo) y hueco que deja a cada lado si no
-     llega a los márgenes (pantallas muy anchas y bajas) */
-  --hx-tfs: min(calc((100vw - 2 * var(--hx-gut)) / 5.5218), 36svh);
-  --hx-tin: calc((100vw - 2 * var(--hx-gut) - 5.5218 * var(--hx-tfs)) / 2);
+  /* el título tiene su propio margen, más fino que el del resto: ocupa
+     casi todo el ancho de la pantalla */
+  --hx-tgut: clamp(10px, 1.1vw, 24px);
+  /* tamaño del título (ver abajo) y dónde empieza su tinta respecto al
+     margen del resto (negativo: más a la izquierda), para alinear el
+     subtítulo con la C (si el alto manda, queda hueco a los lados) */
+  --hx-tfs: min(calc((100vw - 2 * var(--hx-tgut)) / 8.7688), 36svh);
+  --hx-tin: calc(var(--hx-tgut) - var(--hx-gut) + (100vw - 2 * var(--hx-tgut) - 8.7688 * var(--hx-tfs)) / 2);
 }
 body.home-page .center-hero-text {
   width: 100vw;
@@ -4824,15 +4828,17 @@ body.home-page .center-hero-text {
 /* sin velo detrás del texto: ahora el texto va detrás del muñeco */
 body.home-page .center-hero-text::after { content: none; }
 
-/* PORTFOLIO en Clash Display (Fontshare): geométrica y limpia, con
+/* CÉSAR DEL VALLE en Clash Display (Fontshare): geométrica y limpia, con
    remates rectos y curvas algo cuadradas; se distingue de la Inter del
-   resto sin dejar de ser sencilla. La tinta de la palabra (600, -0.03em)
-   mide 5.5218em: con este tamaño va justo de margen a margen (en
+   resto sin dejar de ser sencilla. La tinta del nombre (600, -0.03em)
+   mide 8.7688em: con este tamaño va casi de borde a borde (en
    pantallas muy anchas y bajas manda la altura). align-self la centra
-   aunque se salga un pelo de la caja y left corrige el centro óptico. */
+   aunque se salga un pelo de la caja y left corrige el centro óptico
+   (medidos en Chrome con la fuente real; antes, PORTFOLIO: 5.5218em y
+   -0.0186em). */
 body.home-page .hero-title {
   align-self: center;
-  left: -0.0186em;
+  left: -0.0100em;
   margin: 0;
   font-family: 'Clash Display', 'Inter', sans-serif;
   font-size: var(--hx-tfs);

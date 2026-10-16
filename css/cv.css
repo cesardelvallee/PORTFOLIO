@@ -1,182 +1,302 @@
 /* ============================================================
-   CURRÍCULUM (cv.html) — una hoja A4 vertical. Se apoya en el
-   sistema del dossier (css/dossier.css: la cabecera de la página, el
-   botón de descarga y la hoja de papel) y aquí solo cambia lo suyo.
+   CURRÍCULUM (cv.html) — una hoja A4 vertical, en español y en inglés.
+   Se apoya en el sistema del dossier (css/dossier.css: la cabecera de
+   la página, el botón de descarga y la hoja de papel) y aquí solo
+   cambia lo suyo.
 
-   · Pensado para que lo lea una persona en seis segundos y un filtro
-     automático (ATS) sin tropezar: texto real, apartados con nombres
-     estándar, una sola columna de lectura (la etiqueta de cada
-     apartado va a su izquierda, en su misma fila) y los datos de
-     contacto arriba, con los enlaces vivos.
-   · La retícula de la web: un margen para las etiquetas y el
-     contenido, y una línea fina que abre cada apartado.
-   · Todo en cqw (1 cqw = 1 % del ancho de la hoja = 2,1 mm en papel),
-     así que se ve igual en pantalla y en el PDF.
+   El diseño es el de César (sus PDF del 16-10-2026):
+   · Una columna de pizarra a la izquierda: la foto a sangre arriba,
+     «CÉSAR» en Archivo ancha y «del Valle» en serif cursiva amarilla, y debajo
+     contacto, competencias (las tres principales, rellenas de amarillo),
+     herramientas e idiomas, con filetes finos.
+   · A la derecha, papel blanco: «( Currículum ) —— Portfolio ↗», un
+     titular en serif cursiva, el perfil y los apartados, cada uno con
+     un filete grueso y un cuadrado amarillo.
+   Dos familias, las de su PDF: Archivo (ancha y negra en el nombre, los
+   títulos y las etiquetas; normal para leer) e Instrument Serif cursiva
+   (el apellido, el titular y los puestos).
+
+   Y para los filtros automáticos (ATS): todo es texto real y nada va
+   posicionado (lo posicionado se pinta aparte y el PDF lo escribiría
+   al final), la columna lateral va antes en el código para que el
+   nombre y el contacto se lean primero, y el espaciado entre letras no
+   pasa de 0,1em.
+   Todo en cqw (1 cqw = 1 % del ancho de la hoja = 2,1 mm en papel), así
+   que se ve igual en pantalla y en el PDF.
    ============================================================ */
 
 /* en papel: A4 vertical (manda sobre el apaisado del dossier, que va antes) */
 @page { size: A4 portrait; margin: 0; }
 
 .sheet.cv-sheet {
-  --lab: 22cqw;                 /* el margen de las etiquetas */
+  --ink: #293033;               /* la pizarra: columna, textos y filetes */
+  --soft: rgba(41, 48, 51, 0.86);
+  --mute: rgba(41, 48, 51, 0.56);
+  --lemon: #e5de4a;
+  --s-ink: rgba(255, 255, 255, 0.94);
+  --s-soft: rgba(255, 255, 255, 0.62);
+  --s-mute: rgba(255, 255, 255, 0.5);
+  --s-line: rgba(255, 255, 255, 0.2);
   width: min(860px, 100%);
   aspect-ratio: 210 / 297;
   background: #fff;
+  color: var(--ink);
+  font-family: 'Archivo', 'Inter', sans-serif;
 }
+/* en la web de noche, la hoja se separa del fondo con un filo */
+body:not(.theme-light) .sheet.cv-sheet { box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(236, 230, 218, 0.1); }
+.ds-lead a { color: var(--pj-ink); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
 /* el contenido, dentro de la hoja (las cqw se miden contra ella: el
    margen no puede ir en la propia hoja) */
 .cv-page {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 7.4cqw 7.6cqw 5.6cqw;
-}
-.ds-lead a { color: var(--pj-ink); text-underline-offset: 3px; text-decoration-thickness: 1px; }
-
-/* ---- cabecera: quién, qué y cómo contactar; la foto a la derecha ---- */
-.cv-head { display: flex; align-items: flex-start; gap: 4.4cqw; }
-.cv-id { flex: 1; min-width: 0; }
-.cv-role {
-  font-size: 1.22cqw;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--acc);
-}
-.cv-name {
-  margin-top: 1.2cqw;
-  font-family: 'Clash Display', 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 6.6cqw;
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-  /* el titular va apretado: un poco más de aire entre palabras para que, al
-     leer el PDF, «César del Valle» no salga junto */
-  word-spacing: 0.1em;
-  color: var(--ink);
-}
-.cv-spec { margin-top: 1.5cqw; font-size: 1.62cqw; font-weight: 500; color: var(--soft); }
-/* cada dato en una línea (una URL partida ya no se reconoce) */
-.cv-contact {
   display: grid;
-  grid-template-columns: max-content max-content;
-  gap: 0 5cqw;
-  margin-top: 2.8cqw;
-  padding: 0;
-  list-style: none;
+  grid-template-columns: 34.5cqw minmax(0, 1fr);
 }
-.cv-contact li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4cqw;
-  padding: 0.95cqw 0;
-  border-top: 1px solid var(--line);
-  font-size: 1.36cqw;
-  font-weight: 500;
-  color: var(--ink);
-  white-space: nowrap;
+
+/* ---- la columna de pizarra ---- */
+.cv-side { display: flex; flex-direction: column; min-width: 0; background: var(--ink); color: var(--s-ink); }
+.cv-photo { width: 100%; height: 37.8cqw; object-fit: cover; object-position: 50% 30%; }
+.cv-side-in { padding: 3.7cqw 4.4cqw 4cqw 4.8cqw; }
+.cv-name { font-weight: 400; line-height: 1; }
+.cv-name span {
+  display: block;
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: 5.62cqw;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: #fff;
 }
-.cv-contact span,
-.cv-tools span {
-  font-size: 1.02cqw;
-  font-weight: 600;
+.cv-name em {
+  display: block;
+  margin-top: 0.1cqw;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 6.2cqw;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--lemon);
+}
+.cv-role { margin-top: 2.4cqw; font-size: 1.4cqw; line-height: 1.4; }
+.cv-role b { display: block; font-weight: 600; color: #fff; }
+.cv-role span { display: block; color: var(--s-soft); }
+
+.cv-blk { margin-top: 2.8cqw; padding-top: 1.25cqw; border-top: 1px solid var(--s-line); }
+/* la etiqueta de cada bloque, en amarillo */
+.cv-kick {
+  margin: 0;
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: 1.05cqw;
   letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--lemon);
+}
+/* las etiquetas pequeñas en gris (email, diseño, nativo…) */
+.cv-contact dt,
+.cv-tools h4,
+.cv-langs dd {
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 600;
+  font-stretch: 112%;
+  font-size: 0.9cqw;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--s-mute);
+}
+.cv-contact { margin-top: 1.5cqw; }
+.cv-contact div + div { margin-top: 0.75cqw; }
+.cv-contact dd { margin: 0.3cqw 0 0; font-size: 1.36cqw; line-height: 1.3; color: var(--s-ink); }
+.cv-contact a { color: inherit; text-decoration: none; }
+
+.cv-tags { display: flex; flex-wrap: wrap; gap: 0.75cqw 0.42cqw; margin-top: 1.55cqw; padding: 0; list-style: none; }
+.cv-tags li {
+  padding: 0.4cqw 0.85cqw;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  font-size: 1.12cqw;
+  font-weight: 500;
+  line-height: 1.25;
+  color: #fff;
+}
+.cv-tags .is-key { background: var(--lemon); border-color: var(--lemon); color: var(--ink); }
+
+.cv-tools { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2cqw; margin-top: 1.5cqw; }
+.cv-tools h4 { margin: 0 0 0.2cqw; }
+.cv-tools ul { margin: 0; padding: 0; list-style: none; }
+.cv-tools li { padding: 0.58cqw 0 0.5cqw; border-bottom: 1px solid var(--s-line); font-size: 1.36cqw; line-height: 1.3; }
+
+.cv-langs { margin-top: 0.7cqw; }
+.cv-langs div { display: flex; align-items: baseline; justify-content: space-between; gap: 1cqw; padding: 0.85cqw 0 0.7cqw; border-bottom: 1px solid var(--s-line); }
+.cv-langs dt { font-size: 1.36cqw; line-height: 1.3; }
+.cv-langs dd { margin: 0; }
+
+/* ---- el papel ---- */
+.cv-main { min-width: 0; padding: 6.7cqw 6.6cqw 4cqw 6.2cqw; }
+.cv-top {
+  display: flex;
+  align-items: center;
+  gap: 1.7cqw;
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: 0.98cqw;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.cv-top span { flex: none; }
+.cv-top i { flex: 1; border-top: 1.5px solid var(--ink); }
+.cv-top a { flex: none; display: inline-flex; align-items: center; gap: 0.5cqw; color: inherit; text-decoration: none; }
+.cv-top svg { width: 0.85cqw; height: 0.85cqw; fill: none; stroke: currentColor; stroke-width: 1.3; }
+
+.cv-claim {
+  margin-top: 10.4cqw;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 3.82cqw;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.cv-claim span { display: block; }
+.cv-lead { margin-top: 2.5cqw; font-size: 1.52cqw; line-height: 1.6; color: var(--soft); text-wrap: pretty; }
+.cv-lead strong, .cv-list b, .cv-text b { font-weight: 600; color: var(--ink); }
+
+/* cada apartado: filete grueso y el cuadrado amarillo */
+.cv-sec { margin-top: 7.8cqw; padding-top: 1.35cqw; border-top: 1.5px solid var(--ink); }
+.cv-h {
+  margin: 0;
+  padding-left: 2.4cqw;
+  /* el cuadrado va de fondo y no posicionado (por el orden de lectura del PDF) */
+  background: linear-gradient(var(--lemon), var(--lemon)) no-repeat 0 50% / 1.2cqw 1.2cqw;
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 2.02cqw;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.cv-item { margin-top: 2.3cqw; }
+.cv-item + .cv-item { margin-top: 4.3cqw; }
+.cv-job { line-height: 1.2; }
+.cv-job b {
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: 1.6cqw;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.cv-job em {
+  margin-left: 0.2cqw;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 2.12cqw;
+  letter-spacing: -0.01em;
+  color: var(--soft);
+}
+.cv-meta {
+  margin-top: 0.55cqw;
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-weight: 600;
+  font-stretch: 125%;
+  font-size: 0.98cqw;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
   text-transform: uppercase;
   color: var(--mute);
 }
-.cv-contact a { color: inherit; text-decoration: none; }
-.cv-photo {
-  flex: none;
-  width: 17cqw;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  border-radius: 0.8cqw;
-  background: #eee;
-}
-
-/* ---- apartados: la etiqueta en el margen, el contenido a su lado ---- */
-.cv-sec {
-  display: grid;
-  grid-template-columns: var(--lab) minmax(0, 1fr);
-  margin-top: 2.2cqw;
-  padding-top: 1.4cqw;
-  border-top: 1px solid var(--line);
-}
-.cv-head + .cv-sec { margin-top: 3.2cqw; border-top-color: var(--ink); }
-.cv-lab {
-  margin: 0;
-  padding-top: 0.35cqw;
-  font-size: 1.2cqw;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--acc);
-}
-.cv-body { min-width: 0; }
-.cv-lead,
-.cv-text,
+.cv-list { margin-top: 1.55cqw; padding: 0; list-style: none; }
+/* la viñeta, un cuadradito de pizarra, también de fondo */
 .cv-list li {
+  padding-left: 1.95cqw;
+  background: linear-gradient(var(--ink), var(--ink)) no-repeat 0 0.5em / 0.62cqw 0.62cqw;
   font-size: 1.5cqw;
-  line-height: 1.52;
+  line-height: 1.4;
   color: var(--soft);
   text-wrap: pretty;
 }
-.cv-lead strong { font-weight: 600; color: var(--ink); }
-.cv-lead em, .cv-text em, .cv-list em { font-style: italic; }
+.cv-list li + li { margin-top: 0.75cqw; }
 
-/* experiencia y formación */
-.cv-item + .cv-item { margin-top: 2.2cqw; }
-.cv-item-h { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw; }
-.cv-item-h b { font-size: 1.86cqw; font-weight: 600; letter-spacing: -0.005em; color: var(--ink); }
-.cv-date { flex: none; font-size: 1.3cqw; font-weight: 600; letter-spacing: 0.02em; color: var(--acc); font-variant-numeric: tabular-nums; }
-.cv-item-r { margin-top: 0.45cqw; font-size: 1.4cqw; font-weight: 500; color: var(--mute); }
-.cv-text { margin-top: 0.9cqw; }
-.cv-list { margin-top: 0.9cqw; padding: 0; list-style: none; }
-/* la viñeta, un guion corto en el color de la casa. Va de fondo y no
-   posicionada: lo posicionado se pinta aparte y el PDF lo escribiría
-   al final, desordenando lo que lee un filtro automático */
-.cv-list li {
-  padding-left: 2.2cqw;
-  background: linear-gradient(var(--acc), var(--acc)) no-repeat 0 0.8em / 1cqw 1px;
-}
-.cv-list li + li { margin-top: 0.4cqw; }
+.cv-deg { font-weight: 700; font-stretch: 106%; font-size: 1.74cqw; line-height: 1.25; color: var(--ink); }
+.cv-school { margin-top: 0.35cqw; font-size: 1.36cqw; line-height: 1.35; color: var(--mute); }
+.cv-text { margin-top: 1.5cqw; font-size: 1.5cqw; line-height: 1.5; color: var(--soft); text-wrap: pretty; }
+.cv-tfg { margin-top: 0.9cqw; }
 
-/* competencias: etiquetas con filo, como las del menú */
-.cv-tags { display: flex; flex-wrap: wrap; gap: 0.9cqw; padding: 0; list-style: none; }
-.cv-tags li {
-  padding: 0.62cqw 1.45cqw;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 1.36cqw;
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--ink);
-}
+/* ---- ES · EN: las dos hojas, una encima de la otra (script.js) ---- */
+.ds-sheets.cv-sheets { display: grid; justify-items: center; }
+.cv-sheets > .cv-sheet { grid-area: 1 / 1; }
+.cv-sheet.is-off { visibility: hidden; }
 
-/* herramientas: dos grupos */
-.cv-tools p { display: grid; grid-template-columns: 13cqw minmax(0, 1fr); align-items: baseline; font-size: 1.5cqw; font-weight: 500; color: var(--ink); }
-.cv-tools p + p { margin-top: 0.9cqw; }
-/* idiomas: los dos en la misma línea */
-.cv-langs { display: flex; gap: 6cqw; }
-.cv-langs p { grid-template-columns: auto auto; column-gap: 1.6cqw; }
-.cv-langs p + p { margin-top: 0; }
-
-/* ---- pie: el logo pequeño y dónde ver el trabajo ---- */
-.cv-foot {
+/* el selector, a la izquierda del botón y de su misma altura */
+.cv-dl { display: flex; align-items: center; gap: 10px; }
+.cv-lang {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 1.6cqw;
-  margin-top: auto;
-  padding-top: 1.6cqw;
-  border-top: 1px solid var(--line);
+  height: 52px;
+  padding: 4px;
+  border: 1px solid var(--pj-line);
+  border-radius: 999px;
 }
-.cv-logo { display: block; width: auto; height: 3.6cqw; }
-.cv-logo path { fill: var(--title); }
-.cv-foot p { font-size: 1.22cqw; color: var(--mute); }
-.cv-foot a { color: var(--ink); font-weight: 600; text-decoration: none; }
+/* la pastilla que marca el idioma: se desliza (solo transform) */
+.cv-lang::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: 46px;
+  border-radius: 999px;
+  background: var(--pj-ink);
+  transition: transform 0.28s var(--pj-ease);
+}
+.cv-lang[data-lang="en"]::before { transform: translateX(46px); }
+.cv-lang button {
+  position: relative;
+  width: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: 600 0.68rem/1 'Inter', sans-serif;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  color: var(--pj-mute);
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s var(--pj-ease), transform 0.16s var(--pj-ease);
+}
+.cv-lang button[aria-pressed="true"] { color: var(--pj-bar); }
+.cv-lang button:active { transform: scale(0.94); }
+.cv-lang button:focus-visible { outline: 1px solid var(--pj-ink); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .cv-lang button[aria-pressed="false"]:hover { color: var(--pj-ink); }
+}
+@media (max-width: 768px) {
+  .cv-lang { height: 54px; }
+  .cv-lang button { cursor: pointer; }
+  .cv-dl .ds-print { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cv-lang::before { transition-duration: 0.01s; }
+}
 
-/* ---- al imprimir: la hoja, del tamaño de un A4 vertical ---- */
+/* ---- al imprimir: solo la hoja del idioma elegido, del tamaño de un A4
+   vertical (un pelo menos: con 297 mm justos, por redondeo, pasaría a
+   la página 2) ---- */
 @media print {
   .sheet.cv-sheet { width: 210mm; height: 296.5mm; aspect-ratio: auto; break-inside: auto; }
+  .cv-sheet.is-off { display: none !important; }
 }

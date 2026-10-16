@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* (sin hover en el subtítulo: la animación de rebote solo en la entrada) */
 
-  /* Entrada del hero. PORTFOLIO sube letra a letra desde detrás de su
+  /* Entrada del hero. CÉSAR DEL VALLE sube letra a letra desde detrás de su
      línea base, del centro hacia fuera (nace del muñeco), estirada; al
      llegar se asienta con un pequeño aplastamiento. Después el subtítulo
      sube igual, más rápido, y entran el botón, las cards y el punto.
@@ -714,7 +714,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) { try { loadingScreen.remove(); } catch (e) { loadingScreen.style.display = 'none'; } }
     revealMain();
-    // la entrada espera a que esté la fuente de PORTFOLIO (Clash Display):
+    // la entrada espera a que esté la fuente del título (Clash Display):
     // si llega a mitad, las letras cambian de forma y saltan. Como mucho
     // 0.7 s (la cortina de la página tarda eso en subir)
     let go = false;
@@ -2837,7 +2837,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 /* ============================================================
-   HERO KINÉTICO (home) — PORTFOLIO y su subtítulo, letra a letra.
+   HERO KINÉTICO (home) — CÉSAR DEL VALLE y su subtítulo, letra a letra.
    1) Trocea los dos textos en letras en todos los dispositivos (la
       entrada de playHeroTitleAnimation las necesita).
    2) Escritorio con puntero fino y sin reduced-motion: cada letra es un
@@ -3672,6 +3672,95 @@ try {
     var past = function() { body.classList.toggle('pj-past', window.scrollY > 40); };
     window.addEventListener('scroll', past, { passive: true });
     past();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   CURRÍCULUM (cv.html, css/cv.css) — español / inglés.
+   · Las dos hojas están en la página, una encima de la otra; el
+     selector ES · EN elige cuál se ve y a qué PDF lleva «Descargar CV»
+     (y su peso).
+   · La nueva entra con un fundido sobre la anterior (que no se quita
+     hasta el final, así nunca se ve el fondo). Si se cambia a mitad, el
+     fundido sigue desde donde va, hacia el otro lado.
+   · cv.html#en abre la inglesa (así se genera su PDF).
+   ============================================================ */
+(function() {
+  function init() {
+    var sw = document.querySelector('.cv-lang');
+    if (!sw) return;
+    var btns = Array.prototype.slice.call(sw.querySelectorAll('button[data-lang]'));
+    var sheets = {};
+    document.querySelectorAll('.cv-sheet[data-lang]').forEach(function(s) { sheets[s.getAttribute('data-lang')] = s; });
+    if (!sheets.es || !sheets.en) return;
+    var dl = document.querySelector('.ds-print');
+    var size = document.querySelector('.ds-size');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var cur = 'es';
+    var top = null, anim = null;   // la hoja que se está fundiendo encima, y su fundido
+
+    function other(el) { return el === sheets.es ? sheets.en : sheets.es; }
+
+    function setUi(lang) {
+      sw.setAttribute('data-lang', lang);
+      btns.forEach(function(b) {
+        var on = b.getAttribute('data-lang') === lang;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (!on) return;
+        if (dl) { dl.setAttribute('href', b.getAttribute('data-href')); dl.setAttribute('download', b.getAttribute('data-file')); }
+        if (size) size.textContent = b.getAttribute('data-size');
+      });
+    }
+
+    function show(lang, instant) {
+      var to = sheets[lang];
+      if (!to || lang === cur) return;
+      var from = sheets[cur];
+      cur = lang;
+      setUi(lang);
+      if (instant || !to.animate) {
+        if (anim) { anim.cancel(); top.style.zIndex = ''; anim = top = null; }
+        to.classList.remove('is-off');
+        from.classList.add('is-off');
+        return;
+      }
+      var o = 0;
+      if (anim) {
+        o = parseFloat(getComputedStyle(top).opacity) || 0;
+        anim.cancel();
+      } else {
+        top = to;
+        to.classList.remove('is-off');
+        to.style.zIndex = '1';
+      }
+      var el = top, end = el === to ? 1 : 0;
+      var a = anim = el.animate([{ opacity: o }, { opacity: end }], {
+        duration: Math.max(90, (reduce ? 220 : 360) * Math.abs(end - o)),
+        easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+        fill: 'forwards'
+      });
+      a.onfinish = function() {
+        if (anim !== a) return;
+        // llegó arriba: fuera la de abajo; se apagó: fuera ella
+        (end ? other(el) : el).classList.add('is-off');
+        el.style.zIndex = '';
+        a.cancel();
+        anim = top = null;
+      };
+    }
+
+    var fromHash = function() { return /^#en$/i.test(location.hash) ? 'en' : 'es'; };
+    show(fromHash(), true);
+    btns.forEach(function(b) {
+      b.addEventListener('click', function() {
+        var lang = b.getAttribute('data-lang');
+        show(lang);
+        try { history.replaceState(null, '', lang === 'en' ? '#en' : location.pathname + location.search); } catch (e) {}
+      });
+    });
+    window.addEventListener('hashchange', function() { show(fromHash()); });
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
