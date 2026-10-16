@@ -162,7 +162,9 @@ body.pj-page .top-logo svg { height: 42px; }
 /* la línea sube desde detrás de su base (como PORTFOLIO en la home);
    el relleno deja sitio a las descendentes (la g, la y) */
 .pj-line { display: block; overflow: hidden; padding: 0.05em 0 0.16em; margin: -0.05em 0 -0.16em; }
-.pj-line > span { display: block; }
+/* a lo ancho del texto (no de la línea): así el título que llega volando
+   desde «Siguiente proyecto» encaja en su caja sin escalarse */
+.pj-line > span { display: block; width: fit-content; }
 
 /* la nota a mano: en el cuarto libre a la derecha del título, con la
    flecha bajando hasta la portada (la punta la toca) */
@@ -613,6 +615,23 @@ body.theme-light .pj-keyed.is-plain > video { mix-blend-mode: normal; }
    seguir reaccionando al cursor) */
 .pj-note > span { opacity: 0.95; animation: pj-note 0.9s var(--pj-ease) 1s backwards; }
 .pj-arrow { opacity: 0.9; animation: pj-arrow 0.8s var(--pj-ease) 1.2s backwards; }
+/* al llegar desde «Siguiente proyecto» (el título) o desde la card de la
+   home (la portada), eso ya viene volando de la otra página
+   (transition.js): sin su entrada */
+html.pt-m-title .pj-line > span { animation: none; }
+html.pt-m-cover .pj-cover-in,
+html.pt-m-cover .pj-cover-px > * { animation: none; }
+/* llegando con transición, la página sube como una hoja: lo de arriba
+   entra con ella, no después */
+html.pt-arrived .pj-kicker { animation-delay: 0.12s; }
+html.pt-arrived .pj-line > span { animation-delay: 0.16s; }
+html.pt-arrived .pj-cover-in,
+html.pt-arrived .pj-cover-px > * { animation-delay: 0.2s; }
+html.pt-arrived .pj-note > span { animation-delay: 0.7s; }
+html.pt-arrived .pj-arrow { animation-delay: 0.9s; }
+/* con el título volando, lo que va encima de él espera a que se pose
+   (si no, el título lo atraviesa al subir) */
+html.pt-m-title .pj-kicker { animation-delay: 0.62s; }
 @keyframes pj-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes pj-up { from { transform: translateY(108%); } to { transform: none; } }
 @keyframes pj-fade { from { opacity: 0; } to { opacity: 1; } }

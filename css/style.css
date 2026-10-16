@@ -375,8 +375,9 @@ a, button, input, textarea, .img-drag {
 }
 #egg-cursor {
   position: fixed;
-  left: 0;
-  top: 0;
+  /* al llegar de otra página, donde estaba (transition.js) */
+  left: var(--pt-cx, 0);
+  top: var(--pt-cy, 0);
   width: 36px;
   height: 36px;
   pointer-events: none;
@@ -2118,8 +2119,122 @@ body.theme-light .vinyl-player {
 
 
 /* ================================================
-   TRANSICIÓN ENTRE PÁGINAS — cortina
+   TRANSICIONES ENTRE PÁGINAS (transition.js)
+   Con View Transitions entre documentos el navegador fotografía la
+   página que se va y anima hacia la nueva. transition.js pone en <html>
+   hacia dónde se va (.pt-fwd / .pt-back) y, durante la transición, los
+   nombres de lo que no se mueve o viaja (.pt-out en la que se va,
+   .pt-in en la que llega).
    ================================================ */
+@view-transition { navigation: auto; }
+
+/* la curva de la casa: la hoja arranca rápido (responde al clic) y se
+   posa despacio. Volver es más corto que entrar. */
+:root {
+  --pt-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --pt-in: 0.9s;
+  --pt-out: 0.7s;
+}
+
+/* las dos fotos se tapan, no se suman (el navegador las mezcla con
+   plus-lighter para el fundido por defecto) */
+html.pt-in::view-transition-old(root),
+html.pt-in::view-transition-new(root) { mix-blend-mode: normal; }
+/* hacia dentro: la nueva sube como una hoja con un filo beige; la de
+   antes se queda atrás, sube un poco y se apaga */
+html.pt-fwd::view-transition-old(root) { animation: pt-under-out var(--pt-in) var(--pt-ease) both; }
+html.pt-fwd::view-transition-new(root) {
+  animation: pt-sheet-in var(--pt-in) var(--pt-ease) both;
+  box-shadow: 0 -1px 0 rgba(199, 178, 153, 0.5);
+}
+/* hacia fuera: la que se va baja (va por encima) y la de debajo vuelve
+   de la sombra */
+html.pt-back::view-transition-old(root) {
+  z-index: 1;
+  animation: pt-sheet-out var(--pt-out) var(--pt-ease) both;
+  box-shadow: 0 -1px 0 rgba(199, 178, 153, 0.5);
+}
+html.pt-back::view-transition-new(root) { animation: pt-under-in var(--pt-out) var(--pt-ease) both; }
+/* la card de la home se abre en la portada: el resto de la página nueva
+   se funde en su sitio, encima de la anterior (sin hueco oscuro entre
+   las dos), mientras la card crece */
+html.pt-zoom::view-transition-old(root) { animation: none; }
+html.pt-zoom::view-transition-new(root) { animation: pt-fade-in 0.55s var(--pt-ease) 0.1s both; }
+@keyframes pt-sheet-in { from { transform: translateY(100%); } }
+@keyframes pt-sheet-out { to { transform: translateY(100%); } }
+@keyframes pt-under-out { to { transform: translateY(-6vh); opacity: 0.3; } }
+@keyframes pt-under-in { from { transform: translateY(-6vh); opacity: 0.3; } }
+@keyframes pt-fade-in { from { opacity: 0; } }
+@keyframes pt-fade-out { to { opacity: 0; } }
+
+/* al pulsar un enlace la página ya empieza a irse, mientras llega la
+   nueva: el contenido se apaga y sube un poco (la transición sigue desde
+   ahí, sin saltos). El menú abierto, igual. */
+html.pt-going main,
+html.pt-going .content-drag-area,
+html.pt-going #site-menu .sm-inner {
+  opacity: 0.55;
+  translate: 0 -1.2vh;
+  transition: opacity 0.45s var(--pt-ease), translate 0.45s var(--pt-ease);
+}
+
+/* lo que no se mueve: cabecera, menú y botón de volver se quedan en su
+   sitio (si cambian, se funden ahí mismo) */
+html.pt-out .top-bar, html.pt-in .top-bar { view-transition-name: pt-top; }
+html.pt-out .menu-btn, html.pt-in .menu-btn { view-transition-name: pt-menu; }
+html.pt-out .back-btn, html.pt-in .back-btn { view-transition-name: pt-back; }
+html.pt-in::view-transition-group(pt-top),
+html.pt-in::view-transition-group(pt-menu),
+html.pt-in::view-transition-group(pt-back) { animation-duration: 0.5s; animation-timing-function: var(--pt-ease); }
+/* el cursor tampoco: se queda donde estaba (la nueva lo coloca ahí) */
+html.pt-out #egg-cursor, html.pt-in #egg-cursor { view-transition-name: pt-cur; }
+html.pt-out #cursor-ring, html.pt-in #cursor-ring { view-transition-name: pt-ring; }
+html.pt-in::view-transition-group(pt-cur) { z-index: 3; animation: none; }
+html.pt-in::view-transition-group(pt-ring) { z-index: 2; animation: none; }
+html.pt-in::view-transition-old(pt-cur),
+html.pt-in::view-transition-new(pt-cur) { animation: none; }
+html.pt-in::view-transition-old(pt-ring) { animation: pt-fade-out 0.3s ease both; }
+
+/* lo que viaja: el título de «Siguiente proyecto» sube a ser el título,
+   la card de la home se abre en la portada */
+html.pt-in::view-transition-group(pt-title),
+html.pt-in::view-transition-group(pt-cover) {
+  z-index: 1;
+  animation-duration: 0.9s;
+  animation-timing-function: var(--pt-ease);
+}
+/* el título es el mismo texto: viaja solo el nuevo (con los dos se
+   vería doble por cualquier diferencia de un píxel) */
+html.pt-in::view-transition-old(pt-title) { animation: none; opacity: 0; }
+html.pt-in::view-transition-new(pt-title) { mix-blend-mode: normal; animation: none; }
+/* la card y la portada son fotos distintas: la portada aparece sobre la
+   card mientras la caja se abre, recortadas a su caja */
+html.pt-in::view-transition-group(pt-cover) { overflow: clip; border-radius: 8px; }
+html.pt-in::view-transition-old(pt-cover),
+html.pt-in::view-transition-new(pt-cover) { height: 100%; object-fit: cover; mix-blend-mode: normal; }
+html.pt-in::view-transition-old(pt-cover) { animation: none; }
+html.pt-in::view-transition-new(pt-cover) { animation: pt-fade-in 0.32s ease 0.06s both; }
+/* el título que se va, sin su flecha (no está en el título de llegada) */
+html.pt-out-next .pj-next-t svg { display: none; }
+
+/* sin movimiento: solo fundidos, nada se desplaza */
+@media (prefers-reduced-motion: reduce) {
+  html.pt-in::view-transition-old(root) { animation: pt-fade-out 0.32s ease both; }
+  html.pt-in::view-transition-new(root) { animation: pt-fade-in 0.32s ease both; box-shadow: none; }
+  html.pt-in::view-transition-group(*) { animation: none; }
+  html.pt-in::view-transition-old(pt-title),
+  html.pt-in::view-transition-old(pt-cover) { animation: pt-fade-out 0.32s ease both; }
+  html.pt-in::view-transition-new(pt-title),
+  html.pt-in::view-transition-new(pt-cover) { animation: pt-fade-in 0.32s ease both; }  html.pt-going main,
+  html.pt-going .content-drag-area,
+  html.pt-going #site-menu .sm-inner { translate: none; }
+}
+
+/* ---- respaldo sin View Transitions: la cortina ----
+   Cae rápido (responde al clic) y sube con la curva de la casa; lleva
+   el nombre del destino al irse y el de la página al llegar. Con View
+   Transitions no se usa. */
+html.pt-vt #page-fx { display: none; }
 #page-fx {
   position: fixed;
   inset: 0;
@@ -2129,7 +2244,8 @@ body.theme-light .vinyl-player {
   pointer-events: none;
   will-change: transform;
 }
-#page-fx.fx-anim { transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1); }
+#page-fx.fx-anim { transition: transform 0.5s cubic-bezier(0.5, 0, 0.15, 1); }
+#page-fx.fx-anim.fx-reveal { transition: transform 0.75s var(--pt-ease); }
 #page-fx.fx-reveal { transform: translateY(-100%); }
 
 /* Accesibilidad — foco visible por teclado */
@@ -2146,7 +2262,7 @@ select:focus-visible {
 /* nombre del destino, en grande y en crema: la transición anuncia a
    dónde vas. Viaja con parallax interno (más lento que la cortina). */
 #page-fx::before {
-  content: attr(data-label);  /* el JS pone la página actual o el destino */
+  content: var(--pt-label, '');  /* transition.js: la página actual o el destino */
   position: absolute;
   left: 24px; right: 24px; top: 50%;
   transform: translateY(-50%);
@@ -2161,9 +2277,8 @@ select:focus-visible {
 }
 /* parallax interno: el rótulo se mueve más despacio que la cortina
    (profundidad de doble plano, misma curva) */
-#page-fx.fx-anim::before {
-  transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1);
-}
+#page-fx.fx-anim::before { transition: transform 0.5s cubic-bezier(0.5, 0, 0.15, 1); }
+#page-fx.fx-anim.fx-reveal::before { transition: transform 0.75s var(--pt-ease); }
 #page-fx.fx-reveal::before { transform: translateY(calc(-50% + 26vh)); }
 /* filo cálido en el borde inferior: la línea que barre la pantalla
    al cubrir y al revelar (viaja con la cortina, coste cero) */

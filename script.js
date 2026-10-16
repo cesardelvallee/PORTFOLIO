@@ -1,71 +1,9 @@
 
 /* ============================================================
-   PAGE TRANSITION (curtain) — fluid navigation between pages.
-   Defined first so it works even if later scripts (GSAP) fail.
-   La cortina anuncia el DESTINO: al salir hacia una página, su
-   ::before muestra el nombre de donde vas (attr(data-label)).
+   TRANSICIONES ENTRE PÁGINAS: en transition.js (va en el <head>, antes
+   que este archivo). Aquí se usa window.PageFX.leave(url, src) para lo
+   que navega desde código.
    ============================================================ */
-(function() {
-  /* Cortina teatral en paleta corporativa (tinta + beige): anuncia el
-     destino con su nombre en grande; el rótulo viaja con parallax
-     interno y el filo beige barre la pantalla. */
-  var PAGES_FX = {
-    'index.html':   { label: 'CÉSAR DEL VALLE' },
-    'about.html':   { label: 'SOBRE MÍ' },
-    'contact.html': { label: 'CONTACTO' },
-    'dossier.html': { label: 'DOSSIER' },
-    'cv.html':      { label: 'CURRÍCULUM' },
-    '404.html':     { label: 'CÉSAR DEL VALLE' },
-    'img1.html':    { label: 'COFFEE RITUALS' },
-    'img2.html':    { label: 'OTTOLINGER × MYKITA' },
-    'img3.html':    { label: 'CATALALATA' },
-    'img4.html':    { label: 'EL RASTRILLO' },
-    'img5.html':    { label: 'LOEWE 001' },
-    'img6.html':    { label: 'THE GRMPS' }
-  };
-  function fx() { return document.getElementById('page-fx'); }
-  function pageOf(url) {
-    var file = (url || '').split(/[?#]/)[0].split('/').pop() || 'index.html';
-    return PAGES_FX[file] || PAGES_FX['index.html'];
-  }
-  function dress(el, p) {
-    el.setAttribute('data-label', p.label);
-    var n = el.querySelector('.fx-num');
-    if (n) n.remove();   // limpieza por si quedó de una versión anterior (bfcache)
-  }
-  window.PageFX = {
-    reveal: function() {
-      var el = fx(); if (!el) return;
-      // al llegar (o volver por bfcache) la cortina viste la página actual
-      dress(el, pageOf(location.pathname));
-      requestAnimationFrame(function() { el.classList.add('fx-anim'); el.classList.add('fx-reveal'); });
-    },
-    leave: function(url) {
-      var el = fx();
-      if (!el) { window.location.href = url; return; }
-      var done = false;
-      var go = function() { if (done) return; done = true; window.location.href = url; };
-      dress(el, pageOf(url)); // la cortina cae con el nombre del destino
-      el.classList.add('fx-anim');
-      void el.offsetWidth;
-      el.classList.remove('fx-reveal'); // drop the curtain to cover
-      el.addEventListener('transitionend', go, { once: true });
-      setTimeout(go, 860); // safety fallback
-    }
-  };
-  // Reveal on load and on back/forward (bfcache) restore
-  window.addEventListener('pageshow', function() { window.PageFX.reveal(); });
-  // Intercept internal .html links for a smooth out-transition
-  document.addEventListener('click', function(e) {
-    var a = e.target.closest && e.target.closest('a');
-    if (!a) return;
-    var href = a.getAttribute('href');
-    if (!href || a.target === '_blank' || a.hasAttribute('download')) return;
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
-    if (href.charAt(0) === '#' || /^(mailto:|tel:|https?:|\/\/)/i.test(href)) return;
-    if (/\.html(\?|#|$)/.test(href)) { e.preventDefault(); window.PageFX.leave(href); }
-  });
-})();
 
 document.addEventListener('DOMContentLoaded', () => {
   const isMobileDevice = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 'ontouchstart' in window;
@@ -94,6 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastClientX = 0, lastClientY = 0;
   
   if (!isMobileDevice && eggCursor) {
+    // al llegar de otra página, el cursor ya está donde estaba (transition.js)
+    const at = window.PageFX && window.PageFX.cursor;
+    if (at) {
+      lastClientX = at.x; lastClientY = at.y;
+      eggCursor.style.left = at.x + 'px';
+      eggCursor.style.top = at.y + 'px';
+      eggCursor.style.backgroundImage = "url('img/DEFAULT.svg')";
+    }
     document.addEventListener('mousemove', e => {
       lastClientX = e.clientX;
       lastClientY = e.clientY;
@@ -141,16 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const touchDuration = Date.now() - touchStartTime;
         if (touchDuration < 400 && !isSwiping) { 
           e.preventDefault();
-          window.PageFX.leave(imgLinks[i]);
+          window.PageFX.leave(imgLinks[i], img);
         }
       }, { passive: false });
     } else {
-      img.addEventListener('dblclick', () => { window.PageFX.leave(imgLinks[i]); });
+      img.addEventListener('dblclick', () => { window.PageFX.leave(imgLinks[i], img); });
     }
   });
 
   // botón "About me": mismo comportamiento que el del menú (el press lo
-  // hace el :active del CSS; la cortina de PageFX es la respuesta)
+  // hace el :active del CSS; la transición de página es la respuesta)
   const btn = document.querySelector('.hero-btn');
   if (btn) {
     btn.addEventListener('touchstart', () => {}, { passive: true }); // :active en iOS
@@ -588,7 +534,7 @@ class DraggableImg {
         var coarse = ('ontouchstart' in window) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 768;
         if (!coarse) return;
         var m = Image.className.match(/img-(\d)/);
-        if (m && window.PageFX) window.PageFX.leave('img' + m[1] + '.html');
+        if (m && window.PageFX) window.PageFX.leave('img' + m[1] + '.html', Image);
       },
       onPress() {
         Image.style.zIndex = proxy.style.zIndex; window._setGrabbingCursor(true);
@@ -1679,6 +1625,9 @@ document.addEventListener('DOMContentLoaded', function() {
        visuales). Nunca se escala por encima de 1: rasterizado siempre nítido. */
     var mx = window.innerWidth / 2, my = window.innerHeight / 2;
     var rx = mx, ry = my, rs = 0.5, targetS = 0.5, shown = false;
+    // al llegar de otra página, el halo sigue donde estaba (transition.js)
+    var at = window.PageFX && window.PageFX.cursor;
+    if (at) { rx = mx = at.x; ry = my = at.y; shown = true; ring.classList.add('is-visible'); }
 
     document.addEventListener('mousemove', function(e) {
       mx = e.clientX; my = e.clientY;
@@ -1860,7 +1809,7 @@ document.addEventListener('DOMContentLoaded', function() {
    tinta) y el contenido entra con máscara. Cerrar: lo mismo en
    orden inverso y más rápido. Solo transform/opacity.
    Se inyecta aquí para que todas las páginas compartan una única
-   fuente de verdad. Los enlaces .html pasan por PageFX (cortina)
+   fuente de verdad. Los enlaces .html pasan por transition.js
    gracias al interceptor global de clics.
    ============================================================ */
 (function() {
@@ -2125,7 +2074,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // si se vuelve por bfcache, que no quede abierto
     window.addEventListener('pageshow', function() { setOpen(false); });
   }
-  if (document.readyState !== 'loading') init();
+  // ya, sin esperar al DOMContentLoaded (que espera a otros scripts): este
+  // archivo va al final del <body> y el botón tiene que estar en la
+  // primera imagen de la página (transition.js)
+  if (document.body) init();
   else document.addEventListener('DOMContentLoaded', init);
 })();
 

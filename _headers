@@ -1,0 +1,14 @@
+# Cabeceras de Cloudflare Pages.
+# CSS y JS: todas sus referencias llevan ?v= (y cambian de URL en cada
+# versión). Durante una hora el navegador los usa sin volver a
+# preguntar, y después los sirve al momento y los actualiza por detrás:
+# al pasar de una página a otra no espera a revalidarlos y la
+# transición arranca antes.
+/css/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+/script.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+/transition.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+/game.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800
