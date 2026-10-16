@@ -13,7 +13,7 @@
     font-size: 2.2vw;
     margin-bottom: 3vw;
   }
-  .model-3d-bg model-viewer {
+  .model-3d-bg toon-figure {
     width: 80vw;
     height: 80vw;
     min-width: 300px;
@@ -64,7 +64,7 @@
   .center-hero-text {
     padding-top: 10vw;
   }
-  .model-3d-bg model-viewer {
+  .model-3d-bg toon-figure {
     width: 98vw;
     height: 60vw;
     min-width: 180px;
@@ -593,7 +593,10 @@ img {
   align-items: center;
   justify-content: center;
 }
-.model-3d-bg model-viewer {
+/* el muñeco (toon-figure.js): un lienzo que llena su caja */
+toon-figure { display: block; }
+toon-figure canvas { display: block; width: 100%; height: 100%; }
+.model-3d-bg toon-figure {
   width: 1000px;
   height: 1000px;
   min-width: 500px;
@@ -746,7 +749,7 @@ img {
     padding-top: 8px;
   }
   
-  .model-3d-bg model-viewer {
+  .model-3d-bg toon-figure {
     width: 95vw;
     height: 50vw;
     min-width: 150px;
@@ -1105,6 +1108,28 @@ img {
 @media (hover: hover) and (pointer: fine) {
   .vinyl-btn:hover { color: var(--vp-ink); background: var(--vp-hover); }
 }
+
+/* ---- lo que va de canción: el filo de abajo de la tarjeta se llena de
+   beige (el mismo filo de las transiciones). Va sobre el borde, entre
+   las dos esquinas redondeadas; script.js lo anima con el audio. ---- */
+.vp-progress {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -1px;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.vp-progress i {
+  position: absolute;
+  inset: 0;
+  background: #c7b299;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  opacity: 0.85;
+}
+body.theme-light .vp-progress i { background: #8a7a63; }
 
 @media (prefers-reduced-motion: reduce) {
   .vinyl-title,
@@ -4940,7 +4965,7 @@ body.home-page .center-hero-text {
   justify-content: center;
   align-items: stretch;
 }
-/* sin velo detrás del texto: ahora el texto va detrás del muñeco */
+/* sin velo detrás del texto: el muñeco va detrás y el nombre por delante */
 body.home-page .center-hero-text::after { content: none; }
 
 /* CÉSAR DEL VALLE en Clash Display (Fontshare): geométrica y limpia, con
@@ -4962,7 +4987,7 @@ body.home-page .hero-title {
   letter-spacing: -0.03em;
   white-space: nowrap;
   filter: none;
-  z-index: 0;
+  z-index: 1;
 }
 body.home-page .hero-subtitle {
   align-self: flex-start;
@@ -4974,13 +4999,13 @@ body.home-page .hero-subtitle {
   z-index: 2;
 }
 
-/* el muñeco: un plano propio, delante del título */
+/* el muñeco: un plano propio, detrás del nombre (las cards, encima de todo) */
 body.home-page .model-3d-bg {
   width: min(56vw, 820px);
   height: min(72svh, 700px);
-  z-index: 1;
+  z-index: 0;
 }
-body.home-page .model-3d-bg model-viewer {
+body.home-page .model-3d-bg toon-figure {
   width: 100%;
   height: 100%;
   min-width: 0;

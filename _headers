@@ -12,3 +12,5 @@
   Cache-Control: public, max-age=3600, stale-while-revalidate=604800
 /game.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+/toon-figure.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800

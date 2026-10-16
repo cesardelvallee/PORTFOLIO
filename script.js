@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.startInitialAnimations = startInitialAnimations;
 
-  const modelViewer = document.querySelector('model-viewer');
+  const modelViewer = document.querySelector('.model-3d-bg toon-figure');
   if (modelViewer) {
     modelViewer.addEventListener('load', () => { if (!document.getElementById('loading-screen')) { startInitialAnimations(); } });
   } else { if (!document.getElementById('loading-screen')) { startInitialAnimations(); } }
@@ -401,7 +401,7 @@ function playSweep(c) {
    (solo donde gira solo: en escritorio lo mueve el cursor). Así el móvil no
    tiene que pintar el 3D a la vez que mueve las cards. Vuelve a girar un
    momento después de soltarlas. */
-const heroModel = document.querySelector('.model-3d-bg model-viewer');
+const heroModel = document.querySelector('.model-3d-bg toon-figure');
 const modelHolds = new Set();
 let modelResume = 0;
 function holdModel(reason, on) {
@@ -903,13 +903,13 @@ document.addEventListener('DOMContentLoaded', function() {});
    label: color de la galleta de cada disco (tonos apagados de la paleta)
    ============================================================ */
 var SITE_TRACKS = [
-  { title: 'I Still Haven\'t Found What I\'m Looking For', artist: 'U2', label: '#c7b299', src: 'music/U2 - I Still Haven\'t Found What I\'m Looking For (Official Music Video).mp3' },
+  { title: 'Moonlights Puppet Remix', artist: 'Al Safir, Interferencias', label: '#7a746c', src: 'music/Interferencias - MOONLIGHT\'S PUPPET (REMIX) feat. Al Safir (Videoclip Oficial).mp3' },
   { title: 'Llamando a la tierra', artist: 'M-Clan', label: '#b48a68', src: 'music/M-Clan - Llamando a la Tierra (letra).mp3' },
+  { title: 'I Still Haven\'t Found What I\'m Looking For', artist: 'U2', label: '#c7b299', src: 'music/U2 - I Still Haven\'t Found What I\'m Looking For (Official Music Video).mp3' },
   { title: 'Guaya', artist: 'Don Omar', label: '#929b7f', src: 'music/Don Omar - Guaya Guaya (Audio).mp3' },
   { title: 'Snow Crystal', artist: 'Babalos', label: '#9198a1', src: 'music/Babalos - Snow Crystal [HQ] - Babalos.mp3' },
   { title: 'Vagabond', artist: 'Caamp', label: '#d6c8b0', src: 'music/Vagabond.mp3' },
   { title: 'Si Algo Es Puro Vale El Doble', artist: 'West Srk', label: '#a3877a', src: 'music/West Srk - Si Algo Es Puro Vale El Doble (Video Oficial) - West Srk.mp3' },
-  { title: 'Moonlights Puppet Remix', artist: 'Al Safir, Interferencias', label: '#7a746c', src: 'music/Interferencias - MOONLIGHT\'S PUPPET (REMIX) feat. Al Safir (Videoclip Oficial).mp3' },
   { title: 'Somebody That I Used to Know', artist: 'Gotye ft. Kimbra', label: '#c39c7e', src: 'music/Gotye - Somebody That I Used To Know (feat. Kimbra) [Official Music Video].mp3' }
 ];
 
@@ -995,8 +995,6 @@ var SITE_TRACKS = [
     }
   }
 
-  function pad(n) { return (n < 10 ? '0' : '') + n; }
-
   function renderMeta(dir) {
     const t = tracks[index];
     function apply() {
@@ -1044,6 +1042,28 @@ var SITE_TRACKS = [
   });
   nextBtn.addEventListener('click', function() { load(index + 1, 1); });
 
+  /* ---- lo que va de canción, en el filo de abajo de la tarjeta: una
+     animación lineal hasta el final que se rehace al pausar, saltar o
+     cambiar de pista (corre en el compositor, sin tocar nada por fotograma) ---- */
+  const prog = widget.querySelector('.vp-progress i');
+  let progAnim = null;
+  function syncProgress() {
+    if (!prog) return;
+    if (progAnim) { progAnim.cancel(); progAnim = null; }
+    const d = audio.duration, t = audio.currentTime || 0;
+    const p = d && isFinite(d) ? Math.min(1, t / d) : 0;
+    prog.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    const moving = !audio.paused && audio.readyState > 2 && d && isFinite(d);
+    if (!moving || !prog.animate) return;
+    progAnim = prog.animate(
+      [{ transform: 'scaleX(' + p.toFixed(4) + ')' }, { transform: 'scaleX(1)' }],
+      { duration: Math.max(0, (d - t) * 1000 / (audio.playbackRate || 1)), easing: 'linear', fill: 'forwards' }
+    );
+  }
+  ['playing', 'pause', 'waiting', 'seeked', 'loadedmetadata', 'ratechange', 'emptied'].forEach(function(ev) {
+    audio.addEventListener(ev, syncProgress);
+  });
+
   audio.addEventListener('play', function() { setPlaying(true); });
   audio.addEventListener('pause', function() { setPlaying(false); });
   audio.addEventListener('ended', function() { load(index + 1, 1); play(); });
@@ -1087,7 +1107,7 @@ var SITE_TRACKS = [
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(W, H, false);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;   // sombras recortadas, de dibujo
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(24, W / H, 0.1, 60);
@@ -1096,49 +1116,104 @@ var SITE_TRACKS = [
     camera.position.copy(CAM);
     camera.lookAt(LOOK);
 
-    /* luz: un estudio cálido como entorno (da reflejo a los metales y al
-       vinilo) + una luz principal arriba a la izquierda con sombra suave */
-    const room = new THREE.Scene();
-    room.add(new THREE.Mesh(new THREE.BoxGeometry(12, 12, 12), new THREE.MeshBasicMaterial({ color: 0x3d3730, side: THREE.BackSide })));
-    function panel(w, h, x, y, z, k) {
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.95, 0.88).multiplyScalar(k), side: THREE.DoubleSide }));
-      m.position.set(x, y, z); m.lookAt(0, 0, 0); room.add(m);
-    }
-    panel(7, 3, -2.5, 5.8, 1.5, 4);
-    panel(3, 5, 5.8, 1.5, -1, 1.6);
-    panel(5, 2, 0, 1, 5.8, 0.8);
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(room, 0.04).texture;
-    pmrem.dispose();
-
-    scene.add(new THREE.HemisphereLight(0xfff4e6, 0x2e2822, 0.5));
-    const key = new THREE.DirectionalLight(0xfff0dc, 2.2);
+    /* dibujo, no foto (toon shading): cada pieza tiene tres tonos planos
+       (luz, medio y sombra) sin degradado entre ellos, un contorno de tinta
+       cálida y sombras recortadas. La luz principal, arriba a la izquierda,
+       decide dónde cae cada banda; el relleno evita que la sombra se vaya a
+       negro. */
+    scene.add(new THREE.HemisphereLight(0xfff6ea, 0x6e604f, 1.0));
+    const key = new THREE.DirectionalLight(0xfff3e4, 2.1);
     key.position.set(-3.5, 8, 2.5);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     const sc = key.shadow.camera;
     sc.left = -4; sc.right = 4; sc.top = 4; sc.bottom = -4; sc.near = 1; sc.far = 20;
-    key.shadow.radius = 5;
+    key.shadow.radius = 1;
     key.shadow.bias = -0.0006;
     key.shadow.normalBias = 0.02;
     scene.add(key);
-
-    function mat(color, roughness, metalness) {
-      return new THREE.MeshStandardMaterial({ color: color, roughness: roughness, metalness: metalness || 0 });
+    // las tres bandas de luz (sombra, medio, luz), con salto y sin degradado
+    const bands = new Uint8Array([105, 180, 255]);
+    const gradientMap = new THREE.DataTexture(bands, bands.length, 1, THREE.RedFormat);
+    gradientMap.minFilter = gradientMap.magFilter = THREE.NearestFilter;
+    gradientMap.needsUpdate = true;
+    function mat(color, extra) {
+      return new THREE.MeshToonMaterial(Object.assign({ color: color, gradientMap: gradientMap }, extra || {}));
     }
     const M = {
-      plinth: mat(0xd8cab4, 0.78),
-      dark: mat(0x26221e, 0.5, 0.25),
-      metal: mat(0xd9d3c9, 0.28, 0.9),
-      platter: mat(0x8f877c, 0.35, 0.85),
-      mat: mat(0x1b1917, 0.95),
-      accent: mat(0xc7b299, 0.55, 0.1)
+      plinth: mat(0xe9dcc6),
+      wood: mat(0x8c5f3f),
+      dark: mat(0x3a312a),
+      metal: mat(0xd6cdbf),
+      platter: mat(0xa89c8b),
+      mat: mat(0x2a2420),
+      accent: mat(0xc7b299)
     };
-    function add(geo, material, x, y, z, parent) {
+
+    /* el trazo: cada pieza lleva su contorno de tinta. Es la misma pieza
+       del revés, hinchada en pantalla a lo largo de sus normales (suavizadas,
+       para que el trazo no se abra en las aristas) un número fijo de
+       píxeles: un grosor constante, como una línea de rotulador. */
+    const DPR = renderer.getPixelRatio();
+    const inkPx = { value: 1.1 * DPR };
+    const inkRes = { value: new THREE.Vector2(W * DPR, H * DPR) };
+    function inkMaterial(fading) {
+      return new THREE.ShaderMaterial({
+        uniforms: { px: inkPx, res: inkRes, color: { value: new THREE.Color(0x2a2019) }, alpha: { value: 1 } },
+        vertexShader: [
+          'attribute vec3 smoothNormal;',
+          'uniform float px;',
+          'uniform vec2 res;',
+          'void main() {',
+          '  vec4 clip = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+          '  vec2 d = (projectionMatrix * vec4(normalize(normalMatrix * smoothNormal), 0.0)).xy * res;',
+          '  float l = length(d);',
+          '  if (l > 1e-5) clip.xy += d / l * px * 2.0 / res * clip.w;',
+          '  gl_Position = clip;',
+          '}'
+        ].join('\n'),
+        fragmentShader: [
+          'uniform vec3 color;',
+          'uniform float alpha;',
+          'void main() {',
+          '  gl_FragColor = vec4(color, alpha);',
+          '  #include <colorspace_fragment>',
+          '}'
+        ].join('\n'),
+        side: THREE.BackSide,
+        transparent: !!fading
+      });
+    }
+    const INK = inkMaterial(false);
+    function smooth(geo) {
+      if (geo.getAttribute('smoothNormal')) return geo;
+      const pos = geo.getAttribute('position'), nor = geo.getAttribute('normal');
+      const acc = new Map(), out = new Float32Array(pos.count * 3);
+      const keyOf = function(i) { return Math.round(pos.getX(i) * 1e4) + ',' + Math.round(pos.getY(i) * 1e4) + ',' + Math.round(pos.getZ(i) * 1e4); };
+      for (let i = 0; i < pos.count; i++) {
+        const k = keyOf(i); let a = acc.get(k);
+        if (!a) acc.set(k, a = [0, 0, 0]);
+        a[0] += nor.getX(i); a[1] += nor.getY(i); a[2] += nor.getZ(i);
+      }
+      for (let i = 0; i < pos.count; i++) {
+        const a = acc.get(keyOf(i)), l = Math.hypot(a[0], a[1], a[2]) || 1;
+        out[i * 3] = a[0] / l; out[i * 3 + 1] = a[1] / l; out[i * 3 + 2] = a[2] / l;
+      }
+      geo.setAttribute('smoothNormal', new THREE.BufferAttribute(out, 3));
+      return geo;
+    }
+    function ink(mesh, material) {
+      const o = new THREE.Mesh(smooth(mesh.geometry), material || INK);
+      mesh.add(o);
+      return o;
+    }
+    // noInk: piezas diminutas o tapadas, donde el trazo solo ensucia
+    function add(geo, material, x, y, z, parent, noInk) {
       const m = new THREE.Mesh(geo, material);
       m.position.set(x, y, z);
       m.castShadow = true; m.receiveShadow = true;
       (parent || scene).add(m);
+      if (!noInk) ink(m);
       return m;
     }
 
@@ -1155,77 +1230,71 @@ var SITE_TRACKS = [
       g.translate(0, b, 0);
       return g;
     }
-    const TOP = 0.5;
-    add(roundedSlab(4.8, 3.7, TOP, 0.26), M.plinth, 0, 0, 0);
+    // peana: cuerpo de nogal con la cubierta crema encima (como los
+    // tocadiscos de los sesenta), sobre cuatro patas cortas
+    const TOP = 0.5, DECK = 0.11, FOOT = 0.08;
+    add(roundedSlab(4.8, 3.7, TOP - DECK, 0.26), M.wood, 0, 0, 0);
+    add(roundedSlab(4.7, 3.6, DECK, 0.22), M.plinth, 0, TOP - DECK, 0);
+    [[-1.98, -1.42], [1.98, -1.42], [-1.98, 1.42], [1.98, 1.42]].forEach(function(f) {
+      add(new THREE.CylinderGeometry(0.16, 0.19, FOOT, 24), M.dark, f[0], -FOOT / 2, f[1]);
+    });
 
     // sombra de contacto sobre el "suelo" (solo la sombra, sin plano visible)
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.ShadowMaterial({ opacity: 0.22 }));
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.ShadowMaterial({ opacity: 0.2 }));
     ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -FOOT;
     ground.receiveShadow = true;
     scene.add(ground);
 
     /* ---- plato ---- */
     const C = new THREE.Vector3(-0.42, 0, 0.02);
     const PLATTER_H = 0.13;
-    add(new THREE.CylinderGeometry(1.5, 1.5, 0.03, 64), M.dark, C.x, TOP + 0.015, C.z);
+    add(new THREE.CylinderGeometry(1.5, 1.5, 0.03, 64), M.dark, C.x, TOP + 0.015, C.z, null, true);
     add(new THREE.CylinderGeometry(1.6, 1.6, PLATTER_H - 0.03, 96), M.platter, C.x, TOP + 0.03 + (PLATTER_H - 0.03) / 2, C.z);
-    add(new THREE.CylinderGeometry(1.5, 1.5, 0.006, 64), M.mat, C.x, TOP + PLATTER_H + 0.003, C.z);
+    add(new THREE.CylinderGeometry(1.5, 1.5, 0.006, 64), M.mat, C.x, TOP + PLATTER_H + 0.003, C.z, null, true);
     const RECORD_Y = TOP + PLATTER_H + 0.006 + 0.0125;
-    add(new THREE.CylinderGeometry(0.028, 0.028, 0.12, 16), M.metal, C.x, RECORD_Y + 0.06, C.z);
+    add(new THREE.CylinderGeometry(0.028, 0.028, 0.12, 16), M.metal, C.x, RECORD_Y + 0.06, C.z, null, true);
 
     /* ---- detalles: selector de velocidad + piloto ---- */
     add(new THREE.CylinderGeometry(0.2, 0.21, 0.08, 40), M.dark, -1.95, TOP + 0.04, 1.47);
-    add(new THREE.CylinderGeometry(0.12, 0.12, 0.02, 32), M.metal, -1.95, TOP + 0.09, 1.47);
-    const ledMat = new THREE.MeshStandardMaterial({ color: 0x3a2f24, emissive: 0xe0a85a, emissiveIntensity: 0, roughness: 0.4 });
-    add(new THREE.CylinderGeometry(0.045, 0.045, 0.02, 20), ledMat, -1.5, TOP + 0.01, 1.55);
+    add(new THREE.CylinderGeometry(0.12, 0.12, 0.02, 32), M.metal, -1.95, TOP + 0.09, 1.47, null, true);
+    const ledMat = mat(0x4a3d30, { emissive: 0xffb860, emissiveIntensity: 0 });
+    add(new THREE.CylinderGeometry(0.05, 0.05, 0.02, 20), ledMat, -1.5, TOP + 0.01, 1.55, null, true);
 
-    /* ---- textura de surcos (compartida) ---- */
+    /* ---- surcos de dibujo (compartidos): negro liso y unos pocos anillos,
+       como se dibuja un disco ---- */
     const grooveTex = (function() {
       const c = document.createElement('canvas'); c.width = c.height = 1024;
       const g = c.getContext('2d'), R = 512;
-      g.fillStyle = '#131110'; g.fillRect(0, 0, 1024, 1024);
-      for (let r = R * 0.36; r < R * 0.975; r += 1.7) {
-        const gap = (r > R * 0.6 && r < R * 0.615) || (r > R * 0.78 && r < R * 0.792);
-        g.strokeStyle = gap ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,' + (0.025 + Math.random() * 0.035).toFixed(3) + ')';
-        g.lineWidth = 0.9;
-        g.beginPath(); g.arc(R, R, r, 0, Math.PI * 2); g.stroke();
-      }
+      g.fillStyle = '#211c18'; g.fillRect(0, 0, 1024, 1024);
+      g.strokeStyle = 'rgba(255,240,220,0.1)';
+      [0.56, 0.74, 0.9].forEach(function(k) {
+        g.lineWidth = 7;
+        g.beginPath(); g.arc(R, R, R * k, 0, Math.PI * 2); g.stroke();
+      });
       const t = new THREE.CanvasTexture(c);
       t.colorSpace = THREE.SRGBColorSpace;
       t.anisotropy = renderer.capabilities.getMaxAnisotropy();
       return t;
     })();
 
-    /* ---- galleta impresa de cada disco ---- */
+    /* ---- galleta de cada disco, dibujada: el color de la canción, un
+       anillo, dos trazos de "letra" y el agujero (a este tamaño el texto
+       de verdad solo era ruido) ---- */
     const labelCache = {};
     function labelTexture(i) {
       if (labelCache[i]) return labelCache[i];
-      const t = tracks[i];
       const c = document.createElement('canvas'); c.width = c.height = 256;
       const g = c.getContext('2d');
-      g.fillStyle = t.label;
+      g.fillStyle = tracks[i].label;
       g.beginPath(); g.arc(128, 128, 128, 0, Math.PI * 2); g.fill();
-      g.strokeStyle = 'rgba(40,32,24,0.22)'; g.lineWidth = 1.5;
-      g.beginPath(); g.arc(128, 128, 114, 0, Math.PI * 2); g.stroke();
-      g.fillStyle = 'rgba(36,29,22,0.82)';
-      g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = '700 17px Inter, Arial, sans-serif';
-      g.fillText(t.artist.toUpperCase(), 128, 70);
-      g.font = '500 10px Inter, Arial, sans-serif';
-      g.fillText('CÉSAR DEL VALLE · ' + pad(i + 1), 128, 92);
-      // título en dos líneas como mucho, debajo del agujero
-      g.font = '400 13px Inter, Arial, sans-serif';
-      const words = t.title.split(' '), lines = [''];
-      words.forEach(function(w) {
-        const cand = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w;
-        if (g.measureText(cand).width > 150 && lines[lines.length - 1]) lines.push(w);
-        else lines[lines.length - 1] = cand;
-      });
-      lines.slice(0, 2).forEach(function(l, k) { g.fillText(l, 128, 168 + k * 17); });
-      g.font = '500 9px Inter, Arial, sans-serif';
-      g.fillText('33⅓ RPM', 128, 214);
-      g.fillStyle = '#131110';
-      g.beginPath(); g.arc(128, 128, 6, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = 'rgba(42,32,25,0.35)'; g.lineWidth = 5;
+      g.beginPath(); g.arc(128, 128, 104, 0, Math.PI * 2); g.stroke();
+      g.strokeStyle = 'rgba(42,32,25,0.55)'; g.lineCap = 'round';
+      g.lineWidth = 11; g.beginPath(); g.moveTo(84, 78); g.lineTo(172, 78); g.stroke();
+      g.lineWidth = 8; g.beginPath(); g.moveTo(104, 178); g.lineTo(152, 178); g.stroke();
+      g.fillStyle = '#211c18';
+      g.beginPath(); g.arc(128, 128, 12, 0, Math.PI * 2); g.fill();
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -1234,17 +1303,20 @@ var SITE_TRACKS = [
 
     function makeRecord() {
       const g = new THREE.Group();
-      const edge = new THREE.MeshStandardMaterial({ color: 0x131110, roughness: 0.5, transparent: true });
-      const face = new THREE.MeshStandardMaterial({ map: grooveTex, roughness: 0.32, transparent: true });
+      const edge = mat(0x211c18, { transparent: true });
+      const face = mat(0xffffff, { map: grooveTex, transparent: true });
       const vinyl = new THREE.Mesh(new THREE.CylinderGeometry(1.46, 1.46, 0.025, 96), [edge, face, face]);
       vinyl.castShadow = true; vinyl.receiveShadow = true;
-      const labelMat = new THREE.MeshStandardMaterial({ roughness: 0.85, transparent: true });
+      const line = inkMaterial(true);
+      ink(vinyl, line);
+      const labelMat = mat(0xffffff, { transparent: true });
       const label = new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), labelMat);
       label.rotation.x = -Math.PI / 2;
       label.position.y = 0.0128;
       label.receiveShadow = true;
       g.add(vinyl, label);
       g.userData.mats = [edge, face, labelMat];
+      g.userData.line = line;
       g.userData.labelMat = labelMat;
       scene.add(g);
       return g;
@@ -1253,11 +1325,42 @@ var SITE_TRACKS = [
       rec.position.set(x, y, z);
       rec.visible = opacity > 0.002;
       rec.userData.mats.forEach(function(m) { m.opacity = opacity; m.depthWrite = opacity > 0.98; });
+      rec.userData.line.uniforms.alpha.value = opacity;
+      rec.userData.line.visible = opacity > 0.6;
     }
 
     let current = makeRecord();
     let incoming = null;
     place(current, C.x, RECORD_Y, C.z, 1);
+
+    /* ---- el brillo del vinilo, dibujado: los arcos blancos de los discos de
+       dibujo animado, quietos mientras los surcos giran debajo (es lo que
+       hace que un disco "se vea" girar). Con el cursor sobre el tocadiscos
+       se deslizan un poco, como al inclinar un disco. ---- */
+    const sheenTex = (function() {
+      const c = document.createElement('canvas'); c.width = c.height = 512;
+      const g = c.getContext('2d'), R = 256, A0 = -2.25;
+      g.strokeStyle = '#fff8ec';
+      g.lineCap = 'round';
+      [[0.64, 0.32, 24], [0.8, 0.2, 19]].forEach(function(a) {
+        g.lineWidth = a[2];
+        g.beginPath(); g.arc(R, R, R * a[0], A0 - a[1], A0 + a[1]); g.stroke();
+        g.lineWidth = a[2] * 0.75;
+        g.beginPath(); g.arc(R, R, R * (a[0] + 0.04), A0 + Math.PI - a[1] * 0.55, A0 + Math.PI + a[1] * 0.55); g.stroke();
+      });
+      const t = new THREE.CanvasTexture(c);
+      t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    })();
+    const sheen = new THREE.Mesh(
+      new THREE.RingGeometry(0.5, 1.46, 96, 1),
+      new THREE.MeshBasicMaterial({ map: sheenTex, transparent: true, opacity: 0.8, depthWrite: false })
+    );
+    sheen.rotation.x = -Math.PI / 2;
+    sheen.position.set(C.x, RECORD_Y + 0.016, C.z);
+    sheen.renderOrder = 2;
+    scene.add(sheen);
+    const SHEEN = 0.8;
 
     /* ---- brazo ---- */
     const PIVOT = new THREE.Vector3(1.72, 0, -1.22);
@@ -1297,7 +1400,7 @@ var SITE_TRACKS = [
     const R_OUT = 1.36, R_IN = 0.8;
 
     /* ---- estado animado (todo persigue un objetivo: siempre interrumpible) ---- */
-    const S = { playing: false, rate: 0, angle: 0, yaw: 0, lift: 0, led: 0, tx: 0, ty: 0, ttx: 0, tty: 0 };
+    const S = { playing: false, rate: 0, angle: 0, yaw: 0, lift: 0, led: 0, sheen: 1, tx: 0, ty: 0, ttx: 0, tty: 0 };
     let swap = null;
     const SWAP_MS = reduceMotion ? 260 : 680;
 
@@ -1312,6 +1415,7 @@ var SITE_TRACKS = [
       scene.remove(current);
       current.traverse(function(o) { if (o.geometry) o.geometry.dispose(); });
       current.userData.mats.forEach(function(m) { m.dispose(); });
+      current.userData.line.dispose();
       current = incoming;
       incoming = null;
       swap = null;
@@ -1373,9 +1477,16 @@ var SITE_TRACKS = [
       camera.position.set(CAM.x + S.tx * 0.9, CAM.y - S.ty * 0.6, CAM.z + S.ty * 0.3);
       camera.lookAt(LOOK);
 
+      // el brillo: se va mientras se cambia el disco y se desliza con el cursor
+      S.sheen = approach(S.sheen, swap ? 0 : 1, 9, dt);
+      sheen.material.opacity = SHEEN * S.sheen;
+      sheen.visible = S.sheen > 0.01;
+      sheen.rotation.z = -S.tx * 0.3 + S.ty * 0.12;
+
       return S.playing || !!swap || S.rate > 0 ||
         Math.abs(S.yaw - yawT) > 0.0005 || Math.abs(S.lift - (far ? LIFT : 0)) > 0.0005 ||
         Math.abs(S.led - (S.playing ? 1 : 0)) > 0.002 ||
+        Math.abs(S.sheen - (swap ? 0 : 1)) > 0.002 ||
         Math.abs(S.tx - S.ttx) > 0.001 || Math.abs(S.ty - S.tty) > 0.001;
     }
 
@@ -1506,7 +1617,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!text) return;
     // El modelo 3D gira horizontalmente siguiendo el cursor (en escritorio).
     // Quitamos auto-rotate aquí; en móvil/táctil se conserva (esta función no corre).
-    var mv = document.querySelector('.model-3d-bg model-viewer');
+    var mv = document.querySelector('.model-3d-bg toon-figure');
     if (mv) mv.removeAttribute('auto-rotate');
     var mt = 0;
     var tx = 0, ty = 0, sx = 0, sy = 0, bx = 0, by = 0, px = 0, py = 0;
