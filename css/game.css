@@ -9,19 +9,21 @@
    ============================================================ */
 
 /* ---- botón de acceso: una consolita portátil ----
-   De plástico translúcido y esmerilado, en el color del logo (beige de
-   noche, marrón de día): deja ver lo de detrás desenfocado y, por dentro,
-   la placa y los tornillos; la pantalla, la cruceta y los botones son
-   opacos, como en las de verdad. Su pantalla es un canvas con una partida en
+   Dibujada en toon, como el tocadiscos y el muñeco: plástico opaco en el
+   color del logo (beige de noche, marrón de día) con una banda de luz
+   arriba a la izquierda y una de sombra abajo a la derecha, de corte
+   nítido; contorno de tinta y brillos blancos de dibujo en la pantalla y
+   en los botones. Sin sombra proyectada. Su pantalla es un canvas con una partida en
    miniatura (game.js). Al pasar el cursor se levanta y se ladea un poco,
    como cuando la coges; el LED se enciende. En ordenador va junto al
    título, en espejo del puntito de «Don’t click!» (ver más abajo); en
    móvil, en la esquina. */
 .gb {
   --e: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --gb-glass: rgba(226, 210, 170, 0.66);
-  --gb-rim: rgba(255, 255, 255, 0.3);
-  --gb-drop: rgba(0, 0, 0, 0.45);
+  --gb-base: #d6c3a0;
+  --gb-light: #ead9b8;
+  --gb-shade: #b39d78;
+  --gb-line: #2a2019;
   --gb-ink: #2a2620;
   --gb-led: #d4a947;
   position: fixed;
@@ -39,9 +41,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 body.theme-light .gb {
-  --gb-glass: rgba(107, 93, 71, 0.7);
-  --gb-rim: rgba(255, 255, 255, 0.24);
-  --gb-drop: rgba(60, 50, 38, 0.38);
+  --gb-base: #86755b;
+  --gb-light: #9d8b6e;
+  --gb-shade: #6b5c46;
+  --gb-line: #221d17;
   --gb-ink: #221d17;
 }
 .gb:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; color: rgba(255, 255, 255, 0.7); }
@@ -54,24 +57,35 @@ body.theme-light .gb {
   transition: transform 0.4s var(--e);
 }
 /* el plástico: misma silueta que el dibujo (esquina de abajo más curva).
-   La sombra va por fuera (box-shadow no se pinta bajo la caja), así no se
-   ve a través del plástico */
+   Las bandas son sombras interiores sin desenfoque (siguen la curva de
+   las esquinas) y el contorno, una exterior de grosor fijo */
 .gb-glass {
   position: absolute;
   inset: 0;
   border-radius: 7px 7px 16px 7px;
-  background: var(--gb-glass);
-  -webkit-backdrop-filter: blur(5px) saturate(1.3);
-  backdrop-filter: blur(5px) saturate(1.3);
-  box-shadow: inset 0 0 0 1px var(--gb-rim), inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 10px 18px -8px var(--gb-drop);
-  transition: background-color 0.45s ease;
+  background: var(--gb-base);
+  box-shadow: inset -4px -5px 0 0 var(--gb-shade), inset 3px 3px 0 0 var(--gb-light), 0 0 0 1.6px var(--gb-line);
+  transition: background-color 0.45s ease, box-shadow 0.45s ease;
 }
 .gb-shell { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
-.gb-guts { fill: var(--gb-ink); opacity: 0.2; }
-.gb-gloss { fill: #fff; opacity: 0.09; }
+.gb-shine-dot { fill: #fff8ec; opacity: 0.85; }
+/* los brillos de la pantalla, encima del canvas */
+.gb-glint {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: #fff8ec;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
 .gb-bezel, .gb-ink { fill: var(--gb-ink); }
 .gb-ss { opacity: 0.75; }
-.gb-grill { fill: none; stroke: var(--gb-ink); stroke-width: 1.1; stroke-linecap: round; opacity: 0.32; }
+.gb-grill { fill: none; stroke: var(--gb-ink); stroke-width: 1.1; stroke-linecap: round; opacity: 0.5; }
 .gb-led { fill: var(--gb-led); opacity: 0.4; transition: opacity 0.3s var(--e); }
 .gb-a { transform-box: fill-box; transform-origin: center; transition: transform 0.12s var(--e); }
 /* la pantalla: encima del hueco del bisel, nítida como un LCD */
@@ -96,7 +110,7 @@ body.theme-light .gb {
 @media (max-width: 768px) {
   /* en móvil, en la esquina libre: espeja al botón del menú */
   .gb { right: 16px; bottom: 18px; width: 40px; height: 57.4px; cursor: pointer; }
-  .gb-glass { border-radius: 6px 6px 14px 6px; }
+  .gb-glass { border-radius: 6px 6px 14px 6px; box-shadow: inset -3px -4px 0 0 var(--gb-shade), inset 2.5px 2.5px 0 0 var(--gb-light), 0 0 0 1.4px var(--gb-line); }
 }
 @media (prefers-reduced-motion: reduce) {
   .gb-body, .gb:hover .gb-body, .gb:active .gb-body { transform: none; transition: none; }
