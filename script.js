@@ -3863,3 +3863,185 @@ try {
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
 })();
+
+/* ============================================================
+   HOME — VISTA (index.html, css/style.css «HOME — EL CUADERNO»)
+   El interruptor de la derecha cambia la portada entre la vista libre
+   (el muñeco 3D y las cards) y la vista índice (una página del cuaderno
+   de César). La home siempre abre en la vista libre: el índice solo
+   aparece al pulsar el interruptor (no se recuerda entre visitas).
+   · El texto entra palabra a palabra cuando la portada ya está a la
+     vista (tras la pantalla de carga): html.hvi-in.
+   · Al señalar un proyecto del texto (ratón o teclado) le pasa el
+     rotulador de su color, el resto del texto se aparta y su nota a mano
+     se desliza por el margen hasta su línea. Al pulsarlo, la foto de la
+     nota crece hasta ser la portada del proyecto (data-pt-cover,
+     transition.js).
+   · La hora de Madrid, en el folio de arriba.
+   · Lo que no se ve queda fuera del teclado y de los lectores (inert) y
+     el muñeco deja de pintarse (toon-figure.js).
+   ============================================================ */
+(function() {
+  function init() {
+    var sw = document.querySelector('.hv-switch');
+    var view = document.querySelector('.hvn');
+    if (!sw || !view) return;
+    var html = document.documentElement;
+    var btns = Array.prototype.slice.call(sw.querySelectorAll('button[data-view]'));
+    var tip = sw.querySelector('.hv-tip');
+    var play = Array.prototype.slice.call(document.querySelectorAll('.center-hero-text, .stacked-images'));
+    var fig = document.querySelector('.model-3d-bg toon-figure');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function isIndex() { return html.classList.contains('hv-index'); }
+    function sync() {
+      var idx = isIndex();
+      btns.forEach(function(b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-view') === 'index') === idx)); });
+      if (tip) tip.textContent = idx ? 'Play view' : 'Index view';
+      view.inert = !idx;
+      play.forEach(function(el) { el.inert = idx; });
+    }
+    function set(mode) {
+      if ((mode === 'index') === isIndex()) return;
+      // la consola cambia de sitio: desaparece de golpe y entra ya colocada
+      html.classList.add('hv-swap');
+      html.classList.toggle('hv-index', mode === 'index');
+      sync();
+      off();
+      requestAnimationFrame(function() { requestAnimationFrame(function() { html.classList.remove('hv-swap'); }); });
+      // de vuelta a la vista libre, el muñeco se vuelve a pintar
+      if (mode !== 'index' && fig && fig.kick) { fig.dirty = true; fig.kick(); }
+    }
+    btns.forEach(function(b) {
+      b.addEventListener('click', function() { set(b.getAttribute('data-view')); });
+    });
+
+    /* ---- el texto, palabra a palabra (cada una en su renglón, que la
+       recorta al subir). Los números volados no se parten ---- */
+    var text = view.querySelector('.hvn-text');
+    var wi = 0;
+    function split(el) {
+      Array.prototype.slice.call(el.childNodes).forEach(function(node) {
+        if (node.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          node.textContent.split(/(\s+)/).forEach(function(part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var w = document.createElement('span');
+            w.className = 'hw';
+            w.style.setProperty('--wi', wi++);
+            var inner = document.createElement('span');
+            inner.textContent = part;
+            w.appendChild(inner);
+            frag.appendChild(w);
+          });
+          el.replaceChild(frag, node);
+        } else if (node.nodeType === 1 && node.tagName !== 'SUP') {
+          split(node);
+        }
+      });
+    }
+    // el número volado no ocupa sitio: si detrás no viene una coma o un
+    // punto sino una palabra, el proyecto le deja su hueco
+    Array.prototype.forEach.call(view.querySelectorAll('.hvn-p'), function(a) {
+      var next = a.nextSibling;
+      if (next && next.nodeType === 3 && /^\s/.test(next.textContent)) a.classList.add('is-gap');
+    });
+    if (text) split(text);
+
+    // el texto, lo más grande que quepa: parte del tamaño del CSS y, si no
+    // cabe en su hueco (depende del ancho, del alto y de dónde corta cada
+    // línea), baja poco a poco hasta que entra
+    var body = view.querySelector('.hvn-body');
+    function fit() {
+      if (!text || !body) return;
+      text.style.removeProperty('font-size');
+      var room = body.clientHeight;
+      if (!room) return;
+      var fs = parseFloat(getComputedStyle(text).fontSize);
+      for (var i = 0; i < 24 && text.offsetHeight > room; i++) {
+        fs *= 0.97;
+        text.style.fontSize = fs.toFixed(2) + 'px';
+      }
+    }
+    var fitT = 0;
+    window.addEventListener('resize', function() { clearTimeout(fitT); fitT = setTimeout(fit, 120); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    fit();
+
+    /* ---- la nota del margen ---- */
+    var margin = view.querySelector('.hvn-margin');
+    var notes = view.querySelector('.hvn-notes');
+    var links = Array.prototype.slice.call(view.querySelectorAll('.hvn-p'));
+    var cur = 0, y = 0, ty = 0, raf = 0;
+    function frame() {
+      raf = 0;
+      y += (ty - y) * (reduce ? 1 : 0.16);
+      if (Math.abs(ty - y) < 0.3) y = ty;
+      notes.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+      if (y !== ty) raf = requestAnimationFrame(frame);
+    }
+    function moveTo(v) { ty = v; if (!raf) raf = requestAnimationFrame(frame); }
+    function show(n) {
+      if (n === cur) return;
+      var prev = document.getElementById('hvn-n' + cur), next = document.getElementById('hvn-n' + n);
+      if (prev) prev.classList.remove('is-on');
+      if (next) next.classList.add('is-on');
+      cur = n;
+    }
+    function on(link) {
+      links.forEach(function(l) { l.classList.toggle('is-on', l === link); });
+      text.classList.add('has-on');
+      var n = +link.getAttribute('data-n');
+      show(n);
+      // la flecha de la nota, a la altura de la línea del proyecto (en la
+      // mitad de abajo la nota se da la vuelta: la foto arriba)
+      var note = document.getElementById('hvn-n' + n);
+      if (margin && margin.offsetParent && note) {
+        var m = margin.getBoundingClientRect(), r = link.getBoundingClientRect();
+        var mid = r.top + r.height / 2 - m.top;
+        note.classList.toggle('is-up', mid > m.height * 0.5);
+        var row = note.querySelector('.hvn-row');
+        var rowMid = row ? row.offsetTop + row.offsetHeight / 2 : 0;
+        moveTo(Math.max(-24, Math.min(mid - rowMid, m.height - note.offsetHeight + 40)));
+      }
+    }
+    function off() {
+      links.forEach(function(l) { l.classList.remove('is-on'); });
+      if (text) text.classList.remove('has-on');
+      show(0);
+      moveTo(0);
+    }
+    links.forEach(function(link) {
+      link.addEventListener('mouseenter', function() { on(link); });
+      link.addEventListener('focus', function() { if (link.matches(':focus-visible')) on(link); });
+      link.addEventListener('blur', off);
+    });
+    if (text) text.addEventListener('mouseleave', off);
+    window.addEventListener('pageshow', off);
+
+    /* ---- la hora de Madrid ---- */
+    var timeEl = view.querySelector('.hvn-time');
+    var fmt = null;
+    try { fmt = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' }); } catch (e) {}
+    function tick() { if (timeEl && fmt) timeEl.textContent = fmt.format(new Date()); }
+    tick();
+    setInterval(function() { if (isIndex()) tick(); }, 20000);
+
+    sync();
+
+    // la página entra cuando la portada ya se ve (sin pantalla de carga)
+    (function waitStage() {
+      var ld = document.getElementById('loading-screen');
+      var main = document.getElementById('main-content');
+      var shown = !ld || ld.classList.contains('is-gone');
+      if (shown && (!main || main.style.visibility !== 'hidden')) {
+        requestAnimationFrame(function() { html.classList.add('hvi-in'); });
+        return;
+      }
+      setTimeout(waitStage, 120);
+    })();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();

@@ -216,7 +216,15 @@
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
     if (href.charAt(0) === '#' || /^(mailto:|tel:|https?:|\/\/)/i.test(href)) return;
     if (!/\.html(\?|#|$)/.test(href)) return;
-    if (VT) { PT.to = href; PT.src = null; going(href); return; }
+    if (VT) {
+      PT.to = href;
+      // data-pt-cover: lo que se ve del proyecto en la home (la imagen de
+      // la vista índice) crece hasta ser su portada
+      var cov = a.getAttribute('data-pt-cover');
+      PT.src = cov ? document.querySelector(cov) : null;
+      going(href);
+      return;
+    }
     e.preventDefault();
     curtain(href);
   });

@@ -144,6 +144,26 @@ function flatten(material, avg, k, night) {
 }
 function isNight() { return !document.body.classList.contains('theme-light'); }
 
+/* la postura: la del avatar (brazos hacia abajo, algo separados), con
+   los brazos un poco más cerca del cuerpo: cada brazo baja 12° desde el
+   hombro (venía a unos 31° de la vertical; queda a unos 19°). La ropa,
+   el antebrazo y el trazo lo siguen. */
+const ARMS_IN = 12 * Math.PI / 180;
+function relaxArms(root) {
+  const V = THREE.Vector3, Q = THREE.Quaternion;
+  const at = (o) => o.getWorldPosition(new V());
+  root.updateMatrixWorld(true);
+  ['Left', 'Right'].forEach((side) => {
+    const arm = root.getObjectByName(side + 'Arm'), fore = root.getObjectByName(side + 'ForeArm');
+    if (!arm || !fore) return;
+    const dir = at(fore).sub(at(arm)).normalize();
+    const q = new Q().setFromAxisAngle(new V().crossVectors(dir, new V(0, -1, 0)).normalize(), ARMS_IN);
+    const parent = arm.parent.getWorldQuaternion(new Q()).invert();
+    arm.quaternion.copy(parent.multiply(q).multiply(arm.getWorldQuaternion(new Q())));
+    arm.updateMatrixWorld(true);
+  });
+}
+
 class ToonFigure extends HTMLElement {
   static get observedAttributes() { return ['camera-orbit', 'auto-rotate']; }
 
@@ -216,6 +236,7 @@ class ToonFigure extends HTMLElement {
         o.parent.add(line);
       });
       this.scene.add(root);
+      relaxArms(root);
       root.updateMatrixWorld(true);
       // encuadre: el centro de la caja del muñeco, a la distancia en la que
       // ocupa lo mismo que en el visor de antes
@@ -297,6 +318,9 @@ class ToonFigure extends HTMLElement {
   }
   _frame(now) {
     this.raf = 0;
+    // en la vista índice de la home el muñeco no se ve: no se pinta (al
+    // volver, script.js lo despierta y se pinta en su postura de ahora)
+    if (document.documentElement.classList.contains('hv-index')) { this.last = 0; this.dirty = true; return; }
     const dt = this.last ? Math.min(0.05, (now - this.last) / 1000) : 0;
     this.last = now;
     if (this.auto) this.theta += SPIN * dt;

@@ -5120,3 +5120,331 @@ body.home-page .model-3d-bg toon-figure {
   body.home-page { --hx-gut: 12px; }
   body.home-page .hero-subtitle { top: calc(env(safe-area-inset-top, 0px) + 60px); }
 }
+
+/* ================================================
+   HOME — EL CUADERNO (vista índice; index.html, script.js «HOME — VISTA»)
+   Dos portadas para la misma home, con el interruptor de la derecha
+   (bajo el de día / noche):
+   · libre: la de siempre, con el muñeco 3D y las cards;
+   · índice: una página del cuaderno de César. Un texto grande que cuenta
+     lo que hace, con los seis proyectos tejidos en la frase (son el
+     índice). Al señalar uno, le pasa el rotulador de su color y en el
+     margen aparece su nota a mano (las de sus páginas de proyecto), con
+     su flecha y una foto pegada; la nota se desliza en el margen hasta
+     la línea del proyecto. Sin marcos ni líneas: solo texto, color y
+     letra a mano.
+   html.hv-index marca la vista índice (solo al pulsar el interruptor: la
+   home siempre abre en la vista libre); html.hvi-in, que la portada ya
+   está a la vista.
+   La cabecera, el menú, «About me» y el reproductor no cambian; la
+   consola se queda junto al reproductor (su sitio en el móvil).
+   ================================================ */
+:root { --hv-ease: cubic-bezier(0.22, 0.61, 0.36, 1); }
+
+/* lo de la vista libre se apaga en su sitio (sin desplazarse: el
+   parallax del cursor lleva sus transform). Al volver, espera a que la
+   página se haya ido: las dos portadas no se cruzan */
+body.home-page .center-hero-text,
+body.home-page .stacked-images {
+  transition: opacity 0.45s var(--hv-ease) 0.16s, visibility 0s linear 0s;
+}
+html.hv-index body.home-page .center-hero-text,
+html.hv-index body.home-page .stacked-images {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s var(--hv-ease), visibility 0s linear 0.3s;
+}
+html.hv-index #dragme-bubble,
+html.hv-index .card-title { visibility: hidden !important; }
+/* la consola, junto al reproductor; su nota, fuera. Durante el cambio
+   desaparece de golpe y vuelve a entrar ya en su sitio */
+html.hv-index .gb-hint { opacity: 0; visibility: hidden; }
+/* a la izquierda del reproductor (que mide 222px y va a 18px del borde,
+   14px por debajo de 1024), con aire, y centrada en su altura. En
+   tabletas estrechas no cabe junto a «About me»: va encima del
+   reproductor, a su derecha */
+@media (min-width: 769px) {
+  html.hv-index .gb.is-spot { left: auto !important; top: auto !important; right: 282px; bottom: 28px; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  html.hv-index .gb.is-spot { right: 278px; }
+}
+@media (min-width: 769px) and (max-width: 900px) {
+  html.hv-index .gb.is-spot { right: 26px; bottom: 126px; }
+}
+html.hv-swap .gb { opacity: 0 !important; transition: none !important; }
+
+/* ---- el interruptor: discreto, solo texto («Play · Index») bajo el de
+   día / noche, alineado a su derecha. Apagado; la vista activa, un punto
+   más clara; la otra se aviva al acercar el cursor ---- */
+.hv-switch {
+  position: fixed;
+  top: 64px;
+  right: 50px;
+  z-index: 3001;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transition: opacity 0.6s var(--hv-ease);
+}
+/* entra con el resto de la portada (tras la pantalla de carga) */
+body.home-page:has(#loading-screen:not(.is-gone)) .hv-switch { opacity: 0; }
+.hv-switch button {
+  position: relative;
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  font: 600 0.54rem/1 'Inter', sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 218, 0.28);
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.25s ease, transform 0.16s var(--hv-ease);
+}
+/* área de toque más grande (cómodo en móvil sin cambiar el aspecto) */
+.hv-switch button::after { content: ''; position: absolute; inset: -8px -4px; }
+.hv-switch button[aria-pressed="true"] { color: rgba(236, 230, 218, 0.7); }
+.hv-switch i { width: 2px; height: 2px; border-radius: 50%; background: rgba(236, 230, 218, 0.28); }
+.hv-switch button:active { transform: scale(0.96); }
+.hv-switch button:focus-visible { outline: 1px solid rgba(199, 178, 153, 0.6); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .hv-switch button[aria-pressed="false"]:hover { color: rgba(236, 230, 218, 0.85); }
+}
+body.theme-light .hv-switch button { color: rgba(27, 23, 18, 0.32); }
+body.theme-light .hv-switch button[aria-pressed="true"] { color: rgba(27, 23, 18, 0.72); }
+body.theme-light .hv-switch i { background: rgba(27, 23, 18, 0.3); }
+@media (hover: hover) and (pointer: fine) {
+  body.theme-light .hv-switch button[aria-pressed="false"]:hover { color: rgba(27, 23, 18, 0.9); }
+}
+
+/* ---- la página ---- */
+.hvn {
+  --ink: #ece6da;
+  --soft: rgba(236, 230, 218, 0.62);
+  --mute: rgba(236, 230, 218, 0.26);
+  --line: rgba(236, 230, 218, 0.24);
+  --name: #e6d6ad;
+  --paper: rgba(236, 230, 218, 0.06);
+  --g: 50px;
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear 0.35s;
+}
+body.theme-light .hvn {
+  --ink: #2a2620;
+  --soft: rgba(42, 38, 32, 0.66);
+  --mute: rgba(42, 38, 32, 0.3);
+  --line: rgba(42, 38, 32, 0.26);
+  --name: #6b5d47;
+  --paper: rgba(42, 38, 32, 0.06);
+}
+html.hv-index .hvn { visibility: visible; transition: none; }
+.hvn-page {
+  position: absolute;
+  left: var(--g);
+  right: var(--g);
+  top: 124px;
+  bottom: clamp(100px, 13svh, 130px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  row-gap: clamp(16px, 3.4svh, 40px);
+}
+.hvn-folio {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font: 600 0.6rem/1 'Inter', sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+.hvn-time { margin-left: 8px; font-weight: 600; color: var(--name); font-variant-numeric: tabular-nums; }
+.hvn-status { display: inline-flex; align-items: center; gap: 10px; }
+.hvn-status i { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--name); }
+.hvn-status i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--name);
+  animation: sm-ping 2.4s var(--hv-ease) infinite;
+}
+
+/* el texto a la izquierda y el margen de las notas a la derecha */
+.hvn-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(210px, 21vw, 340px);
+  column-gap: clamp(32px, 5vw, 96px);
+  min-height: 0;
+}
+.hvn-text {
+  margin: 0;
+  max-width: 30em;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: clamp(24px, min(3.05vw, 5.4svh), 60px);
+  line-height: 1.17;
+  letter-spacing: -0.024em;
+  color: var(--soft);
+  text-wrap: pretty;
+  pointer-events: auto;
+  transition: color 0.35s ease;
+}
+.hvn-name { font-family: 'Clash Display', 'Inter', sans-serif; font-weight: 600; letter-spacing: -0.03em; color: var(--name); transition: color 0.35s ease; }
+
+/* el color de cada proyecto: el suyo de noche; de día, su versión oscura
+   (la de su página en modo día), que se lee sobre el crema */
+.hvn-p, .hvn-note { --ci: var(--c); }
+body.theme-light .hvn-p, body.theme-light .hvn-note { --ci: var(--cl, var(--c)); }
+/* los proyectos: en la tipografía del nombre y con su número volado en
+   su color */
+.hvn-p {
+  position: relative;
+  z-index: 0;
+  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  white-space: nowrap;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.3s ease;
+}
+/* el número flota sobre el final de la palabra: no ocupa sitio, y la
+   coma o el punto que siguen quedan pegados a ella */
+.hvn-p sup {
+  position: absolute;
+  left: 100%;
+  top: 0.08em;
+  margin-left: 0.1em;
+  font: 600 0.3em/1 'Inter', sans-serif;
+  letter-spacing: 0.06em;
+  color: var(--ci);
+  transition: color 0.3s ease;
+}
+/* sin coma ni punto detrás, el número necesita su hueco (script.js) */
+.hvn-p.is-gap { margin-right: 0.55em; }
+/* el rotulador: una pasada del color del proyecto por detrás, un pelo
+   torcida, de izquierda a derecha */
+.hvn-p::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: -0.12em;
+  right: -0.62em;
+  top: 0.06em;
+  bottom: -0.04em;
+  border-radius: 0.08em 0.14em 0.1em 0.16em;
+  background: var(--c);
+  transform: scaleX(0) rotate(-1deg);
+  transform-origin: 0 50%;
+  transition: transform 0.42s var(--hv-ease);
+}
+.hvn-p.is-on { color: #1a1714; }
+.hvn-p.is-on sup { color: #1a1714; }
+.hvn-p.is-on::before { transform: scaleX(1) rotate(-1deg); }
+.hvn-p:focus-visible { outline: none; }
+/* con uno señalado, el resto del texto se aparta */
+.hvn-text.has-on { color: var(--mute); }
+.hvn-text.has-on .hvn-name,
+.hvn-text.has-on .hvn-p:not(.is-on) { color: var(--mute); }
+.hvn-p:active::before { transform: scaleX(1) rotate(-1deg) scale(0.97); transition-duration: 0.16s; }
+
+/* el margen: una sola columna de notas que se desliza hasta la línea del
+   proyecto señalado (script.js mueve .hvn-notes) */
+.hvn-margin { position: relative; min-height: 0; }
+.hvn-notes { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+/* la flecha y la letra en una línea; la foto debajo (o encima, con
+   .is-up, para los proyectos de la mitad de abajo: la flecha queda
+   siempre a la altura de su línea) */
+.hvn-note {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateY(10px) rotate(-2.5deg);
+  transform-origin: 0 0;
+  transition: opacity 0.18s ease-out, transform 0.4s var(--hv-ease);
+}
+.hvn-note.is-on { opacity: 1; transform: rotate(-2.5deg); transition: opacity 0.3s ease-out 0.06s, transform 0.5s var(--hv-ease) 0.06s; }
+.hvn-note.is-up { flex-direction: column-reverse; }
+.hvn-row { display: flex; align-items: center; gap: 8px; }
+.hvn-arrow {
+  display: block;
+  flex: none;
+  width: 46px;
+  height: 31px;
+  fill: none;
+  stroke: var(--ci, var(--soft));
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hvn-hand {
+  display: block;
+  min-width: 0;
+  font-family: 'Caveat', cursive;
+  font-weight: 500;
+  font-size: clamp(24px, 2vw, 34px);
+  line-height: 1;
+  color: var(--ci, var(--soft));
+}
+.hvn-pic {
+  display: block;
+  width: clamp(130px, 11vw, 200px);
+  aspect-ratio: 4 / 5;
+  margin: 14px 0 14px 54px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--paper);
+  transform: rotate(4deg);
+}
+.hvn-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- entrada: las palabras suben de su renglón en cascada, como
+   escritas de corrido; el pie y la invitación del margen, después ---- */
+.hw { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.hw > span { display: inline-block; transform: translateY(108%); transition: transform 0.25s ease-out; }
+html.hv-index.hvi-in .hw > span {
+  transform: none;
+  transition: transform 0.9s var(--hv-ease) calc(var(--wi, 0) * 12ms + 0.22s);
+}
+.hvn-folio, .hvn-margin { opacity: 0; transition: opacity 0.2s ease-out; }
+html.hv-index.hvi-in .hvn-folio { opacity: 1; transition: opacity 0.7s var(--hv-ease) 0.3s; }
+html.hv-index.hvi-in .hvn-margin { opacity: 1; transition: opacity 0.7s var(--hv-ease) 1.1s; }
+
+/* ---- pantallas medianas ---- */
+@media (max-width: 1100px) {
+  .hvn-body { grid-template-columns: minmax(0, 1fr) 190px; column-gap: 36px; }
+  .hvn-pic { width: 130px; }
+}
+/* ---- móvil: solo el texto (las notas necesitan un cursor) ---- */
+@media (max-width: 768px) {
+  .hv-switch { top: 50px; }
+  .hvn-page { top: calc(env(safe-area-inset-top, 0px) + 104px); bottom: 108px; row-gap: 22px; }
+  .hvn-body { grid-template-columns: minmax(0, 1fr); }
+  .hvn-margin { display: none; }
+  .hvn-text { font-size: clamp(21px, 6vw, 34px); line-height: 1.2; }
+}
+@media (max-width: 480px) {
+  .hvn { --g: 16px; }
+  .hv-switch { right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hw > span, html.hv-index.hvi-in .hw > span { transform: none !important; }
+  .hvn-note, .hvn-note.is-on { transform: rotate(-2.5deg) !important; }
+  .hvn-p::before { transition-duration: 0.01s; }
+}
+/* los números volados no suben con su palabra: aparecen al final */
+.hvn-p sup { opacity: 0; }
+html.hv-index.hvi-in .hvn-p sup { opacity: 1; transition: opacity 0.6s ease 1.05s, color 0.3s ease; }
