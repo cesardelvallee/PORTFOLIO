@@ -339,3 +339,215 @@
   .cx-dossier::after { transition: none; }
   .cx-social:hover .cx-roll { color: var(--accent) !important; }
 }
+
+/* ================================================
+   BUZÓN DE CONSEJOS — privado (contact.html)
+   «¿Algún consejo?» bajo la presentación abre un panel para escribirle
+   a César una idea o una crítica; se guarda en Firebase y solo lo lee
+   él. Mismo cartel en tinta: papel oscuro, etiquetas pequeñas en beige,
+   botón de píldora como «Copiar email». El panel crece un poco desde
+   donde está el enlace (no del centro) y se cierra rápido.
+   ================================================ */
+/* el enlace: como «Dossier PDF» */
+.cx-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 600 var(--label)/1 'Inter', sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s var(--ease), transform 0.16s var(--ease);
+}
+.cx-tip svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
+.cx-tip::after {
+  content: '';
+  position: absolute;
+  left: 21px;
+  right: 0;
+  bottom: 10px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease);
+}
+.cx-tip:active { transform: scale(0.97); }
+.cx-tip:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; border-radius: 4px; }
+.cx-tip:focus-visible::after { transform: scaleX(1); }
+@media (hover: hover) and (pointer: fine) {
+  .cx-tip:hover { color: var(--ink); }
+  .cx-tip:hover::after { transform: scaleX(1); }
+}
+@media (pointer: coarse) { .cx-tip { height: 44px; cursor: pointer; } .cx-tip::after { bottom: 13px; } }
+
+/* ---- el panel ---- */
+.fb {
+  position: fixed;
+  inset: 0;
+  z-index: 8700;              /* sobre la página y el menú; bajo el grano y el cursor */
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
+.fb[hidden] { display: none; }
+/* el panel va fuera de .cx: mide las cajas igual (el relleno, por dentro) */
+.fb, .fb *, .fb *::before, .fb *::after { box-sizing: border-box; }
+.fb-veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 7, 6, 0.62);
+  opacity: 0;
+  transition: opacity 0.18s ease-out;
+}
+.fb.is-open .fb-veil { opacity: 1; transition-duration: 0.3s; }
+.fb-panel {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100svh - 48px);
+  overflow: auto;
+  padding: clamp(26px, 3vw, 38px);
+  border-radius: 14px;
+  background: #181613;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink);
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
+  transform-origin: var(--fb-o, 50% 50%);
+  transition: opacity 0.16s ease-out, transform 0.18s var(--ease);
+}
+.fb.is-open .fb-panel { opacity: 1; transform: none; transition: opacity 0.22s ease-out, transform 0.32s var(--ease); }
+.fb-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-2);
+  cursor: none;
+  transition: color 0.2s var(--ease), background-color 0.2s var(--ease), transform 0.16s var(--ease);
+}
+.fb-x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.fb-x:active { transform: scale(0.92); }
+.fb-x:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+.fb-lab {
+  display: block;
+  font-size: var(--label);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.fb-title {
+  margin: 14px 0 0;
+  padding-right: 28px;
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+.fb-desc { margin: 12px 0 0; font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); }
+.fb-desc a { color: var(--ink); text-underline-offset: 3px; text-decoration-thickness: 1px; cursor: none; }
+.fb-form { margin: 0; }
+.fb-field { position: relative; display: block; margin-top: 14px; }
+.fb-form .fb-field:first-of-type { margin-top: 22px; }
+.fb textarea,
+.fb input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(236, 230, 218, 0.05);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  font: 400 1rem/1.5 'Inter', sans-serif;
+  color: var(--ink);
+  cursor: none;
+  transition: box-shadow 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+.fb textarea { min-height: 132px; resize: vertical; padding-bottom: 30px; }
+.fb textarea::placeholder, .fb input::placeholder { color: rgba(236, 230, 218, 0.36); }
+.fb textarea:focus, .fb input:focus { outline: none; background: rgba(236, 230, 218, 0.07); box-shadow: inset 0 0 0 1px rgba(199, 178, 153, 0.7); }
+.fb-count {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(236, 230, 218, 0.36);
+  pointer-events: none;
+}
+.fb-count b { font-weight: 500; }
+.fb-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.fb-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; margin-top: 18px; }
+/* el botón: la píldora de «Copiar email» */
+.fb-send {
+  position: relative;
+  display: inline-grid;
+  align-items: center;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: none;
+  font: 600 var(--label)/1 'Inter', sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s var(--ease), background-color 0.2s var(--ease), color 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+.fb-send > span { grid-area: 1 / 1; text-align: center; transition: opacity 0.15s var(--ease); }
+.fb-send-b { opacity: 0; }
+.fb-send.is-busy .fb-send-a { opacity: 0; }
+.fb-send.is-busy .fb-send-b { opacity: 1; }
+.fb-send:active { transform: scale(0.96); }
+.fb-send:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+.fb-send[disabled] { opacity: 0.4; }
+.fb-msg { font-size: 0.85rem; line-height: 1.4; color: var(--ink-2); }
+.fb-msg.is-error { color: #e0a98f; }
+.fb-msg a { color: var(--ink); text-underline-offset: 3px; cursor: none; }
+.fb-done .fb-send { margin-top: 22px; }
+@media (hover: hover) and (pointer: fine) {
+  .fb-x:hover { color: var(--ink); background: rgba(236, 230, 218, 0.07); }
+  .fb-send:not([disabled]):hover { background: var(--ink); color: var(--paper); }
+}
+@media (pointer: coarse) {
+  .fb-send { height: 46px; cursor: pointer; }
+  .fb-x { width: 44px; height: 44px; top: 8px; right: 8px; }
+}
+/* en el móvil, una hoja que sube desde abajo */
+@media (max-width: 768px) {
+  .fb { place-items: end stretch; padding: 0; }
+  .fb-panel {
+    width: 100%;
+    max-height: calc(100svh - 40px);
+    border-radius: 16px 16px 0 0;
+    padding: 26px 22px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    transform: translateY(24px);
+    transform-origin: 50% 100%;
+  }
+  .fb textarea { min-height: 110px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fb-panel, .fb.is-open .fb-panel { transform: none; }
+  .cx-tip::after { transition: none; }
+}

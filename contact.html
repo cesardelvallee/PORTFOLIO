@@ -32,7 +32,7 @@
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=5">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Caveat:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=153">
-  <link rel="stylesheet" href="css/contact.css?v=13">
+  <link rel="stylesheet" href="css/contact.css?v=15">
   <script src="transition.js?v=2"></script>
 </head>
 <body class="contact-page">
@@ -79,6 +79,7 @@
         <span class="cx-status"><span class="cx-dot" aria-hidden="true"></span>Disponible para proyectos</span>
       </div>
       <p class="cx-lead">¿Buscas un diseñador para tu equipo? Escríbeme y hablamos. Suelo responder en menos de 24&nbsp;h.</p>
+      <button type="button" class="cx-tip" aria-haspopup="dialog" aria-controls="fb" data-cursor="Escribir"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 2.5h9a1 1 0 0 1 1 1v5.6a1 1 0 0 1-1 1H6.4L3.6 12v-1.9H2.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1z"/></svg>¿Algún consejo? Déjamelo</button>
     </section>
 
     <section class="cx-c cx-tr cx-in" style="--d:550ms" aria-label="Hora en Madrid">
@@ -114,10 +115,46 @@
     </nav>
   </main>
 
+  <!-- Buzón de consejos: privado (solo lo lee César, en Firebase). Se abre
+       desde «¿Algún consejo?» en la presentación; el script de abajo lo
+       manda a Firestore (colección «feedback», solo escritura). -->
+  <div class="fb" id="fb" hidden>
+    <div class="fb-veil" data-fb-close></div>
+    <section class="fb-panel" role="dialog" aria-modal="true" aria-labelledby="fb-title" aria-describedby="fb-desc">
+      <button type="button" class="fb-x" data-fb-close aria-label="Cerrar"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button>
+      <form class="fb-form" novalidate>
+        <span class="fb-lab">Buzón de consejos</span>
+        <h2 class="fb-title" id="fb-title">¿Qué mejorarías de mi portfolio?</h2>
+        <p class="fb-desc" id="fb-desc">Una idea, una crítica o algo que te haya gustado. Es privado: solo lo leo yo.</p>
+        <label class="fb-field">
+          <span class="cx-sr">Tu consejo</span>
+          <textarea name="message" rows="5" maxlength="800" placeholder="Escribe aquí tu consejo…" required></textarea>
+          <span class="fb-count" aria-hidden="true"><b>0</b> / 800</span>
+        </label>
+        <label class="fb-field">
+          <span class="cx-sr">Tu nombre (opcional)</span>
+          <input name="name" type="text" maxlength="40" autocomplete="name" placeholder="Tu nombre (opcional)">
+        </label>
+        <!-- para bots: un humano no lo ve ni lo rellena -->
+        <input class="fb-hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="fb-acts">
+          <button type="submit" class="fb-send"><span class="fb-send-a">Enviar</span><span class="fb-send-b" aria-hidden="true">Enviando…</span></button>
+          <span class="fb-msg" role="status"></span>
+        </div>
+      </form>
+      <div class="fb-done" hidden>
+        <span class="fb-lab">Recibido</span>
+        <p class="fb-title">Gracias. Lo leeré con calma.</p>
+        <p class="fb-desc">Si quieres que te conteste, escríbeme a <a href="mailto:cesardelvallefuentes@gmail.com">cesardelvallefuentes@gmail.com</a>.</p>
+        <button type="button" class="fb-send" data-fb-close>Cerrar</button>
+      </div>
+    </section>
+  </div>
+
   <script src="script.js?v=140"></script>
   <script>
-    /* Contacto: copiar el correo y hora real de Madrid con aviso de si
-       estoy en horario */
+    /* Contacto: copiar el correo, hora real de Madrid con aviso de si
+       estoy en horario y el buzón de consejos */
     (function() {
 
       /* ---- copiar el correo (también se anuncia a lectores de pantalla) ---- */
@@ -167,6 +204,99 @@
         };
         tick();
         setInterval(tick, 30000);
+      }
+
+      /* ---- buzón de consejos (privado) ----
+         Se guarda en Firestore (el mismo proyecto que el ranking del
+         minijuego), colección «feedback». Las reglas solo permiten crear
+         (nadie puede leerlos desde la web): César los lee en la consola de
+         Firebase. Si falla (sin red o sin permiso), se ofrece el email. */
+      var FB = { projectId: 'break-time-4b68f', coll: 'feedback' };
+      var box = document.getElementById('fb');
+      var openBtn = document.querySelector('.cx-tip');
+      if (box && openBtn) {
+        var panel = box.querySelector('.fb-panel');
+        var form = box.querySelector('.fb-form');
+        var done = box.querySelector('.fb-done');
+        var ta = form.querySelector('textarea');
+        var nameIn = form.querySelector('input[name="name"]');
+        var hp = form.querySelector('.fb-hp');
+        var count = form.querySelector('.fb-count b');
+        var send = form.querySelector('.fb-send');
+        var msg = form.querySelector('.fb-msg');
+        var outside = Array.prototype.slice.call(document.querySelectorAll('main.cx, .top-bar, .back-btn, .menu-btn'));
+        var closeT = 0;
+
+        function openFb() {
+          clearTimeout(closeT);
+          // si ya se envió uno, el formulario de nuevo (vacío)
+          if (!done.hidden) { done.hidden = true; form.hidden = false; }
+          // crece desde el enlace (no desde el centro)
+          var r = openBtn.getBoundingClientRect();
+          box.hidden = false;
+          var p = panel.getBoundingClientRect();
+          if (p.width) panel.style.setProperty('--fb-o', Math.round(r.left + r.width / 2 - p.left) + 'px ' + Math.round(r.top + r.height / 2 - p.top) + 'px');
+          outside.forEach(function(el) { el.inert = true; });
+          requestAnimationFrame(function() { box.classList.add('is-open'); });
+          setTimeout(function() { (done.hidden ? ta : done.querySelector('.fb-send')).focus({ preventScroll: true }); }, 60);
+        }
+        function closeFb() {
+          if (box.hidden) return;
+          box.classList.remove('is-open');
+          outside.forEach(function(el) { el.inert = false; });
+          closeT = setTimeout(function() { box.hidden = true; }, 200);
+          openBtn.focus({ preventScroll: true });
+        }
+        openBtn.addEventListener('click', openFb);
+        box.addEventListener('click', function(e) { if (e.target.closest('[data-fb-close]')) closeFb(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && !box.hidden) closeFb(); });
+
+        function upd() { count.textContent = ta.value.length; }
+        ta.addEventListener('input', function() { upd(); if (msg.classList.contains('is-error')) { msg.textContent = ''; msg.classList.remove('is-error'); } });
+        upd();
+
+        function fail(text) {
+          msg.classList.add('is-error');
+          msg.innerHTML = text;
+          send.disabled = false;
+          send.classList.remove('is-busy');
+        }
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var text = ta.value.trim();
+          if (text.length < 3) { fail('Escribe un poco más.'); ta.focus(); return; }
+          // un bot que rellena el campo oculto: se le da las gracias y no se guarda nada
+          if (hp.value) { form.hidden = true; done.hidden = false; return; }
+          send.disabled = true;
+          send.classList.add('is-busy');
+          msg.textContent = '';
+          msg.classList.remove('is-error');
+          var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+          var t = setTimeout(function() { if (ctl) ctl.abort(); }, 8000);
+          fetch('https://firestore.googleapis.com/v1/projects/' + FB.projectId + '/databases/(default)/documents/' + FB.coll, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fields: {
+              message: { stringValue: text.slice(0, 800) },
+              name: { stringValue: nameIn.value.trim().slice(0, 40) },
+              createdAt: { timestampValue: new Date().toISOString() }
+            } }),
+            signal: ctl ? ctl.signal : undefined
+          }).then(function(r) {
+            clearTimeout(t);
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            form.reset();
+            upd();
+            send.disabled = false;
+            send.classList.remove('is-busy');
+            form.hidden = true;
+            done.hidden = false;
+            done.querySelector('.fb-send').focus({ preventScroll: true });
+          }).catch(function() {
+            clearTimeout(t);
+            fail('No se ha podido enviar. Prueba otra vez o escríbeme a <a href="mailto:cesardelvallefuentes@gmail.com">mi email</a>.');
+          });
+        });
       }
     })();
   </script>
