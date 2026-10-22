@@ -1,0 +1,14 @@
+# Cloudflare Pages: las páginas de proyecto se llamaban img1 … img6.
+# Las direcciones viejas (y las que ya se hayan compartido) llevan a las nuevas.
+/img1        /coffee-rituals  301
+/img1.html   /coffee-rituals  301
+/img2        /ottolinger-mykita  301
+/img2.html   /ottolinger-mykita  301
+/img3        /catalalata  301
+/img3.html   /catalalata  301
+/img4        /el-rastrillo  301
+/img4.html   /el-rastrillo  301
+/img5        /loewe-001  301
+/img5.html   /loewe-001  301
+/img6        /the-grmps  301
+/img6.html   /the-grmps  301

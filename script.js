@@ -1,4 +1,7 @@
 
+/* las páginas de proyecto, en el orden de las cards (img-1 … img-6) y del menú */
+var PROJECT_PAGES = ["coffee-rituals.html", "ottolinger-mykita.html", "catalalata.html", "el-rastrillo.html", "loewe-001.html", "the-grmps.html"];
+
 /* ============================================================
    TRANSICIONES ENTRE PÁGINAS: en transition.js (va en el <head>, antes
    que este archivo). Aquí se usa window.PageFX.leave(url, src) para lo
@@ -54,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const imgLinks = ['img1.html','img2.html','img3.html','img4.html','img5.html','img6.html'];
+  const imgLinks = PROJECT_PAGES;
   function isMobile() { 
     return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 'ontouchstart' in window;
   }
@@ -534,7 +537,7 @@ class DraggableImg {
         var coarse = ('ontouchstart' in window) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 768;
         if (!coarse) return;
         var m = Image.className.match(/img-(\d)/);
-        if (m && window.PageFX) window.PageFX.leave('img' + m[1] + '.html', Image);
+        if (m && window.PageFX) window.PageFX.leave(PROJECT_PAGES[m[1] - 1], Image);
       },
       onPress() {
         Image.style.zIndex = proxy.style.zIndex; window._setGrabbingCursor(true);
@@ -1933,12 +1936,12 @@ document.addEventListener('DOMContentLoaded', function() {
       { href: 'contact.html', label: 'Contacto' }
     ];
     var WORK = [
-      { href: 'img1.html', n: '01', t: 'Coffee Rituals',      c: 'Packaging' },
-      { href: 'img2.html', n: '02', t: 'Ottolinger × Mykita', c: '3D · Motion' },
-      { href: 'img3.html', n: '03', t: 'Catalalata',          c: 'Packaging' },
-      { href: 'img4.html', n: '04', t: 'El Rastrillo',        c: 'Campaña' },
-      { href: 'img5.html', n: '05', t: 'Loewe 001',           c: '3D · Spot' },
-      { href: 'img6.html', n: '06', t: 'The Grmps',           c: 'TFG · Art Toys' }
+      { href: 'coffee-rituals.html', n: '01', t: 'Coffee Rituals',      c: 'Packaging' },
+      { href: 'ottolinger-mykita.html', n: '02', t: 'Ottolinger × Mykita', c: '3D · Motion' },
+      { href: 'catalalata.html', n: '03', t: 'Catalalata',          c: 'Packaging' },
+      { href: 'el-rastrillo.html', n: '04', t: 'El Rastrillo',        c: 'Campaña' },
+      { href: 'loewe-001.html', n: '05', t: 'Loewe 001',           c: '3D · Spot' },
+      { href: 'the-grmps.html', n: '06', t: 'The Grmps',           c: 'TFG · Art Toys' }
     ];
     var COLS = 5;
     var here = location.pathname.split('/').pop() || 'index.html';
@@ -3018,7 +3021,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 /* ============================================================
-   THE GRMPS (img6) — figura 3D interactiva y film del drop.
+   THE GRMPS (the-grmps.html) — figura 3D interactiva y film del drop.
    El visor es un <model-viewer> (mismo motor que el busto de la
    home): arrastre nativo con inercia. Aquí solo se gobierna el
    auto-rotate (fuera con reduced-motion, y en pausa mientras el
@@ -3235,16 +3238,22 @@ try {
       return svg;
     });
 
-    // abajo a la izquierda, bajo el subtítulo: la nota arranca en el margen
-    // y su flecha baja hasta el punto. --fs escala nota y flecha (el tamaño
-    // del título antiguo, con el que se ajustaron). En móvil no se muestra (CSS).
+    // a la izquierda, junto al subtítulo: la nota arranca en el margen y su
+    // flecha baja hasta el punto. Con el subtítulo encima del nombre (el
+    // nombre abajo del todo) va encima de él; si no, debajo. --fs escala
+    // nota y flecha (el tamaño del título antiguo, con el que se
+    // ajustaron). En móvil no se muestra (CSS).
     var sub = document.querySelector('.hero-subtitle');
     function place() {
       var fs = Math.min(window.innerWidth * 0.063, 110);
       ws.style.setProperty('--fs', fs + 'px');
-      var below = sub ? sub.offsetTop + sub.offsetHeight : title.offsetTop + title.offsetHeight;
       ws.style.left = ((sub ? sub.offsetLeft : title.offsetLeft) + fs * 1.7) + 'px';
-      ws.style.top = (below + fs * 0.5 + fs * 1.19) + 'px';
+      if (sub && sub.offsetTop < title.offsetTop) {
+        ws.style.top = (sub.offsetTop - fs * 0.62) + 'px';
+      } else {
+        var below = sub ? sub.offsetTop + sub.offsetHeight : title.offsetTop + title.offsetHeight;
+        ws.style.top = (below + fs * 0.5 + fs * 1.19) + 'px';
+      }
     }
     place();
     window.addEventListener('resize', place);
@@ -3406,7 +3415,7 @@ try {
 })();
 
 /* ============================================================
-   CASO DE ESTUDIO (img1–img6, css/case.css)
+   CASO DE ESTUDIO (las seis páginas de proyecto, css/case.css)
    · Portada: un parallax suave dentro; la barra de arriba gana fondo
      cuando la portada pasa por debajo.
    · Secciones (sobre el proyecto y cada lámina): al verse se traza su

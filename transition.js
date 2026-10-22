@@ -40,10 +40,10 @@
   var LABELS = {
     index: 'CÉSAR DEL VALLE', about: 'SOBRE MÍ', contact: 'CONTACTO',
     dossier: 'DOSSIER', cv: 'CURRÍCULUM', '404': 'CÉSAR DEL VALLE',
-    img1: 'COFFEE RITUALS', img2: 'OTTOLINGER × MYKITA', img3: 'CATALALATA',
-    img4: 'EL RASTRILLO', img5: 'LOEWE 001', img6: 'THE GRMPS'
+    'coffee-rituals': 'COFFEE RITUALS', 'ottolinger-mykita': 'OTTOLINGER × MYKITA', catalalata: 'CATALALATA',
+    'el-rastrillo': 'EL RASTRILLO', 'loewe-001': 'LOEWE 001', 'the-grmps': 'THE GRMPS'
   };
-  // «img2.html», «/img2» (Cloudflare quita el .html) y «/» → img2, index
+  // «catalalata.html», «/catalalata» (Cloudflare quita el .html) y «/» → catalalata, index
   function page(u) {
     var f = '';
     try { f = new URL(u, location.href).pathname.split('/').pop(); } catch (e) {}
