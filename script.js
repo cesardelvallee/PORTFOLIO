@@ -3238,22 +3238,16 @@ try {
       return svg;
     });
 
-    // a la izquierda, junto al subtítulo: la nota arranca en el margen y su
-    // flecha baja hasta el punto. Con el subtítulo encima del nombre (el
-    // nombre abajo del todo) va encima de él; si no, debajo. --fs escala
-    // nota y flecha (el tamaño del título antiguo, con el que se
-    // ajustaron). En móvil no se muestra (CSS).
+    // abajo a la izquierda, bajo el subtítulo: la nota arranca en el margen
+    // y su flecha baja hasta el punto. --fs escala nota y flecha (el tamaño
+    // del título antiguo, con el que se ajustaron). En móvil no se muestra (CSS).
     var sub = document.querySelector('.hero-subtitle');
     function place() {
       var fs = Math.min(window.innerWidth * 0.063, 110);
       ws.style.setProperty('--fs', fs + 'px');
+      var below = sub ? sub.offsetTop + sub.offsetHeight : title.offsetTop + title.offsetHeight;
       ws.style.left = ((sub ? sub.offsetLeft : title.offsetLeft) + fs * 1.7) + 'px';
-      if (sub && sub.offsetTop < title.offsetTop) {
-        ws.style.top = (sub.offsetTop - fs * 0.62) + 'px';
-      } else {
-        var below = sub ? sub.offsetTop + sub.offsetHeight : title.offsetTop + title.offsetHeight;
-        ws.style.top = (below + fs * 0.5 + fs * 1.19) + 'px';
-      }
+      ws.style.top = (below + fs * 0.5 + fs * 1.19) + 'px';
     }
     place();
     window.addEventListener('resize', place);

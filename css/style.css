@@ -4955,21 +4955,14 @@ body.home-page {
      subtítulo con la C (si el alto manda, queda hueco a los lados) */
   --hx-tfs: min(calc((100vw - 2 * var(--hx-tgut)) / 8.7688), 36svh);
   --hx-tin: calc(var(--hx-tgut) - var(--hx-gut) + (100vw - 2 * var(--hx-tgut) - 8.7688 * var(--hx-tfs)) / 2);
-  /* el nombre, alargado en vertical (cuánto) y apoyado abajo del todo:
-     la línea base, un pelo por debajo del borde (el parallax lo mueve
-     ±13px y no debe asomar hueco). Medidas de Clash 600: la línea base
-     está a 0.084em del fondo de su caja, las mayúsculas miden 0.6725em y
-     la tilde de la É llega a 0.8655em */
-  --hx-sy: 1.9;
-  --hx-bleed: 14px;
 }
 body.home-page .center-hero-text {
   width: 100vw;
   height: 100vh;
   height: 100svh;
-  padding: 0 var(--hx-gut);
+  padding: 0 var(--hx-gut) 3vh;
   box-sizing: border-box;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: stretch;
 }
 /* sin velo detrás del texto: el muñeco va detrás y el nombre por delante */
@@ -4984,16 +4977,9 @@ body.home-page .center-hero-text::after { content: none; }
    (medidos en Chrome con la fuente real; antes, PORTFOLIO: 5.5218em y
    -0.0186em). */
 body.home-page .hero-title {
-  order: 2;
   align-self: center;
   left: -0.0100em;
-  /* abajo del todo: la línea base, --hx-bleed por debajo del borde */
-  margin: 0 0 calc(-0.084em - var(--hx-bleed));
-  /* alargado desde la línea base: crece hacia arriba sin moverse de ella
-     (scale, no transform: las letras usan transform. !important porque
-     GSAP, al animar la entrada, pone scale: none en línea) */
-  scale: 1 var(--hx-sy) !important;
-  transform-origin: 50% calc(100% - 0.084em);
+  margin: 0;
   font-family: 'Clash Display', 'Inter', sans-serif;
   font-size: var(--hx-tfs);
   font-weight: 600;
@@ -5004,11 +4990,8 @@ body.home-page .hero-title {
   z-index: 1;
 }
 body.home-page .hero-subtitle {
-  order: 1;
   align-self: flex-start;
-  /* encima del nombre: deja sitio a lo que el nombre crece por encima de
-     su caja al alargarse (hasta la tilde de la É) */
-  margin: 0 0 calc(var(--hx-tfs) * (0.8655 * var(--hx-sy) - 0.716) + 2.6vh) var(--hx-tin);
+  margin: 3.2vh 0 0 var(--hx-tin);
   font-size: clamp(0.72rem, 0.9vw, 0.9rem);
   font-weight: 600;
   letter-spacing: 0.24em;
@@ -5117,10 +5100,8 @@ body.home-page .model-3d-bg toon-figure {
    abajo a la derecha, por encima de los botones */
 @media (max-width: 768px) {
   /* mismos márgenes que la barra superior: 50px hasta 480, 12px debajo */
-  body.home-page { --hx-gut: 50px; --hx-sy: 1.8; }
-  body.home-page .center-hero-text { padding: 0 var(--hx-gut); }
-  /* en el móvil, justo encima de la fila de botones (no bajo ellos) */
-  body.home-page .hero-title { margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 108px); }
+  body.home-page { --hx-gut: 50px; }
+  body.home-page .center-hero-text { padding: 0 var(--hx-gut) 6svh; }
   /* el muñeco ocupa todo el centro: el subtítulo sube a la cabecera,
      centrado bajo el logo */
   body.home-page .hero-subtitle {
