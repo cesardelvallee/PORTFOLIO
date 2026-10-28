@@ -16,3 +16,7 @@
   Cache-Control: public, max-age=3600, stale-while-revalidate=604800
 /gate.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+/gate-gl.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+/gate-worker.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800

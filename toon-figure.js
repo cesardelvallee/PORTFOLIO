@@ -11,7 +11,9 @@
      cursor, script.js)
    · auto-rotate: gira solo (en táctil); script.js lo quita mientras se
      reparten o se tocan las cards
-   · evento 'load' cuando el modelo ya está pintado
+   · evento 'load' cuando el modelo ya está pintado; detrás de la puerta
+     (gate.js), 'toon:warm' en window cuando ya está preparado (la cuenta
+     de la puerta lo espera)
    Solo pinta cuando algo cambia. Three.js es el mismo módulo que usa el
    tocadiscos (import map de index.html).
    ============================================================ */
@@ -93,6 +95,22 @@ function smoothNormals(geo) {
 // piezas sin trazo: los ojos y los dientes van dentro de la cabeza
 const NO_INK = /eye|teeth/i;
 
+/* los índices de los huesos llegan como enteros (u8): en Windows (ANGLE
+   sobre D3D11) eso pide otra versión de cada shader, que se compila al
+   primer fotograma en el hilo de la GPU y para toda la pantalla un buen
+   rato. En float sirve la que ya se compiló aparte (como en gate-gl.js) */
+function floatJoints(root) {
+  const done = new Set();
+  root.traverse((o) => {
+    const geo = o.geometry, a = geo && geo.getAttribute('skinIndex');
+    if (!a || done.has(geo) || a.array instanceof Float32Array) return;
+    done.add(geo);
+    const f = new Float32Array(a.count * 4);
+    for (let i = 0; i < a.count; i++) { f[i * 4] = a.getX(i); f[i * 4 + 1] = a.getY(i); f[i * 4 + 2] = a.getZ(i); f[i * 4 + 3] = a.getW(i); }
+    geo.setAttribute('skinIndex', new THREE.BufferAttribute(f, 4));
+  });
+}
+
 /* colores de dibujo: las texturas del avatar traen arrugas y sombras
    pintadas (son de foto). Cada material se acerca a su color medio:
    mucho en la ropa (queda plana, como pintada), poco en la cara (los
@@ -104,7 +122,8 @@ function averageColor(tex) {
   if (!img) return null;
   try {
     const c = document.createElement('canvas'); c.width = c.height = 8;
-    const g = c.getContext('2d'); g.drawImage(img, 0, 0, 8, 8);
+    // (un lienzo para leer: sin GPU, leerlo no espera a la tarjeta)
+    const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, 8, 8);
     const d = g.getImageData(0, 0, 8, 8).data;
     let r = 0, gg = 0, b = 0;
     for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; }
@@ -140,7 +159,28 @@ function flatten(material, avg, k, night) {
       ].join('\n')
     );
   };
-  material.customProgramCacheKey = () => 'flat' + k + (night ? 'n' : '');
+  // lo que cambia de un material a otro va en uniforms: todos comparten el
+  // mismo shader (con k en la clave salían 8 distintos, y cada uno cuesta
+  // compilarlo y estrenarlo)
+  material.customProgramCacheKey = () => 'flat';
+}
+
+/* detrás de la puerta (gate.js) el muñeco se prepara sin parar la página:
+   los shaders se compilan aparte (compileAsync) y las texturas suben a la
+   tarjeta de una en una, una por fotograma */
+function warmUp(renderer, scene, camera) {
+  const maps = new Set();
+  scene.traverse((o) => { if (o.isMesh && o.material.map) maps.add(o.material.map); });
+  const next = () => new Promise((r) => requestAnimationFrame(r));
+  return renderer.compileAsync(scene, camera).then(async () => {
+    for (const t of maps) { await next(); renderer.initTexture(t); }
+  });
+}
+// la puerta espera a que el muñeco de la home esté listo (toon:warm)
+function warmed(el) {
+  if (el.warm) return;
+  el.warm = true;
+  window.dispatchEvent(new Event('toon:warm'));
 }
 function isNight() { return !document.body.classList.contains('theme-light'); }
 
@@ -181,7 +221,7 @@ class ToonFigure extends HTMLElement {
     let renderer;
     try {
       renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-    } catch (e) { console.warn('Muñeco 3D no disponible:', e); return; }
+    } catch (e) { console.warn('Muñeco 3D no disponible:', e); warmed(this); return; }
     this.renderer = renderer;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
@@ -205,9 +245,11 @@ class ToonFigure extends HTMLElement {
     this.res = { value: new THREE.Vector2(1, 1) };
     this._resize();
     new ResizeObserver(() => { this._resize(); this.kick(); }).observe(this);
+    window.addEventListener('scroll', () => { this._rect = null; }, { passive: true });
 
     new GLTFLoader().load(this.getAttribute('src'), (gltf) => {
       const root = gltf.scene;
+      floatJoints(root);
       const outlines = [];
       root.traverse((o) => {
         if (!o.isMesh) return;
@@ -249,10 +291,27 @@ class ToonFigure extends HTMLElement {
       tintOn.value = isNight() ? 1 : 0;
       new MutationObserver(() => this._theme()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
       this._place();
-      renderer.render(this.scene, this.camera);
-      this.dispatchEvent(new Event('load'));
-      this.kick();
-    }, undefined, (err) => console.warn('Muñeco 3D no disponible:', err));
+      let shown = false;
+      const show = () => {
+        if (shown) return;
+        shown = true;
+        renderer.render(this.scene, this.camera);
+        this.dispatchEvent(new Event('load'));
+        this.kick();
+      };
+      // detrás de la puerta, ya preparado, su primer fotograma (que aún
+      // cuesta algo: estrena los shaders) se pinta en el glitch de la señal
+      // (gate:loaded), donde un tirón no se ve; así, al entrar, ya está
+      const cl = document.documentElement.classList;
+      if (cl.contains('gt-on') && renderer.compileAsync) {
+        warmUp(renderer, this.scene, this.camera).then(() => {
+          warmed(this);
+          const gt = document.getElementById('loading-screen');
+          if (!cl.contains('gt-on') || !gt || gt.classList.contains('is-loaded')) { show(); return; }
+          ['gate:loaded', 'gate:reveal', 'gate:fail'].forEach((n) => window.addEventListener(n, show, { once: true }));
+        });
+      } else { warmed(this); show(); }
+    }, undefined, (err) => { console.warn('Muñeco 3D no disponible:', err); warmed(this); });
   }
 
   attributeChangedCallback(name) {
@@ -278,6 +337,7 @@ class ToonFigure extends HTMLElement {
     return m ? parseFloat(m[1]) * Math.PI / 180 : (this.theta || 0);
   }
   _resize() {
+    this._rect = null;
     const w = Math.max(1, this.clientWidth), h = Math.max(1, this.clientHeight);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
@@ -312,6 +372,16 @@ class ToonFigure extends HTMLElement {
       this.rim.target.updateMatrixWorld();
     }
   }
+  // lo que ve su cámara: su caja en pantalla y la cámara (giro, altura,
+  // distancia, centro, apertura). La puerta (gate.js) encaja en ella su
+  // holograma para que, al entrar, se vuelva este muñeco en el mismo sitio
+  view() {
+    if (!this.loaded || !this.target) return null;
+    // (la caja se mide una vez: cambia al redimensionar o al bajar)
+    const r = this._rect || (this._rect = this.getBoundingClientRect());
+    if (r.width < 2 || r.height < 2) return null;
+    return { x: r.left, y: r.top, w: r.width, h: r.height, theta: this.theta, phi: PHI, dist: this.dist, target: this.target.toArray(), fov: this.camera.fov };
+  }
   kick() {
     if (this.raf || !this.loaded) return;
     this.raf = requestAnimationFrame((now) => this._frame(now));
@@ -319,19 +389,10 @@ class ToonFigure extends HTMLElement {
   _frame(now) {
     this.raf = 0;
     // en la vista índice de la home el muñeco no se ve, ni detrás de la
-    // puerta de entrada (gate.js): no se pinta (al volver, script.js lo
+    // puerta de entrada (gate.js), ni con el anillo de cards: no se pinta (al volver, script.js lo
     // despierta y se pinta en su postura de ahora)
     const cl = document.documentElement.classList;
-    if (cl.contains('hv-index') || cl.contains('gt-on')) {
-      // detrás de la puerta se pinta una vez: así sus shaders ya están
-      // compilados y, al entrar, el primer fotograma no da un tirón
-      if (cl.contains('gt-on') && !this.warm) {
-        this.warm = true;
-        this._place();
-        this.renderer.render(this.scene, this.camera);
-      }
-      this.last = 0; this.dirty = true; return;
-    }
+    if (cl.contains('hv-index') || cl.contains('gt-on') || cl.contains('cr-fig')) { this.last = 0; this.dirty = true; return; }
     const dt = this.last ? Math.min(0.05, (now - this.last) / 1000) : 0;
     this.last = now;
     if (this.auto) this.theta += SPIN * dt;

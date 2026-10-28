@@ -2,6 +2,25 @@
 /* las páginas de proyecto, en el orden de las cards (img-1 … img-6) y del menú */
 var PROJECT_PAGES = ["coffee-rituals.html", "ottolinger-mykita.html", "catalalata.html", "el-rastrillo.html", "loewe-001.html", "the-grmps.html"];
 
+/* lo que no corre prisa en la home y pide WebGL (el tocadiscos 3D, la
+   tinta) espera, en la primera visita, a que la puerta (gate.js) se vaya:
+   crear un contexto y compilar shaders para el hilo principal y le
+   quitaba fotogramas a la pantalla de carga. Va «ms» después de que se
+   vaya y con el navegador libre. Sin puerta, enseguida. */
+function afterGate(fn, ms) {
+  var ld = document.getElementById('loading-screen');
+  if (!ld || ld.dataset.run !== '1' || ld.classList.contains('is-gone')) { fn(); return; }
+  var idle = window.requestIdleCallback || function(f) { return setTimeout(f, 0); };
+  var done = false;
+  var go = function() {
+    if (done) return;
+    done = true;
+    setTimeout(function() { idle(function() { fn(); }, { timeout: 3000 }); }, ms);
+  };
+  window.addEventListener('gate:done', go, { once: true });
+  window.addEventListener('gate:fail', go, { once: true });
+}
+
 /* ============================================================
    TRANSICIONES ENTRE PÁGINAS: en transition.js (va en el <head>, antes
    que este archivo). Aquí se usa window.PageFX.leave(url, src) para lo
@@ -674,9 +693,10 @@ window.addEventListener('DOMContentLoaded', function() {
     } else start();
   }
 
-  // la puerta (gate.js, módulo): aquí solo se le da paso y se escucha.
-  // gate:alive → ya está en marcha · gate:reveal → el ruido tapa la
-  // pantalla: la home se enciende detrás · gate:done → se ha deshecho
+  // la puerta (gate.js): aquí solo se le da paso y se escucha.
+  // gate:alive → ya está en marcha · gate:cover → su lienzo lo tapa todo:
+  // la home se pinta debajo · gate:reveal → la línea del render empieza a
+  // bajar: la home se pone en marcha · gate:done → se ha deshecho
   function runLoader() {
     const ld = document.getElementById('loading-screen');
     if (!ld || !ld.classList.contains('gt')) { showInstant(); return; }
@@ -684,16 +704,17 @@ window.addEventListener('DOMContentLoaded', function() {
     // el muñeco de la home no se pinta mientras tanto (toon-figure.js)
     document.documentElement.classList.add('gt-on');
 
-    // si el módulo no llega (sin red para three.js), se entra sin puerta
+    // si gate.js no llega (o no arranca), se entra sin puerta
     const fail = setTimeout(() => {
       document.documentElement.classList.remove('gt-on');
       showInstant();
     }, 9000);
     window.addEventListener('gate:alive', () => clearTimeout(fail), { once: true });
     const main = document.getElementById('main-content');
-    // con el muñeco listo, la home se pinta debajo (tapada y sin poder
-    // tocarse ni recibir el foco): al entrar ya está hecha y no da tirones
-    window.addEventListener('gate:ready', () => {
+    // en cuanto el lienzo de la puerta lo tapa todo (en la señal), la home se
+    // pinta debajo (tapada y sin poder tocarse ni recibir el foco): al
+    // entrar ya está hecha y no da tirones
+    window.addEventListener('gate:cover', () => {
       if (main) main.inert = true;
       revealMain();
       // las fotos de las cards, ya decodificadas para cuando se repartan
@@ -994,30 +1015,30 @@ var SITE_TRACKS = [
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
   window.addEventListener('resize', measureTitle);
 
-  /* ---- Tocadiscos 3D: se carga tras el load y solo en escritorio ---- */
-  const hasWebGL = (function() {
-    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
-    catch (e) { return false; }
-  })();
+  /* ---- Tocadiscos 3D: se carga tras el load y solo en escritorio; en la
+     primera visita, cuando la puerta ya se ha ido (afterGate). Sin WebGL
+     se queda el vinilo CSS (no se crea un contexto solo para preguntarlo:
+     cuesta y paraba la pantalla de carga) ---- */
+  const hasWebGL = !!(window.WebGL2RenderingContext || window.WebGLRenderingContext);
   const isDesktop = !(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
 
   if (hasWebGL && isDesktop && canvas) {
     const start = function() {
-      import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js')
+      import('https://cdn.jsdelivr.net/npm/three@0.160.0/+esm')
         .then(function(THREE) {
-          deck = createDeck(THREE);
+          deck = createDeck(THREE, function() { widget.classList.add('has-3d'); });
           deck.setTrack(index, 0);
           if (spin) { cancelAnimationFrame(rateRAF); spin.cancel(); spin = null; }
           deck.setPlaying(!audio.paused);
-          widget.classList.add('has-3d');
         })
         .catch(function(err) { console.warn('Tocadiscos 3D no disponible:', err); });
     };
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true });
+    const boot = function() { afterGate(start, 3600); };
+    if (document.readyState === 'complete') boot();
+    else window.addEventListener('load', boot, { once: true });
   }
 
-  function createDeck(THREE) {
+  function createDeck(THREE, onReady) {
     const W = stage.clientWidth, H = stage.clientHeight;
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -1406,7 +1427,7 @@ var SITE_TRACKS = [
         Math.abs(S.tx - S.ttx) > 0.001 || Math.abs(S.ty - S.tty) > 0.001;
     }
 
-    let raf = 0, last = 0;
+    let raf = 0, last = 0, ready = false;
     function frame(now) {
       raf = 0;
       const dt = Math.min(0.05, (now - last) / 1000);
@@ -1416,7 +1437,7 @@ var SITE_TRACKS = [
       if (busy) raf = requestAnimationFrame(frame);
     }
     function kick() {
-      if (raf) return;
+      if (raf || !ready) return;
       last = performance.now();
       raf = requestAnimationFrame(frame);
     }
@@ -1431,7 +1452,14 @@ var SITE_TRACKS = [
       stage.addEventListener('pointerleave', function() { S.ttx = 0; S.tty = 0; kick(); });
     }
 
-    kick();
+    // los shaders se compilan sin parar la página (antes, el primer
+    // fotograma la congelaba casi medio segundo); ya listos, se pinta y el
+    // tocadiscos entra (se funde con el vinilo CSS)
+    renderer.compileAsync(scene, camera).then(function() {
+      ready = true;
+      kick();
+      if (onReady) onReady();
+    });
 
     return {
       setPlaying: function(on) { S.playing = on; kick(); },
@@ -3781,9 +3809,259 @@ try {
 })();
 
 /* ============================================================
+   HOME — EL ANILLO (css/style.css «HOME — EL ANILLO»)
+   «Ring», en el interruptor de la portada: las cards salen del montón,
+   cada una desde donde esté, y vuelan a formar un anillo en 3D que rodea
+   CÉSAR DEL VALLE como un anillo a un dedo: el nombre pasa por dentro y
+   las cards son la banda (por encima, por delante, por debajo y por
+   detrás de las letras), girando alrededor de la palabra. Va recto, de
+   frente, y con profundidad de verdad:
+   las de delante, más grandes y por delante del nombre; las de detrás,
+   por detrás, enseñando su reverso. El muñeco se va. Gira despacio solo y
+   se puede girar arrastrando arriba y abajo (con inercia); al señalar una
+   card se frena y dice qué proyecto es, y pulsarla lo abre. Al volver a
+   «Play» cada card vuelve a su sitio en el montón y el muñeco vuelve.
+   · Las cards del anillo son copias (las del montón llevan su física y su
+     arrastre): el montón se esconde mientras tanto, con las copias justo
+     encima, y vuelve al acabar sin que se note el cambio.
+   · Delante y detrás del nombre: dos capas con la misma perspectiva
+     (.cr-back por debajo del nombre, .cr-front por encima); cada card se
+     cambia de capa al cruzar el plano del nombre.
+   · Con movimiento reducido: sin vuelos (se funden) y sin giro solo.
+   window.cardRing = { on(), off(instant), active() } (lo usa «HOME — VISTA»)
+   ============================================================ */
+(function() {
+  function init() {
+    var area = document.querySelector('.content-drag-area');
+    var stack = document.querySelector('.stacked-images');
+    var title = document.querySelector('.hero-title');
+    var fig = document.querySelector('.model-3d-bg toon-figure');
+    if (!area || !stack || !title || !document.body.classList.contains('home-page')) return;
+    var imgs = Array.prototype.slice.call(stack.querySelectorAll('.img-drag'));
+    var n = imgs.length;
+    if (!n) return;
+    var html = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    var back = document.createElement('div'), front = document.createElement('div');
+    back.className = 'cr-layer cr-back';
+    front.className = 'cr-layer cr-front';
+    back.setAttribute('aria-hidden', 'true');
+    front.setAttribute('aria-hidden', 'true');
+    area.insertBefore(back, area.firstChild);   // por debajo del nombre
+    stack.after(front);                         // por encima del nombre y del montón
+
+    var cards = imgs.map(function(img, i) {
+      var el = document.createElement('div');
+      el.className = 'cr-card';
+      var face = document.createElement('img');
+      face.className = 'cr-face';
+      face.src = img.currentSrc || img.src;
+      face.alt = '';
+      face.draggable = false;
+      var rev = document.createElement('span');
+      rev.className = 'cr-rev';
+      var m = img.className.match(/img-(\d)/), k = m ? +m[1] : i + 1;
+      var num = String(k).padStart(2, '0'), name = (img.alt || '').split(' — ')[0];
+      rev.innerHTML = '<b>' + num + '</b><i>' + name + '</i>';
+      el.appendChild(face);
+      el.appendChild(rev);
+      var c = { el: el, img: img, face: face, i: i, side: null, p: null, from: null, url: PROJECT_PAGES[k - 1],
+                tip: { img: el, num: num, title: name } };
+      if (fine) {
+        el.addEventListener('mouseenter', function() { hover = c; if (typeof showTitle === 'function') showTitle(c.tip); });
+        el.addEventListener('mouseleave', function() { if (hover === c) hover = null; if (typeof hideTitle === 'function') hideTitle(c.tip); });
+      }
+      return c;
+    });
+
+    /* ---- el sitio: el centro del nombre, el radio, la perspectiva ----
+       El anillo gira sobre el eje de la palabra (x). Las cards, cuadradas,
+       casi se tocan: la banda es un hexágono de cards. Va recto, de frente
+       (YAW lo ladearía) */
+    var YAW = 0, AUTO = 0.32;                      // recto (sin ladear) y el giro solo (rad/s)
+    var L = {};
+    function layout() {
+      var ar = area.getBoundingClientRect(), tr = title.getBoundingClientRect();
+      var vw = ar.width, vh = ar.height || window.innerHeight, mobile = vw <= 768;
+      L.ox = ar.left; L.oy = ar.top;
+      // holgado alrededor de las letras, sin salirse de la pantalla
+      L.R = Math.min(Math.max(tr.height * 1.35, (mobile ? 0.27 : 0.16) * vw), vh * 0.3, 300);
+      L.size = Math.round(L.R * 2 * Math.PI / n * 0.86);
+      L.cx = tr.left + tr.width / 2 - ar.left;
+      L.cy = tr.top + tr.height / 2 - ar.top;
+      // la misma profundidad en cualquier pantalla: la de delante, ×1.5; la de detrás, ×0.75
+      var P = L.R * 2.8;
+      [back, front].forEach(function(l) {
+        l.style.perspective = P.toFixed(0) + 'px';
+        l.style.perspectiveOrigin = L.cx.toFixed(0) + 'px ' + L.cy.toFixed(0) + 'px';
+      });
+      cards.forEach(function(c) { c.el.style.width = c.el.style.height = L.size + 'px'; });
+    }
+    // su sitio en el anillo (base: lo que ha girado)
+    var base = 0;
+    // (φ = 0: delante; 90°: encima; 180°: detrás; 270°: debajo). Mira hacia
+    // fuera del eje
+    function slot(c) {
+      var ph = base + c.i * 2 * Math.PI / n, s = Math.sin(ph), co = Math.cos(ph);
+      return { x: L.cx + L.R * co * Math.sin(YAW), y: L.cy - L.R * s, z: L.R * co * Math.cos(YAW),
+               rx: Math.atan2(s, co) * 180 / Math.PI, ry: YAW * 180 / Math.PI, rz: 0, s: 1 };
+    }
+    // su sitio en el montón (tal como está ahora: arrastrada, girada…)
+    function home(c) {
+      var r = c.img.getBoundingClientRect();
+      var w = (c.img.offsetWidth || L.size) * (+gsap.getProperty(c.img, 'scale') || 1);
+      return { x: r.left + r.width / 2 - L.ox, y: r.top + r.height / 2 - L.oy, z: 0, rx: 0, ry: 0,
+               rz: +gsap.getProperty(c.img, 'rotation') || 0, s: w / L.size };
+    }
+    function mix(a, b, k) {
+      return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, z: a.z + (b.z - a.z) * k,
+               rx: a.rx + (b.rx - a.rx) * k, ry: a.ry + (b.ry - a.ry) * k, rz: a.rz + (b.rz - a.rz) * k, s: a.s + (b.s - a.s) * k };
+    }
+    // delante o detrás del nombre según su profundidad; luego, su transform
+    function put(c, p) {
+      var side = p.z >= 0 ? front : back;
+      if (c.side !== side) { side.appendChild(c.el); c.side = side; }
+      c.p = p;
+      c.el.style.transform = 'translate3d(' + (p.x - L.size / 2).toFixed(1) + 'px,' + (p.y - L.size / 2).toFixed(1) + 'px,' + p.z.toFixed(1) +
+        'px) rotateY(' + p.ry.toFixed(2) + 'deg) rotateX(' + p.rx.toFixed(2) + 'deg) rotateZ(' + p.rz.toFixed(2) + 'deg) scale(' + p.s.toFixed(3) + ')';
+    }
+
+    /* ---- el bucle: los vuelos (de ida y de vuelta) y el giro ---- */
+    var state = 'off', t0 = 0, last = 0, raf = 0, vel = 0, hover = null, drag = null;
+    var FLY = 1000, STAG = 70, BACK = 820;
+    var inOut = function(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    function kick() { if (!raf && state !== 'off') { last = 0; raf = requestAnimationFrame(frame); } }
+    function frame(now) {
+      raf = 0;
+      if (state === 'off') return;
+      var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+      last = now;
+      if (!t0) t0 = now;
+      // gira solo; tras arrastrarlo sigue con su inercia y vuelve poco a poco a
+      // su ritmo; al señalar una card se frena
+      if (!drag) {
+        var want = reduce || hover || state === 'out' ? 0 : AUTO;
+        vel += (want - vel) * (1 - Math.exp(-dt * (hover ? 6 : 1.4)));
+        base += vel * dt;
+      }
+      var te = now - t0, done = true;
+      cards.forEach(function(c) {
+        var p;
+        if (state === 'in') {
+          // de una en una, la de arriba del montón primero
+          var k = Math.min(1, Math.max(0, (te - (n - 1 - c.i) * STAG) / FLY));
+          if (k < 1) done = false;
+          p = k >= 1 ? slot(c) : mix(c.from, slot(c), inOut(k));
+        } else if (state === 'out') {
+          var k2 = Math.min(1, Math.max(0, (te - c.i * STAG * 0.6) / BACK));
+          if (k2 < 1) done = false;
+          p = mix(c.from, c.to, inOut(k2));
+        } else p = slot(c);
+        put(c, p);
+      });
+      if (state === 'in' && done) state = 'ring';
+      if (state === 'out' && done) { end(); return; }
+      raf = requestAnimationFrame(frame);
+    }
+    function end() {
+      state = 'off';
+      // las copias están justo encima de las del montón: se cambian sin que se note
+      html.classList.remove('cr-on');
+      cards.forEach(function(c) { c.el.remove(); c.side = null; });
+      if (fine && typeof hideTitle === 'function') hideTitle();
+    }
+
+    /* ---- entrar y salir ---- */
+    function on() {
+      if (state === 'in' || state === 'ring') return;
+      // mientras se reparten (la entrada de la home), espera a que acaben
+      if (stack.classList.contains('is-dealing')) { setTimeout(on, 120); return; }
+      layout();
+      var wasOut = state === 'out';
+      cards.forEach(function(c) { c.from = wasOut && c.p ? c.p : home(c); });
+      if (!wasOut) base = Math.PI / n;           // ninguna justo delante del nombre al llegar (se lee)
+      vel = 0;
+      state = reduce ? 'ring' : 'in';
+      t0 = 0;
+      cards.forEach(function(c) { put(c, reduce ? slot(c) : c.from); });
+      html.classList.add('cr-on', 'cr-fig');
+      kick();
+    }
+    function off(instant) {
+      if (state === 'off' || state === 'out') { if (instant && state === 'out') { cancelAnimationFrame(raf); raf = 0; end(); } return; }
+      html.classList.remove('cr-fig');
+      if (fig && fig.kick) { fig.dirty = true; fig.kick(); }
+      if (instant || reduce) { cancelAnimationFrame(raf); raf = 0; end(); return; }
+      cards.forEach(function(c) { c.from = c.p || slot(c); c.to = home(c); });
+      drag = null; hover = null;
+      state = 'out';
+      t0 = 0;
+      kick();
+    }
+
+    /* ---- girarlo a mano: arrastrar arriba y abajo en cualquier parte de
+       la portada (la de delante va con el dedo). Un toque sin arrastrar
+       sobre una card abre su proyecto ---- */
+    area.addEventListener('pointerdown', function(e) {
+      if (state !== 'ring' && state !== 'in') return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest && e.target.closest('button, a, .whatsit, .gb')) return;
+      // (con ratón, arrastrar no selecciona el nombre)
+      if (e.pointerType === 'mouse') e.preventDefault();
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), v: 0, moved: 0, card: e.target.closest ? e.target.closest('.cr-card') : null };
+      vel = 0;
+      try { area.setPointerCapture(e.pointerId); } catch (err) {}
+      if (window._setGrabbingCursor) window._setGrabbingCursor(true);
+      kick();
+    });
+    area.addEventListener('pointermove', function(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var now = performance.now(), dy = e.clientY - drag.y;
+      drag.moved += Math.abs(e.clientX - drag.x) + Math.abs(dy);
+      drag.x = e.clientX; drag.y = e.clientY;
+      // la card de delante sigue al dedo: bajar la baja (media vuelta, unos 3 radios)
+      var d = -dy / (L.R * 1.05);
+      base += d;
+      var v = d / Math.max(0.008, (now - drag.t) / 1000);
+      drag.v += (v - drag.v) * 0.35;
+      drag.t = now;
+      kick();
+    });
+    function release(e) {
+      if (!drag || (e && e.pointerId !== drag.id)) return;
+      var tap = drag.moved < 6, c = drag.card;
+      // la inercia, con tope (si se soltó parado, no sale disparado)
+      vel = performance.now() - drag.t > 90 ? 0 : Math.max(-7, Math.min(7, drag.v));
+      drag = null;
+      if (window._setGrabbingCursor) window._setGrabbingCursor(false);
+      if (tap && c) {
+        var card = cards.filter(function(x) { return x.el === c; })[0];
+        if (card && window.PageFX) window.PageFX.leave(card.url, card.face);
+      }
+    }
+    area.addEventListener('pointerup', release);
+    area.addEventListener('pointercancel', release);
+
+    var rt = 0;
+    window.addEventListener('resize', function() {
+      if (state === 'off') return;
+      clearTimeout(rt);
+      rt = setTimeout(function() { layout(); kick(); }, 120);
+    });
+
+    window.cardRing = { on: on, off: off, active: function() { return state === 'in' || state === 'ring'; } };
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
    HOME — VISTA (index.html, css/style.css «HOME — EL CUADERNO»)
    El interruptor de la derecha cambia la portada entre la vista libre
-   (el muñeco 3D y las cards) y la vista índice (una página del cuaderno
+   (el muñeco 3D y las cards), el anillo (las cards girando alrededor del
+   nombre: «HOME — EL ANILLO») y la vista índice (una página del cuaderno
    de César). La home siempre abre en la vista libre: el índice solo
    aparece al pulsar el interruptor (no se recuerda entre visitas).
    · El texto entra palabra a palabra cuando la portada ya está a la
@@ -3810,23 +4088,38 @@ try {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function isIndex() { return html.classList.contains('hv-index'); }
+    var ring = function() { return window.cardRing || null; };
+    function mode() { return isIndex() ? 'index' : (ring() && ring().active() ? 'ring' : 'play'); }
     function sync() {
-      var idx = isIndex();
-      btns.forEach(function(b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-view') === 'index') === idx)); });
+      var idx = isIndex(), m = mode();
+      btns.forEach(function(b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === m)); });
       if (tip) tip.textContent = idx ? 'Play view' : 'Index view';
       view.inert = !idx;
       play.forEach(function(el) { el.inert = idx; });
     }
-    function set(mode) {
-      if ((mode === 'index') === isIndex()) return;
+    function index(on) {
       // la consola cambia de sitio: desaparece de golpe y entra ya colocada
       html.classList.add('hv-swap');
-      html.classList.toggle('hv-index', mode === 'index');
-      sync();
+      html.classList.toggle('hv-index', on);
       off();
       requestAnimationFrame(function() { requestAnimationFrame(function() { html.classList.remove('hv-swap'); }); });
       // de vuelta a la vista libre, el muñeco se vuelve a pintar
-      if (mode !== 'index' && fig && fig.kick) { fig.dirty = true; fig.kick(); }
+      if (!on && fig && fig.kick) { fig.dirty = true; fig.kick(); }
+    }
+    // play ↔ ring: las cards vuelan (el anillo); hacia o desde el índice, la
+    // portada se funde (y el anillo, si estaba, se deshace por debajo)
+    function set(m) {
+      var cur = mode();
+      if (m === cur) return;
+      if (m === 'index') {
+        if (cur === 'ring' && ring()) ring().off(true);
+        index(true);
+      } else {
+        if (cur === 'index') index(false);
+        if (m === 'ring' && ring()) ring().on();
+        else if (cur === 'ring' && ring()) ring().off();
+      }
+      sync();
     }
     btns.forEach(function(b) {
       b.addEventListener('click', function() { set(b.getAttribute('data-view')); });
@@ -4185,6 +4478,8 @@ try {
       }
     }
   }
-  if (document.readyState !== 'loading') init();
-  else document.addEventListener('DOMContentLoaded', init);
+  // en la primera visita, cuando la puerta ya se ha ido (afterGate)
+  var boot = function() { afterGate(init, 2000); };
+  if (document.readyState !== 'loading') boot();
+  else document.addEventListener('DOMContentLoaded', boot);
 })();

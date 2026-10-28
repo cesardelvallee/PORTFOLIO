@@ -1827,7 +1827,7 @@ a.back-top-link svg {
    Negro, el muñeco en holograma (lo pinta el <canvas>, con su glitch) y
    alrededor los datos, en mono pequeño y en mayúsculas, sin marcos ni
    líneas: el nombre, las disciplinas, las coordenadas de Madrid, el
-   cursor, la hora y el contador. Al bajar salen las frases junto al
+   cursor, la hora y el contador. Al entrar (solo) salen las frases junto al
    muñeco (se descifran letra a letra). Por encima solo el cursor.
    ================================================ */
 html { scroll-behavior: smooth; }
@@ -1869,7 +1869,18 @@ html { scroll-behavior: smooth; }
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.gt-gl { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/* el lienzo entra fundido cuando su shader ya está compilado (hasta
+   entonces, el negro de detrás y los datos) */
+.gt-gl {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s var(--gt-ease);
+}
+.gt-gl.is-on { opacity: 1; }
 
 /* ---- los datos ---- */
 .gt-hud { position: absolute; inset: 0; pointer-events: none; }
@@ -1891,7 +1902,7 @@ html { scroll-behavior: smooth; }
   letter-spacing: -0.04em;
   margin-bottom: 10px !important;
 }
-.gt-bar, .gt-prog { color: var(--gt-beige); letter-spacing: 0.08em; white-space: pre; }
+.gt-bar { color: var(--gt-beige); letter-spacing: 0.08em; white-space: pre; }
 .gt-br .gt-time { color: var(--gt-ink); }
 .gt-state { color: var(--gt-mute); }
 #loading-screen.is-loaded .gt-state { color: var(--gt-ink); }
@@ -1906,8 +1917,9 @@ html { scroll-behavior: smooth; }
 /* al entrar, los datos se van enseguida (la banda pasa por debajo) */
 #loading-screen.is-entering .gt-hud { opacity: 0; transition: opacity 0.35s var(--gt-ease); }
 
-/* ---- el aviso para entrar: centrado, justo bajo los pies del muñeco
-   (gate.js mueve su envoltorio; el botón tiene su propia entrada) ---- */
+/* ---- el aviso: centrado, justo bajo los pies del muñeco. La entrada
+   va sola (el contador dice lo que falta); pulsarlo entra ya (gate.js
+   mueve su envoltorio; el botón tiene su propia entrada) ---- */
 .gt-cue-wrap {
   position: absolute;
   left: 50%;
@@ -1936,17 +1948,15 @@ html { scroll-behavior: smooth; }
 }
 #loading-screen.is-ready .gt-cue { opacity: 1; transform: none; pointer-events: auto; }
 #loading-screen.is-entering .gt-cue { opacity: 0; transform: none; pointer-events: none; transition-duration: 0.3s; }
-.gt-cue .gt-prog { font-size: 11px; font-weight: 400; letter-spacing: 0.08em; }
 .gt-cue-t { transition: transform 0.16s var(--gt-ease); }
 .gt-cue:active .gt-cue-t { transform: scale(0.97); }
 .gt-cue:focus-visible { outline: 1px solid var(--gt-beige); outline-offset: 2px; }
-/* el aviso respira despacio y su flecha baja un poco, mientras se espera */
+/* el aviso respira despacio mientras entra; al pasar por encima se
+   enciende en beige (se puede pulsar para no esperar) */
 #loading-screen.is-ready:not(.is-entering) .gt-cue-t { animation: gt-breathe 2.4s ease-in-out 0.8s infinite; }
-.gt-cue-t i { display: inline-block; font-style: normal; }
-#loading-screen.is-ready:not(.is-entering) .gt-cue-t i { animation: gt-bob 1.6s ease-in-out infinite; }
 @keyframes gt-breathe { 50% { opacity: 0.55; } }
-@keyframes gt-bob { 50% { transform: translateY(3px); } }
 @media (hover: hover) and (pointer: fine) {
+  .gt-cue:hover { color: var(--gt-beige); }
   .gt-cue:hover .gt-cue-t { animation-play-state: paused; }
 }
 
@@ -1969,16 +1979,6 @@ html { scroll-behavior: smooth; }
 .gt-l4 { top: 62%; left: calc(50% + clamp(120px, 12vw, 220px)); }
 .gt-l5 { top: 70%; right: calc(50% + clamp(120px, 12vw, 220px)); text-align: right; color: var(--gt-beige); }
 
-/* ---- sin WebGL: los datos y un velo del color de la home que sube ---- */
-.gt-veil { display: none; }
-#loading-screen.gt-flat .gt-veil {
-  display: block;
-  position: absolute;
-  inset: 0;
-  background: #100f0d;
-  transform: translateY(100%);
-}
-body.theme-light #loading-screen.gt-flat .gt-veil { background: #ece2d1; }
 
 /* ---- móvil: menos datos; las frases, de una en una sobre la cabeza ---- */
 @media (max-width: 768px) {
@@ -1999,8 +1999,7 @@ body.theme-light #loading-screen.gt-flat .gt-veil { background: #ece2d1; }
 /* ---- reduced motion: sin desplazamientos (solo fundidos) ---- */
 @media (prefers-reduced-motion: reduce) {
   .gt-line, .gt-line.is-on:not(.is-cur), .gt-cue { transform: none; }
-  #loading-screen.is-ready:not(.is-entering) .gt-cue-t,
-  #loading-screen.is-ready:not(.is-entering) .gt-cue-t i { animation: none; }
+  #loading-screen.is-ready:not(.is-entering) .gt-cue-t { animation: none; }
 }
 
 /* ================================================
@@ -5451,7 +5450,7 @@ html.hv-index.hvi-in .hvn-margin { opacity: 1; transition: opacity 0.7s var(--hv
 }
 /* ---- móvil: solo el texto (las notas necesitan un cursor) ---- */
 @media (max-width: 768px) {
-  .hv-switch { top: 50px; }
+  .hv-switch { top: 82px; }
   .hvn-page { top: calc(env(safe-area-inset-top, 0px) + 104px); bottom: 108px; row-gap: 22px; }
   .hvn-body { grid-template-columns: minmax(0, 1fr); }
   .hvn-margin { display: none; }
@@ -5486,3 +5485,87 @@ html.hv-index.hvi-in .hvn-p sup { opacity: 1; transition: opacity 0.6s ease 1.05
   transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 html.hv-index .cursor-ink { opacity: 0; }
+
+
+/* ================================================
+   HOME — EL ANILLO (script.js «HOME — EL ANILLO»)
+   Las cards en un anillo 3D que rodea el nombre (como a un dedo). Dos capas con la
+   misma perspectiva: .cr-back va por debajo del nombre y .cr-front por
+   encima (cada card se cambia de capa al cruzar su plano). Cada card
+   tiene cara (la foto) y reverso (número y nombre del proyecto). El
+   montón se esconde mientras tanto (las copias están justo encima) y el
+   muñeco se funde.
+   ================================================ */
+.cr-layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  visibility: hidden;
+}
+.cr-back { z-index: 0; }
+.cr-front { z-index: 3; }
+html.cr-on .cr-layer { visibility: visible; }
+html.cr-on body.home-page .stacked-images { visibility: hidden; }
+html.cr-on .content-drag-area { touch-action: none; -webkit-user-select: none; user-select: none; }
+.cr-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+  pointer-events: auto;
+  will-change: transform;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.cr-face,
+.cr-rev {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.cr-face {
+  display: block;
+  object-fit: cover;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  -webkit-user-drag: none;
+}
+/* el reverso: cartulina del tono del fondo, con el número y el proyecto
+   (vuelto sobre el eje del anillo: al pasar por detrás se lee derecho) */
+.cr-rev {
+  transform: rotateX(180deg);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #2a251f;
+  border: 1px solid rgba(236, 230, 218, 0.16);
+  color: rgba(236, 230, 218, 0.55);
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  text-transform: uppercase;
+}
+.cr-rev b { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: #c7b299; }
+.cr-rev i { font-style: normal; font-size: 10px; font-weight: 400; letter-spacing: 0.12em; }
+body.theme-light .cr-rev { background: #d8cab2; border-color: rgba(27, 23, 18, 0.14); color: rgba(27, 23, 18, 0.55); }
+body.theme-light .cr-rev b { color: #8a7458; }
+/* el muñeco se va (y vuelve) */
+body.home-page .model-3d-bg { transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1); }
+html.cr-fig body.home-page .model-3d-bg {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+  transition-duration: 0.45s;
+}
+/* en el índice no hay anillo */
+html.hv-index .cr-layer { visibility: hidden !important; }
+/* con movimiento reducido no vuelan: el montón y el anillo se funden */
+@media (prefers-reduced-motion: reduce) {
+  .cr-layer { opacity: 0; transition: opacity 0.4s ease, visibility 0s linear 0.4s; }
+  html.cr-on .cr-layer { opacity: 1; transition: opacity 0.4s ease; }
+  html.cr-on body.home-page .stacked-images { visibility: visible; opacity: 0; }
+  html.cr-fig body.home-page .model-3d-bg { transform: translate(-50%, -50%); }
+}

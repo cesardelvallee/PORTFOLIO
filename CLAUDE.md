@@ -12,8 +12,12 @@ sin build step). Se abre directamente o con un static server. No hay framework.
 - `css/style.css` — hoja principal (~3800 líneas). `css/contact.css`, `css/dragme.css`.
 - `script.js` — toda la interacción/animación (cursor, parallax, tilt, reveals, loader).
 - `gate.js` — la pantalla de carga de la home («la puerta»: muñeco en holograma con
-  glitch, hay que bajar para entrar). Módulo three.js; script.js le da paso y escucha
-  sus eventos `gate:*`.
+  glitch; al estar listo entra solo en la home, y bajar/Enter/clic se lo saltan). Script normal (defer): datos, contador y scroll;
+  script.js le da paso y escucha sus eventos `gate:*`. El lienzo (three.js) está en
+  `gate-gl.js` y corre en un worker (`gate-worker.js`, OffscreenCanvas); en Safari, en
+  la página. Lo pesado (primer fotograma del muñeco de la home, pintar la home debajo)
+  cae en el glitch de la señal (SIGNAL // ACQUIRED); no añadas trabajo WebGL en la home mientras `gt-on`
+  (usa `afterGate()` de script.js).
 - `assets/`, `img/`, `video/`, `music/` — media.
 
 Cómo previsualizar: servir la carpeta (`python -m http.server` o equivalente) y abrir
