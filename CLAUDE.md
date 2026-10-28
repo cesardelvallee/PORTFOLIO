@@ -11,6 +11,9 @@ sin build step). Se abre directamente o con un static server. No hay framework.
 - `img1.html`…`img5.html` — páginas de proyecto (hero con tilt 3D + glare).
 - `css/style.css` — hoja principal (~3800 líneas). `css/contact.css`, `css/dragme.css`.
 - `script.js` — toda la interacción/animación (cursor, parallax, tilt, reveals, loader).
+- `gate.js` — la pantalla de carga de la home («la puerta»: muñeco en holograma con
+  glitch, hay que bajar para entrar). Módulo three.js; script.js le da paso y escucha
+  sus eventos `gate:*`.
 - `assets/`, `img/`, `video/`, `music/` — media.
 
 Cómo previsualizar: servir la carpeta (`python -m http.server` o equivalente) y abrir

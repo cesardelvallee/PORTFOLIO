@@ -692,7 +692,7 @@ toon-figure canvas { display: block; width: 100%; height: 100%; }
   }
 }
 
-/* (los estilos del loader viven en la sección LOADING SCREEN de abajo) */
+/* (los estilos de la pantalla de carga viven en la sección LA PUERTA de abajo) */
 
 #video-section {
   position: relative;
@@ -1823,38 +1823,44 @@ a.back-top-link svg {
 
 
 /* ================================================
-   LOADING SCREEN — el autorretrato
-   La cara se monta por capas, y cada capa es su propio <svg>: así todo
-   se anima solo con transform/opacity en el compositor y va fluido
-   aunque la home esté cargando el 3D por detrás.
-   1) el pelo y el contorno se rellenan desde abajo (los descubre una
-   tapa que sube); 2) salen los ojos; 3) la sonrisa; 4) la oreja. Al llegar a 100 parpadea y la
-   cámara entra por el brillo del ojo izquierdo: el escenario (fondo
-   oscuro con ese brillo recortado + la cara) crece hasta que el agujero
-   cubre la pantalla, y por él aparece la home. script.js coloca el
-   recorte, calcula cuánto crecer y dispara las clases.
+   LA PUERTA — la pantalla de carga de la home (gate.js)
+   Negro, el muñeco en holograma (lo pinta el <canvas>, con su glitch) y
+   alrededor los datos, en mono pequeño y en mayúsculas, sin marcos ni
+   líneas: el nombre, las disciplinas, las coordenadas de Madrid, el
+   cursor, la hora y el contador. Al bajar salen las frases junto al
+   muñeco (se descifran letra a letra). Por encima solo el cursor.
    ================================================ */
 html { scroll-behavior: smooth; }
 
 #loading-screen {
-  --ld-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --ld-inout: cubic-bezier(0.65, 0, 0.35, 1);
-  --ld-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ld-ink: #ece6da;
-  --ld-mute: rgba(236, 230, 218, 0.5);
-  --ld-beige: #c7b299;
+  --gt-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --gt-ink: #ece6da;
+  --gt-mute: rgba(236, 230, 218, 0.46);
+  --gt-beige: #c7b299;
+  --gt-gut: clamp(20px, 3.2vw, 48px);
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  font-family: 'Inter', sans-serif;
-  color: var(--ld-ink);
-  transition: opacity 0.32s var(--ld-ease);
+  z-index: 9996;
+  background: #000;
+  color: var(--gt-ink);
+  font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 #loading-screen *, #loading-screen *::before, #loading-screen *::after { box-sizing: border-box; }
+#loading-screen p, #loading-screen ul { margin: 0; padding: 0; list-style: none; }
+/* con el muñeco listo el lienzo ya lo tapa todo y el negro de detrás se
+   va: por donde pase la banda al entrar se ve la home */
+#loading-screen.is-revealing { background: transparent; }
 #loading-screen.is-gone { opacity: 0; pointer-events: none; }
-/* tras entrar por el ojo el fundido es más corto, a la par de la entrada */
-#loading-screen.is-exit { transition-duration: 0.24s; }
-.ld-sr {
+.gt-sr {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1863,123 +1869,138 @@ html { scroll-behavior: smooth; }
   clip-path: inset(50%);
   white-space: nowrap;
 }
+.gt-gl { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 
-/* ---- escenario ---- */
-.ld-zoom { position: absolute; inset: 0; }
-.ld-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-/* el agujero del brillo solo existe al entrar (antes no hay nada detrás) */
-.ld-hole { opacity: 0; }
-#loading-screen.is-exit .ld-hole { opacity: 1; }
-
-/* ---- esquinas ---- */
-.ld-corner {
-  position: absolute;
-  font-size: max(11px, 0.6875rem);
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ld-mute);
-  opacity: 0;
-}
-.ld-tl { top: clamp(22px, 3.4vh, 34px); left: clamp(20px, 4vw, 56px); color: var(--ld-ink); }
-.ld-tr { top: clamp(22px, 3.4vh, 34px); right: clamp(20px, 4vw, 56px); }
-.ld-bl { bottom: clamp(22px, 3.4vh, 34px); left: clamp(20px, 4vw, 56px); display: flex; align-items: center; gap: 12px; }
-.ld-bl i { width: 18px; height: 1px; background: var(--ld-beige); }
-.ld-br {
-  bottom: clamp(16px, 2.6vh, 28px);
-  right: clamp(20px, 4vw, 56px);
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
-  color: var(--ld-ink);
-}
-#loading-screen.is-run .ld-corner { animation: ld-rise 0.8s var(--ld-ease) forwards; }
-#loading-screen.is-run .ld-tr { animation-delay: 0.08s; }
-#loading-screen.is-run .ld-bl { animation-delay: 0.16s; }
-#loading-screen.is-run .ld-br { animation-delay: 0.24s; }
-
-/* contador de rodillos */
-.ld-count {
-  display: flex;
-  font-size: clamp(2.4rem, 5.2vw, 4.6rem);
-  font-weight: 800;
+/* ---- los datos ---- */
+.gt-hud { position: absolute; inset: 0; pointer-events: none; }
+.gt-dim { color: var(--gt-mute); }
+.gt-tl, .gt-tr, .gt-bl, .gt-br, .gt-ml, .gt-mr { position: absolute; }
+.gt-tl { top: var(--gt-gut); left: var(--gt-gut); }
+.gt-tl p:first-child { font-weight: 500; }
+.gt-xy, .gt-time, .gt-count { font-variant-numeric: tabular-nums; }
+.gt-tr { top: var(--gt-gut); right: var(--gt-gut); text-align: right; color: var(--gt-mute); }
+.gt-ml, .gt-mr { top: 50%; transform: translateY(-50%); }
+.gt-ml { left: var(--gt-gut); }
+.gt-mr { right: var(--gt-gut); }
+.gt-bl { bottom: var(--gt-gut); left: var(--gt-gut); }
+.gt-br { bottom: var(--gt-gut); right: var(--gt-gut); text-align: right; }
+.gt-count {
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  font-weight: 300;
   line-height: 1;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.04em;
+  margin-bottom: 10px !important;
 }
-.ld-pc { padding-top: 0.5em; font-size: max(11px, 0.6875rem); color: var(--ld-beige); }
-.ld-digit { display: block; height: 1em; overflow: hidden; }
-.ld-strip {
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.45s var(--ld-ease), opacity 0.3s var(--ld-ease);
-}
-.ld-strip span { display: block; height: 1em; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
-.ld-digit.is-lead .ld-strip { opacity: 0.22; }
+.gt-bar, .gt-prog { color: var(--gt-beige); letter-spacing: 0.08em; white-space: pre; }
+.gt-br .gt-time { color: var(--gt-ink); }
+.gt-state { color: var(--gt-mute); }
+#loading-screen.is-loaded .gt-state { color: var(--gt-ink); }
 
-/* ---- la cara, por capas ---- */
-.ld-mark {
+/* las esquinas entran al abrir */
+.gt-tl, .gt-tr, .gt-bl, .gt-br, .gt-ml, .gt-mr { animation: gt-in 0.7s var(--gt-ease) both; }
+.gt-tr { animation-delay: 0.06s; }
+.gt-ml, .gt-mr { animation-delay: 0.12s; }
+.gt-bl { animation-delay: 0.18s; }
+.gt-br { animation-delay: 0.24s; }
+@keyframes gt-in { from { opacity: 0; } }
+/* al entrar, los datos se van enseguida (la banda pasa por debajo) */
+#loading-screen.is-entering .gt-hud { opacity: 0; transition: opacity 0.35s var(--gt-ease); }
+
+/* ---- el aviso para entrar: centrado, justo bajo los pies del muñeco
+   (gate.js mueve su envoltorio; el botón tiene su propia entrada) ---- */
+.gt-cue-wrap {
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: clamp(220px, 34vmin, 400px);
-  aspect-ratio: 714.21 / 817.09;
-  margin: 0;
-  transform: translate(-50%, -50%);
+  top: 0;
+  transform: translate3d(-50%, 80vh, 0);
 }
-.ld-part { position: absolute; inset: 0; }
-.ld-part > svg { display: block; width: 100%; height: 100%; }
-.ld-part path { fill: var(--ld-beige); }
-/* el relleno: una tapa del color del fondo, encima del pelo y el
-   contorno, sube y los descubre de abajo arriba. Es una sola capa que se
-   mueve (nada de máscaras con dos capas a contrapelo, que tiemblan) */
-.ld-cover {
+.gt-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border: 0;
+  background: none;
+  color: var(--gt-ink);
+  font: inherit;
+  font-size: clamp(14px, 1.15vw, 17px);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: inherit;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.6s var(--gt-ease), transform 0.6s var(--gt-ease), color 0.16s var(--gt-ease);
+}
+#loading-screen.is-ready .gt-cue { opacity: 1; transform: none; pointer-events: auto; }
+#loading-screen.is-entering .gt-cue { opacity: 0; transform: none; pointer-events: none; transition-duration: 0.3s; }
+.gt-cue .gt-prog { font-size: 11px; font-weight: 400; letter-spacing: 0.08em; }
+.gt-cue-t { transition: transform 0.16s var(--gt-ease); }
+.gt-cue:active .gt-cue-t { transform: scale(0.97); }
+.gt-cue:focus-visible { outline: 1px solid var(--gt-beige); outline-offset: 2px; }
+/* el aviso respira despacio y su flecha baja un poco, mientras se espera */
+#loading-screen.is-ready:not(.is-entering) .gt-cue-t { animation: gt-breathe 2.4s ease-in-out 0.8s infinite; }
+.gt-cue-t i { display: inline-block; font-style: normal; }
+#loading-screen.is-ready:not(.is-entering) .gt-cue-t i { animation: gt-bob 1.6s ease-in-out infinite; }
+@keyframes gt-breathe { 50% { opacity: 0.55; } }
+@keyframes gt-bob { 50% { transform: translateY(3px); } }
+@media (hover: hover) and (pointer: fine) {
+  .gt-cue:hover .gt-cue-t { animation-play-state: paused; }
+}
+
+/* ---- las frases, junto al muñeco ---- */
+.gt-line {
   position: absolute;
-  inset: -3px;
+  max-width: min(32ch, 30vw);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gt-ink);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s var(--gt-ease), transform 0.4s var(--gt-ease);
+}
+.gt-line.is-on { opacity: 1; transform: none; }
+.gt-line::before { content: '// '; color: var(--gt-beige); }
+.gt-l1 { top: 30%; right: calc(50% + clamp(120px, 12vw, 220px)); text-align: right; }
+.gt-l2 { top: 38%; left: calc(50% + clamp(120px, 12vw, 220px)); }
+.gt-l3 { top: 54%; right: calc(50% + clamp(120px, 12vw, 220px)); text-align: right; }
+.gt-l4 { top: 62%; left: calc(50% + clamp(120px, 12vw, 220px)); }
+.gt-l5 { top: 70%; right: calc(50% + clamp(120px, 12vw, 220px)); text-align: right; color: var(--gt-beige); }
+
+/* ---- sin WebGL: los datos y un velo del color de la home que sube ---- */
+.gt-veil { display: none; }
+#loading-screen.gt-flat .gt-veil {
+  display: block;
+  position: absolute;
+  inset: 0;
   background: #100f0d;
+  transform: translateY(100%);
 }
-/* ojos, sonrisa y oreja: aparecen desde su centro con un pequeño rebote */
-.ld-eye, .ld-ear, .ld-mouth { opacity: 0; transform: scale(0.35); }
-.ld-mouth { transform: scale(0.6); }
-.ld-eye-l, .ld-eye-l .ld-lid { transform-origin: 55.63% 63.75%; }
-.ld-eye-r, .ld-eye-r .ld-lid { transform-origin: 78.54% 61.08%; }
-.ld-mouth { transform-origin: 62.53% 85.05%; }
-.ld-ear { transform-origin: 28.91% 74.56%; }
+body.theme-light #loading-screen.gt-flat .gt-veil { background: #ece2d1; }
 
-/* 1) el pelo y el contorno se rellenan de abajo arriba  2) los ojos
-   3) la sonrisa  4) la oreja */
-#loading-screen.is-run .ld-cover { animation: ld-lift 1.3s var(--ld-inout) 0.35s both; }
-#loading-screen.is-run .ld-eye { animation: ld-pop 0.7s var(--ld-pop) both; }
-#loading-screen.is-run .ld-eye-l { animation-delay: 1.2s; }
-#loading-screen.is-run .ld-eye-r { animation-delay: 1.33s; }
-#loading-screen.is-run .ld-mouth { animation: ld-pop 0.65s var(--ld-pop) 1.46s both; }
-#loading-screen.is-run .ld-ear { animation: ld-pop 0.6s var(--ld-pop) 1.65s both; }
-@keyframes ld-lift { from { transform: none; } to { transform: translateY(-101%); } }
-@keyframes ld-pop { to { opacity: 1; transform: none; } }
-@keyframes ld-hide { from { opacity: 1; } to { opacity: 0; } }
-
-/* parpadeo antes de entrar */
-#loading-screen.is-blink .ld-lid { animation: ld-blink 0.34s var(--ld-ease); }
-@keyframes ld-blink { 0%, 100% { transform: none; } 42% { transform: scaleY(0.06); } }
-
-/* al entrar, los textos se van antes de que la cara crezca */
-#loading-screen.is-exit .ld-corner { animation: ld-hide 0.25s var(--ld-ease) forwards; }
-
-@keyframes ld-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes ld-fade { to { opacity: 1; } }
-
-/* ---- móvil ---- */
+/* ---- móvil: menos datos; las frases, de una en una sobre la cabeza ---- */
 @media (max-width: 768px) {
-  .ld-mark { width: min(44vw, 26svh); }
-  .ld-count { font-size: min(13vw, 7svh); }
+  .gt-tr, .gt-ml, .gt-mr { display: none; }
+  .gt-count { font-size: min(14vw, 7svh); }
+  .gt-line {
+    top: 14%;
+    left: var(--gt-gut);
+    right: var(--gt-gut);
+    max-width: none;
+    font-size: 11px;
+    text-align: left;
+  }
+  .gt-line.is-on:not(.is-cur) { opacity: 0; transform: translateY(-6px); }
+  .gt-cue { font-size: 14px; letter-spacing: 0.14em; }
 }
 
-/* ---- reduced motion: la cara aparece ya montada y la pantalla se funde ---- */
+/* ---- reduced motion: sin desplazamientos (solo fundidos) ---- */
 @media (prefers-reduced-motion: reduce) {
-  .ld-part, .ld-part > svg { transform: none !important; animation: none !important; opacity: 1; }
-  .ld-cover { display: none; }
-  .ld-mark { opacity: 0; }
-  #loading-screen.is-run .ld-mark { animation: ld-fade 0.6s var(--ld-ease) 0.2s forwards; }
-  .ld-strip { transition: none; }
+  .gt-line, .gt-line.is-on:not(.is-cur), .gt-cue { transform: none; }
+  #loading-screen.is-ready:not(.is-entering) .gt-cue-t,
+  #loading-screen.is-ready:not(.is-entering) .gt-cue-t i { animation: none; }
 }
 
 /* ================================================
@@ -5448,3 +5469,20 @@ html.hv-index.hvi-in .hvn-margin { opacity: 1; transition: opacity 0.7s var(--hv
 /* los números volados no suben con su palabra: aparecen al final */
 .hvn-p sup { opacity: 0; }
 html.hv-index.hvi-in .hvn-p sup { opacity: 1; transition: opacity 0.6s ease 1.05s, color 0.3s ease; }
+
+/* ================================================
+   HOME — LA TINTA (script.js)
+   La tinta que remueve el cursor: un <canvas> fijo sobre el fondo, por
+   detrás del título, el muñeco y las cards. La pinta script.js (colores
+   por tema incluidos); en el cuaderno se aparta.
+   ================================================ */
+.cursor-ink {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+html.hv-index .cursor-ink { opacity: 0; }

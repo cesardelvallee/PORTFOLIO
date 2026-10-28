@@ -674,146 +674,59 @@ window.addEventListener('DOMContentLoaded', function() {
     } else start();
   }
 
+  // la puerta (gate.js, módulo): aquí solo se le da paso y se escucha.
+  // gate:alive → ya está en marcha · gate:reveal → el ruido tapa la
+  // pantalla: la home se enciende detrás · gate:done → se ha deshecho
   function runLoader() {
     const ld = document.getElementById('loading-screen');
-    const zoom = ld && ld.querySelector('.ld-zoom');
-    const mark = ld && ld.querySelector('.ld-mark');
-    const hole = ld && ld.querySelector('.ld-hole');
-    const glint = ld && ld.querySelector('.ld-glint');
-    if (!(ld && zoom && mark && hole && glint)) { showInstant(); return; }
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!ld || !ld.classList.contains('gt')) { showInstant(); return; }
+    ld.dataset.run = '1';
+    // el muñeco de la home no se pinta mientras tanto (toon-figure.js)
+    document.documentElement.classList.add('gt-on');
 
-    const yy = String(new Date().getFullYear()).slice(-2);
-    ld.querySelectorAll('.ld-year').forEach((y) => { y.textContent = 'Portfolio — ’' + yy; });
-
-    // el brillo grande del ojo izquierdo, recortado en el fondo justo
-    // debajo de la cara (algo agrandado, para que su borde quede bajo el
-    // beige del ojo). Solo se recorta al entrar: por ahí se ve la home.
-    // VB es el viewBox del logo.
-    const VB = { x: 122.89, y: 71.46, w: 714.21 };
-    const GLINT = { x: 544.87, y: 551.08 };              // centro del brillo
-    let geo = null;
-    const placeHole = () => {
-      const m = mark.getBoundingClientRect(), z = zoom.getBoundingClientRect();
-      const s = m.width / VB.w, ox = m.left - z.left, oy = m.top - z.top;
-      const t = 'translate(' + ox.toFixed(2) + ' ' + oy.toFixed(2) + ') scale(' + s.toFixed(6) + ') translate(' + (-VB.x) + ' ' + (-VB.y) + ')';
-      hole.setAttribute('transform', t);
-      glint.setAttribute('transform', t);
-      geo = { s, ox, oy, w: z.width, h: z.height };
-    };
-    placeHole();
-    window.addEventListener('resize', placeHole);
-
-    // cuánto tiene que crecer el escenario, desde el centro del brillo, para
-    // que el agujero cubra toda la pantalla (se comprueba con su forma real)
-    const zoomTarget = () => {
-      const { s, ox, oy, w, h } = geo;
-      const Ox = ox + (GLINT.x - VB.x) * s, Oy = oy + (GLINT.y - VB.y) * s;
-      const pt = glint.ownerSVGElement.createSVGPoint();
-      const probe = [[0, 0], [w, 0], [0, h], [w, h], [w / 2, 0], [w / 2, h], [0, h / 2], [w, h / 2]];
-      const covers = (S) => probe.every(([px, py]) => {
-        pt.x = VB.x + (Ox + (px - Ox) / S - ox) / s;
-        pt.y = VB.y + (Oy + (py - Oy) / S - oy) / s;
-        return glint.isPointInFill(pt);
-      });
-      let lo = 1, hi = 3000;
-      if (!covers(hi)) return { S: 400, Ox, Oy };
-      for (let i = 0; i < 28; i++) { const mid = Math.sqrt(lo * hi); if (covers(mid)) hi = mid; else lo = mid; }
-      return { S: hi * 1.1, Ox, Oy };
-    };
-
-    // contador de rodillos
-    const counters = Array.prototype.map.call(ld.querySelectorAll('.ld-count'), (el) => [0, 1, 2].map(() => {
-      const d = document.createElement('span');
-      d.className = 'ld-digit';
-      const strip = document.createElement('span');
-      strip.className = 'ld-strip';
-      for (let n = 0; n <= 9; n++) { const s = document.createElement('span'); s.textContent = n; strip.appendChild(s); }
-      d.appendChild(strip);
-      el.appendChild(d);
-      return { d, strip };
-    }));
-    const msgs = ld.querySelectorAll('.ld-msg');
-    const STEPS = ['Trazando el contorno', 'Dibujando los ojos', 'Afinando la sonrisa', 'Listo'];
-    let msgIdx = 0;
-    const setCount = (v) => {
-      const str = String(Math.round(v)).padStart(3, '0');
-      counters.forEach((cols) => {
-        let lead = true;
-        cols.forEach((col, i) => {
-          const n = +str[i];
-          if (n !== 0 || i === 2) lead = false;
-          col.d.classList.toggle('is-lead', lead);
-          col.strip.style.transform = 'translateY(' + (-n) + 'em)';
-        });
-      });
-      const idx = v >= 100 ? 3 : v >= 66 ? 2 : v >= 30 ? 1 : 0;
-      if (idx !== msgIdx) { msgIdx = idx; msgs.forEach((m) => { m.textContent = STEPS[idx]; }); }
-    };
-    setCount(0);
-
-    ld.classList.add('is-run');
-
-    // contador: entra lento, corre en medio y se asienta (acaba cuando la
-    // cara ya está montada)
-    const START = reduce ? 150 : 350;
-    const FILL = reduce ? 900 : 2600;
-    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-    let t0 = null;
-    const step = (ts) => {
-      if (t0 === null) t0 = ts;
-      const x = Math.min(1, (ts - t0) / FILL);
-      setCount(ease(x) * 100);
-      if (x < 1) requestAnimationFrame(step); else finish();
-    };
-    setTimeout(() => requestAnimationFrame(step), START);
-
-    function done() {
-      try { sessionStorage.setItem(visitedKey, '1'); } catch (e) {}
-      window.removeEventListener('resize', placeHole);
-      setTimeout(() => { try { ld.remove(); } catch (e) { ld.style.display = 'none'; } }, 700);
-    }
-
-    // la entrada: se destapa el brillo, la home ya está detrás y el
-    // escenario crece desde ese punto. Un leve retroceso al principio y
-    // luego cada vez más deprisa (la escala sube de forma exponencial y su
-    // logaritmo acelera, así el viaje se siente continuo). Hasta 120
-    // aumentos como mucho: a esas alturas el brillo ya llena casi toda la
-    // pantalla y la pantalla de carga se funde. Solo transform y opacidad.
-    function enter() {
-      const target = zoomTarget();
-      const S = Math.min(target.S, 120);
-      zoom.style.transformOrigin = target.Ox.toFixed(2) + 'px ' + target.Oy.toFixed(2) + 'px';
-      ld.classList.add('is-exit');
+    // si el módulo no llega (sin red para three.js), se entra sin puerta
+    const fail = setTimeout(() => {
+      document.documentElement.classList.remove('gt-on');
+      showInstant();
+    }, 9000);
+    window.addEventListener('gate:alive', () => clearTimeout(fail), { once: true });
+    const main = document.getElementById('main-content');
+    // con el muñeco listo, la home se pinta debajo (tapada y sin poder
+    // tocarse ni recibir el foco): al entrar ya está hecha y no da tirones
+    window.addEventListener('gate:ready', () => {
+      if (main) main.inert = true;
       revealMain();
-      // T: duración total (antes 1400 ms: él la quería más rápida)
-      const T = 850, A = 0.94, t1 = 0.14, n = 12, p = 1.4;
-      const frames = [{ offset: 0, transform: 'scale(1)', easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
-                      { offset: t1, transform: 'scale(' + A + ')' }];
-      for (let i = 1; i <= n; i++) {
-        frames.push({ offset: t1 + (1 - t1) * Math.pow(i / n, 1 / p), transform: 'scale(' + (A * Math.pow(S / A, i / n)).toFixed(4) + ')' });
-      }
-      if (zoom.animate) zoom.animate(frames, { duration: T, fill: 'forwards' });
-      setTimeout(triggerStartAnimations, T * 0.45);     // la home entra mientras se llega
-      setTimeout(() => ld.classList.add('is-gone'), T * 0.76);
-      setTimeout(done, T);
-    }
+      // las fotos de las cards, ya decodificadas para cuando se repartan
+      if (main) main.querySelectorAll('img').forEach((img) => { if (img.decode) img.decode().catch(() => {}); });
+    }, { once: true });
+    // y si se rompe a mitad, igual (sin repetir la entrada de la home)
+    let revealed = false;
+    window.addEventListener('gate:fail', () => {
+      clearTimeout(fail);
+      if (main) main.inert = false;
+      document.documentElement.classList.remove('gt-on');
+      try { sessionStorage.setItem(visitedKey, '1'); } catch (e) {}
+      if (revealed) { try { ld.remove(); } catch (e) { ld.style.display = 'none'; } } else showInstant();
+    }, { once: true });
 
-    function finish() {
-      setCount(100);
-      if (reduce) {
-        setTimeout(() => {
-          revealMain();
-          ld.classList.add('is-gone');
-          triggerStartAnimations();
-          done();
-        }, 300);
-        return;
-      }
-      // 1) parpadea  2) entra por el brillo del ojo (en cuanto acaba el parpadeo)
-      setTimeout(() => ld.classList.add('is-blink'), 160);
-      setTimeout(enter, 600);
-    }
+    window.addEventListener('gate:reveal', () => {
+      revealed = true;
+      if (main) main.inert = false;
+      revealMain();
+      const fig = document.querySelector('.model-3d-bg toon-figure');
+      if (fig && fig.kick) { fig.dirty = true; fig.kick(); }
+      // la banda está a punto de destaparla: su entrada se ve mientras aparece
+      triggerStartAnimations();
+    }, { once: true });
+
+    window.addEventListener('gate:done', () => {
+      try { sessionStorage.setItem(visitedKey, '1'); } catch (e) {}
+      ld.classList.add('is-gone');
+      // ya es transparente: se quita cuando la home ha terminado de entrar
+      // y el navegador está libre (quitarla en plena entrada daba un tirón)
+      const idle = window.requestIdleCallback || ((f) => setTimeout(f, 0));
+      setTimeout(() => idle(() => { try { ld.remove(); } catch (e) { ld.style.display = 'none'; } }, { timeout: 3000 }), 2400);
+    }, { once: true });
   }
 
   function initializeLoading() {
@@ -4044,6 +3957,233 @@ try {
       }
       setTimeout(waitStage, 120);
     })();
+  }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ============================================================
+   HOME — LA TINTA (css/style.css «HOME — LA TINTA»)
+   En la home el cursor remueve tinta, como una gota de tinta en agua:
+   un fluido de verdad (WebGL2) que se arremolina detrás del cursor y se
+   disuelve en dos o tres segundos. Beige que brilla de noche; tinta
+   sepia de día. El borde va algo más cargado, como en la acuarela.
+   · Va sobre el fondo, por detrás del título, el muñeco y las cards.
+   · Solo con ratón y en la vista libre: en el cuaderno, con el menú, el
+     minijuego o la puerta delante, no remueve. Con movimiento reducido,
+     menos remolino y se disuelve antes.
+   · Solo trabaja mientras hay tinta: al rato de parar el cursor se
+     duerme. Sin WebGL2, no hay tinta (y no pasa nada).
+   ============================================================ */
+(function() {
+  function init() {
+    var main = document.getElementById('main-content');
+    if (!main || !document.body.classList.contains('home-page')) return;
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var html = document.documentElement, body = document.body;
+
+    var cv = document.createElement('canvas');
+    cv.className = 'cursor-ink';
+    cv.setAttribute('aria-hidden', 'true');
+    var bg = document.getElementById('vanta-bg');
+    main.insertBefore(cv, bg ? bg.nextSibling : main.firstChild);
+    var gl = cv.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+    if (!gl || !(gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float'))) { cv.remove(); return; }
+
+    var SIM = 128, DYE = 512, ITER = 20;           // resolución del fluido y de la tinta
+    var CURL = reduce ? 6 : 22;                   // cuánto se arremolina
+    var VDISS = 0.5, DDISS = reduce ? 2.4 : 1.6;  // lo que se calma y se disuelve por segundo
+    var FORCE = 2800, RADIUS = 21, SLEEP = reduce ? 2000 : 3000;
+
+    /* ---- shaders ---- */
+    var VS = '#version 300 es\nin vec2 aPos;\nuniform vec2 uTexel;\nout vec2 vUv, vL, vR, vT, vB;\n' +
+      'void main() { vUv = aPos * 0.5 + 0.5; vL = vUv - vec2(uTexel.x, 0.0); vR = vUv + vec2(uTexel.x, 0.0);' +
+      ' vT = vUv + vec2(0.0, uTexel.y); vB = vUv - vec2(0.0, uTexel.y); gl_Position = vec4(aPos, 0.0, 1.0); }';
+    var HEAD = '#version 300 es\nprecision highp float;\nprecision highp sampler2D;\nin vec2 vUv, vL, vR, vT, vB;\nout vec4 o;\n';
+    var FS = {
+      // una gota (de velocidad o de tinta) donde pasa el cursor
+      splat: 'uniform sampler2D uT; uniform float uAspect, uR; uniform vec3 uC; uniform vec2 uP;\n' +
+        'void main() { vec2 p = vUv - uP; p.x *= uAspect; o = vec4(texture(uT, vUv).xyz + exp(-dot(p, p) / uR) * uC, 1.0); }',
+      // el fluido se lleva lo que hay (y se va apagando)
+      advect: 'uniform sampler2D uV, uS; uniform vec2 uTexel; uniform float uDt, uDiss;\n' +
+        'void main() { vec2 c = vUv - uDt * texture(uV, vUv).xy * uTexel; o = texture(uS, c) / (1.0 + uDiss * uDt); }',
+      curl: 'uniform sampler2D uV;\n' +
+        'void main() { float L = texture(uV, vL).y, R = texture(uV, vR).y, T = texture(uV, vT).x, B = texture(uV, vB).x;' +
+        ' o = vec4(0.5 * (R - L - T + B), 0.0, 0.0, 1.0); }',
+      // refuerza los remolinos (lo que hace que la tinta se enrosque)
+      vort: 'uniform sampler2D uV, uCurl; uniform float uK, uDt;\n' +
+        'void main() { float L = texture(uCurl, vL).x, R = texture(uCurl, vR).x, T = texture(uCurl, vT).x, B = texture(uCurl, vB).x, C = texture(uCurl, vUv).x;' +
+        ' vec2 f = 0.5 * vec2(abs(T) - abs(B), abs(R) - abs(L)); f /= length(f) + 0.0001; f *= uK * C; f.y *= -1.0;' +
+        ' o = vec4(clamp(texture(uV, vUv).xy + f * uDt, -1000.0, 1000.0), 0.0, 1.0); }',
+      div: 'uniform sampler2D uV;\n' +
+        'void main() { vec2 C = texture(uV, vUv).xy; float L = texture(uV, vL).x, R = texture(uV, vR).x, T = texture(uV, vT).y, B = texture(uV, vB).y;' +
+        ' if (vL.x < 0.0) L = -C.x; if (vR.x > 1.0) R = -C.x; if (vT.y > 1.0) T = -C.y; if (vB.y < 0.0) B = -C.y;' +
+        ' o = vec4(0.5 * (R - L + T - B), 0.0, 0.0, 1.0); }',
+      fade: 'uniform sampler2D uT; uniform float uK;\nvoid main() { o = uK * texture(uT, vUv); }',
+      pres: 'uniform sampler2D uP, uD;\n' +
+        'void main() { float L = texture(uP, vL).x, R = texture(uP, vR).x, T = texture(uP, vT).x, B = texture(uP, vB).x;' +
+        ' o = vec4((L + R + B + T - texture(uD, vUv).x) * 0.25, 0.0, 0.0, 1.0); }',
+      grad: 'uniform sampler2D uP, uV;\n' +
+        'void main() { float L = texture(uP, vL).x, R = texture(uP, vR).x, T = texture(uP, vT).x, B = texture(uP, vB).x;' +
+        ' o = vec4(texture(uV, vUv).xy - vec2(R - L, T - B), 0.0, 1.0); }',
+      // la tinta en pantalla: se satura suave y su borde se carga un poco
+      show: 'uniform sampler2D uDye; uniform vec3 uInk; uniform float uGain, uMax, uEdge;\n' +
+        'void main() { float d = texture(uDye, vUv).r;' +
+        ' float g = length(vec2(texture(uDye, vR).r - texture(uDye, vL).r, texture(uDye, vT).r - texture(uDye, vB).r));' +
+        ' float a = min(1.0 - exp(-(d + g * uEdge) * uGain), uMax);' +
+        ' a = clamp(a + (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0, 0.0, 1.0);' +
+        ' o = vec4(uInk * a, a); }'
+    };
+    function sh(type, src) {
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    }
+    var P = {};
+    try {
+      var vs = sh(gl.VERTEX_SHADER, VS);
+      Object.keys(FS).forEach(function(k) {
+        var p = gl.createProgram();
+        gl.attachShader(p, vs);
+        gl.attachShader(p, sh(gl.FRAGMENT_SHADER, HEAD + FS[k]));
+        gl.bindAttribLocation(p, 0, 'aPos');
+        gl.linkProgram(p);
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+        P[k] = { p: p, loc: {} };
+      });
+    } catch (err) { cv.remove(); return; }
+
+    var quad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.disable(gl.BLEND);
+
+    /* ---- texturas ---- */
+    function tex(w, h) {
+      var t = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+      var f = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      gl.viewport(0, 0, w, h);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      return { t: t, f: f, w: w, h: h };
+    }
+    function pair(w, h) { return { r: tex(w, h), w: tex(w, h), swap: function() { var x = this.r; this.r = this.w; this.w = x; } }; }
+    function drop(o) { if (!o) return; [o.r, o.w, o].forEach(function(x) { if (x && x.t) { gl.deleteTexture(x.t); gl.deleteFramebuffer(x.f); } }); }
+    function res(n) {
+      var a = W / H, s = a >= 1 ? [Math.round(n * a), n] : [n, Math.round(n / a)];
+      return s;
+    }
+    var W = 0, H = 0, vel, dye, pres, div, curl, vT, dT;
+    function build() {
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = W; cv.height = H;
+      [vel, dye, pres].forEach(drop); [div, curl].forEach(drop);
+      var s = res(SIM), d = res(DYE);
+      vel = pair(s[0], s[1]); pres = pair(s[0], s[1]); dye = pair(d[0], d[1]);
+      div = tex(s[0], s[1]); curl = tex(s[0], s[1]);
+      vT = [1 / s[0], 1 / s[1]]; dT = [2 / d[0], 2 / d[1]];
+      return gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    }
+    if (!build()) { cv.remove(); return; }
+
+    // una pasada: el programa, dónde se pinta y sus valores (las texturas
+    // van a sus unidades)
+    function run(k, target, u) {
+      var pr = P[k], unit = 0;
+      gl.useProgram(pr.p);
+      Object.keys(u).forEach(function(n) {
+        var l = pr.loc[n] !== undefined ? pr.loc[n] : (pr.loc[n] = gl.getUniformLocation(pr.p, n));
+        var v = u[n];
+        if (l === null) return;
+        if (v && v.t) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, v.t); gl.uniform1i(l, unit++); }
+        else if (typeof v === 'number') gl.uniform1f(l, v);
+        else if (v.length === 2) gl.uniform2f(l, v[0], v[1]);
+        else gl.uniform3f(l, v[0], v[1], v[2]);
+      });
+      if (target) { gl.bindFramebuffer(gl.FRAMEBUFFER, target.f); gl.viewport(0, 0, target.w, target.h); }
+      else { gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, cv.width, cv.height); }
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    function splat(x, y, dx, dy, amt) {
+      var r = (RADIUS / H) * (RADIUS / H);
+      run('splat', vel.w, { uT: vel.r, uAspect: W / H, uP: [x, y], uC: [dx, dy, 0], uR: r, uTexel: vT }); vel.swap();
+      run('splat', dye.w, { uT: dye.r, uAspect: W / H, uP: [x, y], uC: [amt, 0, 0], uR: r, uTexel: dT }); dye.swap();
+    }
+    function step(dt) {
+      run('curl', curl, { uV: vel.r, uTexel: vT });
+      run('vort', vel.w, { uV: vel.r, uCurl: curl, uK: CURL, uDt: dt, uTexel: vT }); vel.swap();
+      run('div', div, { uV: vel.r, uTexel: vT });
+      run('fade', pres.w, { uT: pres.r, uK: 0.8, uTexel: vT }); pres.swap();
+      for (var i = 0; i < ITER; i++) { run('pres', pres.w, { uP: pres.r, uD: div, uTexel: vT }); pres.swap(); }
+      run('grad', vel.w, { uP: pres.r, uV: vel.r, uTexel: vT }); vel.swap();
+      run('advect', vel.w, { uV: vel.r, uS: vel.r, uTexel: vT, uDt: dt, uDiss: VDISS }); vel.swap();
+      run('advect', dye.w, { uV: vel.r, uS: dye.r, uTexel: vT, uDt: dt, uDiss: DDISS }); dye.swap();
+    }
+    function show() {
+      var light = body.classList.contains('theme-light');
+      run('show', null, light
+        ? { uDye: dye.r, uInk: [0.27, 0.22, 0.16], uGain: 2.2, uMax: 0.32, uEdge: 1.2, uTexel: dT }
+        : { uDye: dye.r, uInk: [0.8, 0.72, 0.61], uGain: 2.2, uMax: 0.4, uEdge: 1.0, uTexel: dT });
+    }
+
+    /* ---- el cursor ---- */
+    var mx = 0, my = 0, px = null, py = null, raf = 0, lastT = 0, lastSplat = 0;
+    function quiet() {
+      return html.classList.contains('hv-index') || html.classList.contains('gt-on') ||
+        body.classList.contains('menu-open') || body.classList.contains('bk-open');
+    }
+    window.addEventListener('pointermove', function(e) {
+      if (e.pointerType === 'touch') return;
+      mx = e.clientX; my = e.clientY;
+      if (px === null) { px = mx; py = my; }
+      if (!raf) { lastT = 0; raf = requestAnimationFrame(frame); }
+    }, { passive: true });
+    window.addEventListener('resize', function() { if (!build()) { cv.remove(); return; } px = null; });
+    cv.addEventListener('webglcontextlost', function(e) { e.preventDefault(); cancelAnimationFrame(raf); raf = -1; cv.remove(); });
+
+    function frame(now) {
+      raf = 0;
+      var dt = lastT ? Math.min(1 / 30, (now - lastT) / 1000) : 1 / 60;
+      lastT = now;
+      // lo que se ha movido desde el fotograma anterior, en gotas seguidas
+      // (deprisa, varias por el camino: un trazo continuo, no puntos)
+      var ddx = mx - px, ddy = my - py, d = Math.sqrt(ddx * ddx + ddy * ddy);
+      if (d > 0.5 && !quiet()) {
+        // (lo que se suelta en total no depende de cuántas gotas sean)
+        var n = Math.min(16, Math.max(1, Math.ceil(d / (RADIUS * 0.35)))), k = Math.min(1, 1.6 / n);
+        var amt = Math.min(0.5, Math.max(0.04, d / 40)) * 0.15 * k;
+        for (var i = 1; i <= n; i++) {
+          var f = i / n;
+          splat((px + ddx * f) / W, 1 - (py + ddy * f) / H, ddx / W * FORCE * k, -ddy / H * FORCE * k, amt);
+        }
+        lastSplat = now;
+      }
+      px = mx; py = my;
+      step(dt);
+      show();
+      // al rato de parar ya no queda tinta: se duerme (y queda limpio)
+      if (now - lastSplat < SLEEP) raf = requestAnimationFrame(frame);
+      else {
+        [vel, dye, pres].forEach(function(o) { [o.r, o.w].forEach(function(x) { gl.bindFramebuffer(gl.FRAMEBUFFER, x.f); gl.clear(gl.COLOR_BUFFER_BIT); }); });
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, cv.width, cv.height);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      }
+    }
   }
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);

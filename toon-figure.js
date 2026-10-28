@@ -318,9 +318,20 @@ class ToonFigure extends HTMLElement {
   }
   _frame(now) {
     this.raf = 0;
-    // en la vista índice de la home el muñeco no se ve: no se pinta (al
-    // volver, script.js lo despierta y se pinta en su postura de ahora)
-    if (document.documentElement.classList.contains('hv-index')) { this.last = 0; this.dirty = true; return; }
+    // en la vista índice de la home el muñeco no se ve, ni detrás de la
+    // puerta de entrada (gate.js): no se pinta (al volver, script.js lo
+    // despierta y se pinta en su postura de ahora)
+    const cl = document.documentElement.classList;
+    if (cl.contains('hv-index') || cl.contains('gt-on')) {
+      // detrás de la puerta se pinta una vez: así sus shaders ya están
+      // compilados y, al entrar, el primer fotograma no da un tirón
+      if (cl.contains('gt-on') && !this.warm) {
+        this.warm = true;
+        this._place();
+        this.renderer.render(this.scene, this.camera);
+      }
+      this.last = 0; this.dirty = true; return;
+    }
     const dt = this.last ? Math.min(0.05, (now - this.last) / 1000) : 0;
     this.last = now;
     if (this.auto) this.theta += SPIN * dt;
