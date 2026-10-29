@@ -3810,24 +3810,30 @@ try {
 
 /* ============================================================
    HOME — EL ANILLO (css/style.css «HOME — EL ANILLO»)
-   «Ring», en el interruptor de la portada: las cards salen del montón,
-   cada una desde donde esté, y vuelan a formar un anillo en 3D que rodea
-   CÉSAR DEL VALLE como un anillo a un dedo: el nombre pasa por dentro y
-   las cards son la banda (por encima, por delante, por debajo y por
-   detrás de las letras), girando alrededor de la palabra. Va recto, de
-   frente, y con profundidad de verdad:
-   las de delante, más grandes y por delante del nombre; las de detrás,
-   por detrás, enseñando su reverso. El muñeco se va. Gira despacio solo y
-   se puede girar arrastrando arriba y abajo (con inercia); al señalar una
-   card se frena y dice qué proyecto es, y pulsarla lo abre. Al volver a
-   «Play» cada card vuelve a su sitio en el montón y el muñeco vuelve.
+   «Ring», en el interruptor de la portada: el montón se abre y las cards
+   forman un anillo 3D que rodea CÉSAR DEL VALLE como un anillo a un
+   dedo: el nombre pasa por dentro y las cards son la banda, recta y de
+   frente, girando sobre el eje de la palabra (suben por delante, pasan
+   por encima, bajan por detrás de las letras y vuelven por debajo).
+   · Una banda continua: ocho paneles cuadrados (las fotos enteras: los
+     seis proyectos y dos que se repiten) casi tocándose. Con luz: cada panel se oscurece según hacia dónde
+     mira (el de delante, a plena luz; los de arriba, abajo y detrás, en
+     sombra) y por dentro la banda es oscura.
+   · Entra girando: las seis cards vuelan desde donde estén en el montón
+     (las otras salen de debajo) mientras el anillo llega dando media
+     vuelta y se frena hasta su ritmo.
+   · Gira solo, despacio; con la rueda o arrastrando arriba y abajo se
+     gira a mano, con inercia. Al señalar un panel sale un poco hacia
+     fuera, el anillo se frena y dice qué proyecto es; pulsarlo lo abre.
+   · El muñeco se va mientras tanto. Al volver a «Play» cada card vuelve
+     a su sitio en el montón y el muñeco vuelve.
    · Las cards del anillo son copias (las del montón llevan su física y su
-     arrastre): el montón se esconde mientras tanto, con las copias justo
-     encima, y vuelve al acabar sin que se note el cambio.
+     arrastre): salen justo encima de las suyas y, mientras arrancan, el
+     montón se funde; al volver, al revés.
    · Delante y detrás del nombre: dos capas con la misma perspectiva
-     (.cr-back por debajo del nombre, .cr-front por encima); cada card se
+     (.cr-back por debajo del nombre, .cr-front por encima); cada panel se
      cambia de capa al cruzar el plano del nombre.
-   · Con movimiento reducido: sin vuelos (se funden) y sin giro solo.
+   · Con movimiento reducido: sin vuelos (se funde) y sin giro solo.
    window.cardRing = { on(), off(instant), active() } (lo usa «HOME — VISTA»)
    ============================================================ */
 (function() {
@@ -3852,86 +3858,122 @@ try {
     area.insertBefore(back, area.firstChild);   // por debajo del nombre
     stack.after(front);                         // por encima del nombre y del montón
 
-    var cards = imgs.map(function(img, i) {
+    // los proyectos, en el orden del montón
+    var projects = imgs.map(function(img, i) {
+      var m = img.className.match(/img-(\d)/), k = m ? +m[1] : i + 1;
+      return { img: img, src: img.currentSrc || img.src, url: PROJECT_PAGES[k - 1],
+               num: String(k).padStart(2, '0'), title: (img.alt || '').split(' — ')[0] };
+    });
+    var panels = [], N = 0;
+    function build() {
+      var want = Math.max(n, 8);
+      if (want === N) return;
+      panels.forEach(function(c) { c.el.remove(); });
+      N = want;
+      panels = [];
+      for (var i = 0; i < N; i++) panels.push(panel(i));
+    }
+    function panel(i) {
+      var pr = projects[i % n];
       var el = document.createElement('div');
       el.className = 'cr-card';
-      var face = document.createElement('img');
-      face.className = 'cr-face';
-      face.src = img.currentSrc || img.src;
-      face.alt = '';
-      face.draggable = false;
-      var rev = document.createElement('span');
-      rev.className = 'cr-rev';
-      var m = img.className.match(/img-(\d)/), k = m ? +m[1] : i + 1;
-      var num = String(k).padStart(2, '0'), name = (img.alt || '').split(' — ')[0];
-      rev.innerHTML = '<b>' + num + '</b><i>' + name + '</i>';
-      el.appendChild(face);
-      el.appendChild(rev);
-      var c = { el: el, img: img, face: face, i: i, side: null, p: null, from: null, url: PROJECT_PAGES[k - 1],
-                tip: { img: el, num: num, title: name } };
+      el.innerHTML = '<img class="cr-face" alt="" draggable="false"><span class="cr-shade"></span><span class="cr-rev"></span>';
+      var face = el.firstChild;
+      face.src = pr.src;
+      var c = { el: el, face: face, shade: el.children[1], i: i, pr: pr, own: i < n, side: null, p: null, from: null, to: null,
+                lift: 0, tip: { img: el, num: pr.num, title: pr.title } };
       if (fine) {
-        el.addEventListener('mouseenter', function() { hover = c; if (typeof showTitle === 'function') showTitle(c.tip); });
-        el.addEventListener('mouseleave', function() { if (hover === c) hover = null; if (typeof hideTitle === 'function') hideTitle(c.tip); });
+        el.addEventListener('mouseenter', function() { hover = c; if (typeof showTitle === 'function') showTitle(c.tip); kick(); });
+        el.addEventListener('mouseleave', function() { if (hover === c) hover = null; if (typeof hideTitle === 'function') hideTitle(c.tip); kick(); });
       }
       return c;
-    });
+    }
 
-    /* ---- el sitio: el centro del nombre, el radio, la perspectiva ----
-       El anillo gira sobre el eje de la palabra (x). Las cards, cuadradas,
-       casi se tocan: la banda es un hexágono de cards. Va recto, de frente
-       (YAW lo ladearía) */
-    var YAW = 0, AUTO = 0.32;                      // recto (sin ladear) y el giro solo (rad/s)
+    /* ---- el sitio: el centro del nombre, el radio, la perspectiva.
+       Los paneles, cuadrados como las fotos (ASPECT 1: no se recortan),
+       casi se tocan: la banda es continua ---- */
+    var AUTO = 0.3;                              // el giro solo (rad/s)
     var L = {};
     function layout() {
+      build();
       var ar = area.getBoundingClientRect(), tr = title.getBoundingClientRect();
       var vw = ar.width, vh = ar.height || window.innerHeight, mobile = vw <= 768;
       L.ox = ar.left; L.oy = ar.top;
-      // holgado alrededor de las letras, sin salirse de la pantalla
-      L.R = Math.min(Math.max(tr.height * 1.35, (mobile ? 0.27 : 0.16) * vw), vh * 0.3, 300);
-      L.size = Math.round(L.R * 2 * Math.PI / n * 0.86);
       L.cx = tr.left + tr.width / 2 - ar.left;
       L.cy = tr.top + tr.height / 2 - ar.top;
-      // la misma profundidad en cualquier pantalla: la de delante, ×1.5; la de detrás, ×0.75
+      // holgado alrededor de las letras, sin salirse de la pantalla…
+      var R = Math.min(Math.max(tr.height * 1.5, (mobile ? 0.34 : 0.22) * vw), vh * 0.38, 360);
+      var ASPECT = 1;
+      // …ni pisar lo que tiene encima o debajo (el logo; en el móvil, el
+      // subtítulo y el interruptor; «About me»). k: lo que sube y baja el
+      // anillo de verdad, en radios: el borde de arriba de cada panel, con
+      // su perspectiva (y algo más por el panel señalado, que sale)
+      var tn = Math.tan(Math.PI / N) * 0.95, k = 0;
+      for (var a = 0; a <= Math.PI / 2 + 1e-6; a += Math.PI / 180) {
+        var r1 = 1.04, ey = r1 * Math.sin(a) + tn * Math.cos(a), ez = r1 * Math.cos(a) - tn * Math.sin(a);
+        k = Math.max(k, ey * 2.8 / (2.8 - ez));
+      }
+      var halfW = R * tn * ASPECT * 1.7;
+      ['.top-logo', '.hero-subtitle', '.hv-switch', '.hero-btn-bottom-wrapper'].forEach(function(sel) {
+        var el = document.querySelector(sel), b = el && el.getBoundingClientRect();
+        if (!b || !b.width) return;
+        var x0 = b.left - ar.left, x1 = b.right - ar.left, y0 = b.top - ar.top, y1 = b.bottom - ar.top;
+        if (x1 < L.cx - halfW || x0 > L.cx + halfW) return;
+        if (y1 <= L.cy) R = Math.min(R, (L.cy - y1 - 16) / k);
+        else if (y0 >= L.cy) R = Math.min(R, (y0 - 16 - L.cy) / k);
+      });
+      L.R = Math.max(R, tr.height * 0.75);
+      L.h = Math.round(L.R * 2 * tn);
+      L.w = Math.round(L.h * ASPECT);
+      // la misma profundidad en cualquier pantalla: la de delante, ×1.55
       var P = L.R * 2.8;
       [back, front].forEach(function(l) {
         l.style.perspective = P.toFixed(0) + 'px';
         l.style.perspectiveOrigin = L.cx.toFixed(0) + 'px ' + L.cy.toFixed(0) + 'px';
       });
-      cards.forEach(function(c) { c.el.style.width = c.el.style.height = L.size + 'px'; });
+      panels.forEach(function(c) { c.el.style.width = L.w + 'px'; c.el.style.height = L.h + 'px'; });
     }
-    // su sitio en el anillo (base: lo que ha girado)
-    var base = 0;
-    // (φ = 0: delante; 90°: encima; 180°: detrás; 270°: debajo). Mira hacia
-    // fuera del eje
+    // su sitio en el anillo (φ = 0: delante; 90°: encima; 180°: detrás;
+    // 270°: debajo), mirando hacia fuera del eje. El señalado sale un poco
+    var base = 0, spinOff = 0;
     function slot(c) {
-      var ph = base + c.i * 2 * Math.PI / n, s = Math.sin(ph), co = Math.cos(ph);
-      return { x: L.cx + L.R * co * Math.sin(YAW), y: L.cy - L.R * s, z: L.R * co * Math.cos(YAW),
-               rx: Math.atan2(s, co) * 180 / Math.PI, ry: YAW * 180 / Math.PI, rz: 0, s: 1 };
+      var ph = base - spinOff + c.i * 2 * Math.PI / N, s = Math.sin(ph), co = Math.cos(ph);
+      var r = L.R * (1 + 0.08 * c.lift);
+      return { x: L.cx, y: L.cy - r * s, z: r * co, rx: Math.atan2(s, co) * 180 / Math.PI, rz: 0, sx: 1, sy: 1, o: 1 };
     }
-    // su sitio en el montón (tal como está ahora: arrastrada, girada…)
+    // su sitio en el montón (tal como está ahora: arrastrada, girada…), del
+    // tamaño de su card (cuadrada). Las que no tienen card propia salen de
+    // debajo del montón
     function home(c) {
-      var r = c.img.getBoundingClientRect();
-      var w = (c.img.offsetWidth || L.size) * (+gsap.getProperty(c.img, 'scale') || 1);
-      return { x: r.left + r.width / 2 - L.ox, y: r.top + r.height / 2 - L.oy, z: 0, rx: 0, ry: 0,
-               rz: +gsap.getProperty(c.img, 'rotation') || 0, s: w / L.size };
+      var img = c.pr.img, r = img.getBoundingClientRect();
+      var w = (img.offsetWidth || L.h) * (+gsap.getProperty(img, 'scale') || 1) * (c.own ? 1 : 0.8);
+      return { x: r.left + r.width / 2 - L.ox, y: r.top + r.height / 2 - L.oy, z: c.own ? 0 : -40, rx: 0,
+               rz: +gsap.getProperty(img, 'rotation') || 0, sx: w / L.w, sy: w / L.h, o: 0 };
     }
     function mix(a, b, k) {
       return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, z: a.z + (b.z - a.z) * k,
-               rx: a.rx + (b.rx - a.rx) * k, ry: a.ry + (b.ry - a.ry) * k, rz: a.rz + (b.rz - a.rz) * k, s: a.s + (b.s - a.s) * k };
+               rx: a.rx + (b.rx - a.rx) * k, rz: a.rz + (b.rz - a.rz) * k,
+               sx: a.sx + (b.sx - a.sx) * k, sy: a.sy + (b.sy - a.sy) * k, o: a.o + (b.o - a.o) * k };
     }
-    // delante o detrás del nombre según su profundidad; luego, su transform
+    // delante o detrás del nombre según su profundidad; su transform y su
+    // luz (cuanto menos mira hacia aquí, más sombra)
     function put(c, p) {
       var side = p.z >= 0 ? front : back;
       if (c.side !== side) { side.appendChild(c.el); c.side = side; }
       c.p = p;
-      c.el.style.transform = 'translate3d(' + (p.x - L.size / 2).toFixed(1) + 'px,' + (p.y - L.size / 2).toFixed(1) + 'px,' + p.z.toFixed(1) +
-        'px) rotateY(' + p.ry.toFixed(2) + 'deg) rotateX(' + p.rx.toFixed(2) + 'deg) rotateZ(' + p.rz.toFixed(2) + 'deg) scale(' + p.s.toFixed(3) + ')';
+      c.el.style.transform = 'translate3d(' + (p.x - L.w / 2).toFixed(1) + 'px,' + (p.y - L.h / 2).toFixed(1) + 'px,' + p.z.toFixed(1) +
+        'px) rotateX(' + p.rx.toFixed(2) + 'deg) rotateZ(' + p.rz.toFixed(2) + 'deg) scale(' + p.sx.toFixed(3) + ',' + p.sy.toFixed(3) + ')';
+      var face = Math.cos(p.rx * Math.PI / 180);
+      c.shade.style.opacity = (Math.min(0.72, Math.max(0, 1 - face) * 0.62) * (1 - 0.6 * c.lift)).toFixed(3);
+      var o = p.o.toFixed(3);
+      if (c.el.style.opacity !== o) c.el.style.opacity = o;
     }
 
     /* ---- el bucle: los vuelos (de ida y de vuelta) y el giro ---- */
     var state = 'off', t0 = 0, last = 0, raf = 0, vel = 0, hover = null, drag = null;
-    var FLY = 1000, STAG = 70, BACK = 820;
+    var FLY = 1100, STAG = 45, BACK = 820, SPIN = Math.PI * 0.85;
     var inOut = function(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    var outQ = function(t) { return 1 - Math.pow(1 - t, 4); };
     function kick() { if (!raf && state !== 'off') { last = 0; raf = requestAnimationFrame(frame); } }
     function frame(now) {
       raf = 0;
@@ -3939,25 +3981,33 @@ try {
       var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
       last = now;
       if (!t0) t0 = now;
-      // gira solo; tras arrastrarlo sigue con su inercia y vuelve poco a poco a
-      // su ritmo; al señalar una card se frena
+      var te = now - t0, done = true;
+      // gira solo; tras la rueda o el arrastre sigue con su inercia y vuelve
+      // poco a poco a su ritmo; al señalar un panel se frena
       if (!drag) {
         var want = reduce || hover || state === 'out' ? 0 : AUTO;
-        vel += (want - vel) * (1 - Math.exp(-dt * (hover ? 6 : 1.4)));
+        vel += (want - vel) * (1 - Math.exp(-dt * (hover ? 6 : 1.2)));
         base += vel * dt;
       }
-      var te = now - t0, done = true;
-      cards.forEach(function(c) {
+      // al entrar, el anillo llega dando media vuelta y se frena
+      spinOff = state === 'in' && !reduce ? SPIN * (1 - outQ(Math.min(1, te / (FLY + STAG * n)))) : 0;
+      panels.forEach(function(c) {
+        c.lift += ((hover === c ? 1 : 0) - c.lift) * Math.min(1, dt * 10);
         var p;
         if (state === 'in') {
-          // de una en una, la de arriba del montón primero
-          var k = Math.min(1, Math.max(0, (te - (n - 1 - c.i) * STAG) / FLY));
+          // de una en una; las de debajo del montón, a la vez que las suyas
+          var k = Math.min(1, Math.max(0, (te - (c.i % n) * STAG) / FLY));
           if (k < 1) done = false;
           p = k >= 1 ? slot(c) : mix(c.from, slot(c), inOut(k));
+          // la copia aparece mientras arranca (la suya, debajo, se funde)
+          p.o = Math.min(1, k * (c.own ? 6 : 3));
         } else if (state === 'out') {
-          var k2 = Math.min(1, Math.max(0, (te - c.i * STAG * 0.6) / BACK));
+          // vuelven juntas: al llegar, la copia se funde y la suya aparece
+          var k2 = Math.min(1, Math.max(0, (te - (c.own ? 0 : (c.i % n) * STAG * 0.8)) / BACK));
           if (k2 < 1) done = false;
           p = mix(c.from, c.to, inOut(k2));
+          p.o = c.own ? Math.min(1, (1 - k2) * 6) : Math.max(0, 1 - k2 * 1.6);
+          if (c.own && k2 > 0.8 && html.classList.contains('cr-hide')) html.classList.remove('cr-hide');
         } else p = slot(c);
         put(c, p);
       });
@@ -3968,8 +4018,9 @@ try {
     function end() {
       state = 'off';
       // las copias están justo encima de las del montón: se cambian sin que se note
-      html.classList.remove('cr-on');
-      cards.forEach(function(c) { c.el.remove(); c.side = null; });
+      html.classList.remove('cr-on', 'cr-hide');
+      panels.forEach(function(c) { c.el.remove(); c.side = null; });
+      hover = null;
       if (fine && typeof hideTitle === 'function') hideTitle();
     }
 
@@ -3978,15 +4029,15 @@ try {
       if (state === 'in' || state === 'ring') return;
       // mientras se reparten (la entrada de la home), espera a que acaben
       if (stack.classList.contains('is-dealing')) { setTimeout(on, 120); return; }
-      layout();
       var wasOut = state === 'out';
-      cards.forEach(function(c) { c.from = wasOut && c.p ? c.p : home(c); });
-      if (!wasOut) base = Math.PI / n;           // ninguna justo delante del nombre al llegar (se lee)
-      vel = 0;
+      if (!wasOut) layout();
+      panels.forEach(function(c) { c.from = wasOut && c.p ? c.p : home(c); c.lift = 0; });
+      if (!wasOut) base = Math.PI / N;           // ninguno justo delante del nombre al llegar
+      vel = 0; spinOff = 0;
       state = reduce ? 'ring' : 'in';
       t0 = 0;
-      cards.forEach(function(c) { put(c, reduce ? slot(c) : c.from); });
-      html.classList.add('cr-on', 'cr-fig');
+      panels.forEach(function(c) { put(c, reduce ? slot(c) : c.from); });
+      html.classList.add('cr-on', 'cr-hide', 'cr-fig');
       kick();
     }
     function off(instant) {
@@ -3994,16 +4045,24 @@ try {
       html.classList.remove('cr-fig');
       if (fig && fig.kick) { fig.dirty = true; fig.kick(); }
       if (instant || reduce) { cancelAnimationFrame(raf); raf = 0; end(); return; }
-      cards.forEach(function(c) { c.from = c.p || slot(c); c.to = home(c); });
+      base -= spinOff; spinOff = 0;
+      panels.forEach(function(c) { c.from = c.p || slot(c); c.to = home(c); });
       drag = null; hover = null;
       state = 'out';
       t0 = 0;
       kick();
     }
 
-    /* ---- girarlo a mano: arrastrar arriba y abajo en cualquier parte de
-       la portada (la de delante va con el dedo). Un toque sin arrastrar
-       sobre una card abre su proyecto ---- */
+    /* ---- girarlo a mano: la rueda, o arrastrar arriba y abajo en
+       cualquier parte de la portada (el panel de delante va con el dedo).
+       Un toque sin arrastrar sobre un panel abre su proyecto ---- */
+    area.addEventListener('wheel', function(e) {
+      if (state !== 'ring' && state !== 'in') return;
+      e.preventDefault();
+      var k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? area.clientHeight : 1;
+      vel = Math.max(-6, Math.min(6, vel + e.deltaY * k * 0.0045));
+      kick();
+    }, { passive: false });
     area.addEventListener('pointerdown', function(e) {
       if (state !== 'ring' && state !== 'in') return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -4021,7 +4080,7 @@ try {
       var now = performance.now(), dy = e.clientY - drag.y;
       drag.moved += Math.abs(e.clientX - drag.x) + Math.abs(dy);
       drag.x = e.clientX; drag.y = e.clientY;
-      // la card de delante sigue al dedo: bajar la baja (media vuelta, unos 3 radios)
+      // el panel de delante sigue al dedo: bajar lo baja
       var d = -dy / (L.R * 1.05);
       base += d;
       var v = d / Math.max(0.008, (now - drag.t) / 1000);
@@ -4031,14 +4090,14 @@ try {
     });
     function release(e) {
       if (!drag || (e && e.pointerId !== drag.id)) return;
-      var tap = drag.moved < 6, c = drag.card;
+      var tap = drag.moved < 6, el = drag.card;
       // la inercia, con tope (si se soltó parado, no sale disparado)
       vel = performance.now() - drag.t > 90 ? 0 : Math.max(-7, Math.min(7, drag.v));
       drag = null;
       if (window._setGrabbingCursor) window._setGrabbingCursor(false);
-      if (tap && c) {
-        var card = cards.filter(function(x) { return x.el === c; })[0];
-        if (card && window.PageFX) window.PageFX.leave(card.url, card.face);
+      if (tap && el) {
+        var c = panels.filter(function(x) { return x.el === el; })[0];
+        if (c && window.PageFX) window.PageFX.leave(c.pr.url, c.face);
       }
     }
     area.addEventListener('pointerup', release);
@@ -4048,7 +4107,13 @@ try {
     window.addEventListener('resize', function() {
       if (state === 'off') return;
       clearTimeout(rt);
-      rt = setTimeout(function() { layout(); kick(); }, 120);
+      rt = setTimeout(function() {
+        var had = N;
+        layout();
+        // (si cambia el número de paneles, los nuevos van ya a su sitio)
+        if (N !== had) panels.forEach(function(c) { c.from = slot(c); put(c, slot(c)); });
+        kick();
+      }, 120);
     });
 
     window.cardRing = { on: on, off: off, active: function() { return state === 'in' || state === 'ring'; } };

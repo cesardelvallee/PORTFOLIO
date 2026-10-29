@@ -5489,12 +5489,13 @@ html.hv-index .cursor-ink { opacity: 0; }
 
 /* ================================================
    HOME — EL ANILLO (script.js «HOME — EL ANILLO»)
-   Las cards en un anillo 3D que rodea el nombre (como a un dedo). Dos capas con la
-   misma perspectiva: .cr-back va por debajo del nombre y .cr-front por
-   encima (cada card se cambia de capa al cruzar su plano). Cada card
-   tiene cara (la foto) y reverso (número y nombre del proyecto). El
-   montón se esconde mientras tanto (las copias están justo encima) y el
-   muñeco se funde.
+   Las cards en un anillo 3D que rodea el nombre (como a un dedo): una
+   banda continua de paneles. Dos capas con la misma perspectiva:
+   .cr-back va por debajo del nombre y .cr-front por encima (cada panel se
+   cambia de capa al cruzar su plano). Cada panel: la foto, su sombra
+   (script.js la ajusta según hacia dónde mira) y, por dentro, la banda
+   oscura. El montón se esconde mientras tanto (las copias están justo
+   encima) y el muñeco se funde.
    ================================================ */
 .cr-layer {
   position: absolute;
@@ -5506,7 +5507,9 @@ html.hv-index .cursor-ink { opacity: 0; }
 .cr-back { z-index: 0; }
 .cr-front { z-index: 3; }
 html.cr-on .cr-layer { visibility: visible; }
-html.cr-on body.home-page .stacked-images { visibility: hidden; }
+/* el montón se funde mientras las copias arrancan (y vuelve al revés) */
+html.cr-on body.home-page .stacked-images { transition: opacity 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0s; }
+html.cr-hide body.home-page .stacked-images { opacity: 0; visibility: hidden; transition: opacity 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0.2s; }
 html.cr-on .content-drag-area { touch-action: none; -webkit-user-select: none; user-select: none; }
 .cr-card {
   position: absolute;
@@ -5519,40 +5522,31 @@ html.cr-on .content-drag-area { touch-action: none; -webkit-user-select: none; u
   user-select: none;
 }
 .cr-face,
+.cr-shade,
 .cr-rev {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 6px;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 .cr-face {
   display: block;
   object-fit: cover;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   -webkit-user-drag: none;
 }
-/* el reverso: cartulina del tono del fondo, con el número y el proyecto
-   (vuelto sobre el eje del anillo: al pasar por detrás se lee derecho) */
+/* la sombra del panel (lo que no mira hacia aquí, más oscuro) */
+.cr-shade { background: #070605; opacity: 0; pointer-events: none; }
+body.theme-light .cr-shade { background: #2e251b; }
+/* por dentro: la banda, oscura (vuelta sobre el eje del anillo) */
 .cr-rev {
   transform: rotateX(180deg);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 14px 16px;
-  background: #2a251f;
-  border: 1px solid rgba(236, 230, 218, 0.16);
-  color: rgba(236, 230, 218, 0.55);
-  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
-  text-transform: uppercase;
+  background: #0d0c0a;
+  box-shadow: inset 0 0 0 1px rgba(236, 230, 218, 0.06);
 }
-.cr-rev b { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: #c7b299; }
-.cr-rev i { font-style: normal; font-size: 10px; font-weight: 400; letter-spacing: 0.12em; }
-body.theme-light .cr-rev { background: #d8cab2; border-color: rgba(27, 23, 18, 0.14); color: rgba(27, 23, 18, 0.55); }
-body.theme-light .cr-rev b { color: #8a7458; }
+body.theme-light .cr-rev { background: #8f806a; box-shadow: inset 0 0 0 1px rgba(27, 23, 18, 0.08); }
 /* el muñeco se va (y vuelve) */
 body.home-page .model-3d-bg { transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1); }
 html.cr-fig body.home-page .model-3d-bg {
@@ -5566,6 +5560,6 @@ html.hv-index .cr-layer { visibility: hidden !important; }
 @media (prefers-reduced-motion: reduce) {
   .cr-layer { opacity: 0; transition: opacity 0.4s ease, visibility 0s linear 0.4s; }
   html.cr-on .cr-layer { opacity: 1; transition: opacity 0.4s ease; }
-  html.cr-on body.home-page .stacked-images { visibility: visible; opacity: 0; }
+  html.cr-hide body.home-page .stacked-images { visibility: visible; opacity: 0; transition: opacity 0.4s ease; }
   html.cr-fig body.home-page .model-3d-bg { transform: translate(-50%, -50%); }
 }
